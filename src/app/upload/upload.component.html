@@ -12,7 +12,12 @@
     <p *ngIf="stage"><b>Stage:</b> {{ stage }}</p>
     <p *ngIf="progress"><b>Progress:</b> {{ progress }}%</p>
 
-    <progress *ngIf="progress" [value]="progress" max="100" style="width: 300px"></progress>
+    <progress
+      *ngIf="progress"
+      [value]="progress"
+      max="100"
+      style="width: 300px"
+    ></progress>
   </div>
 
   <!-- OUTPUT -->

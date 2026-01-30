@@ -1,15 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-upload',
   standalone: true,
-
-  // 🔥🔥🔥 THIS LINE WAS MISSING 🔥🔥🔥
-  imports: [CommonModule],
-
   templateUrl: './upload.component.html',
 })
 export class UploadComponent {
@@ -27,7 +22,8 @@ export class UploadComponent {
 
   constructor(
     private api: ApiService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private zone: NgZone
   ) {}
 
   onFileChange(e: any) {
@@ -49,6 +45,7 @@ export class UploadComponent {
         this.progress = 0;
         this.outputPath = undefined;
         this.safeOutputPath = undefined;
+
         this.startPolling();
       },
       error: (err) => {
@@ -64,21 +61,24 @@ export class UploadComponent {
     this.pollingTimer = setInterval(() => {
       this.api.status(this.jobId!).subscribe({
         next: (res) => {
-          console.log('STATUS RESPONSE', res);
+          // 🔴 FORCE ANGULAR CHANGE DETECTION
+          this.zone.run(() => {
+            this.status = res.status;
+            this.stage = res.stage;
+            this.progress = Number(res.progress || 0);
 
-          this.status = res.status;
-          this.stage = res.stage;
-          this.progress = Number(res.progress || 0);
+            if (res.output_path && !this.safeOutputPath) {
+              console.log('FINAL OUTPUT URL:', res.output_path);
 
-          if (res.output_path) {
-            this.outputPath = res.output_path;
-            this.safeOutputPath =
-              this.sanitizer.bypassSecurityTrustUrl(res.output_path);
-          }
+              this.outputPath = res.output_path;
+              this.safeOutputPath =
+                this.sanitizer.bypassSecurityTrustUrl(res.output_path);
+            }
 
-          if (res.status === 'COMPLETED' || res.status === 'FAILED') {
-            clearInterval(this.pollingTimer);
-          }
+            if (res.status === 'COMPLETED' || res.status === 'FAILED') {
+              clearInterval(this.pollingTimer);
+            }
+          });
         },
         error: (err) => {
           console.error('Status polling error', err);
