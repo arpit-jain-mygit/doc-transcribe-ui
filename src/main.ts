@@ -1,6 +1,5 @@
-// main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { UploadComponent } from './app/upload/upload.component';
+import { AppComponent } from './app/app';
 
-bootstrapApplication(UploadComponent)
+bootstrapApplication(AppComponent)
   .catch(err => console.error(err));
