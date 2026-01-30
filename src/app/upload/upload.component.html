@@ -12,13 +12,28 @@
     <p *ngIf="stage"><b>Stage:</b> {{ stage }}</p>
     <p *ngIf="progress"><b>Progress:</b> {{ progress }}%</p>
 
-    <progress
-      *ngIf="progress"
-      [value]="progress"
-      max="100"
-      style="width: 300px"
-    ></progress>
+    <progress *ngIf="progress" [value]="progress" max="100" style="width: 300px"></progress>
   </div>
+
+  <div *ngIf="safeOutputPath" style="margin-top:20px; color:red; font-size:18px;">
+    DEBUG: LINK SHOULD BE HERE
+  </div>
+
+  <div *ngIf="safeOutputPath" style="margin-top: 20px">
+  <a
+    [href]="safeOutputPath"
+    target="_blank"
+    rel="noopener"
+    style="
+      color: #1a73e8;
+      text-decoration: underline;
+      font-weight: 600;
+      font-size: 16px;
+    "
+  >
+    ⬇ Download Result
+  </a>
+</div>
 
   <!-- OUTPUT -->
   <div *ngIf="safeOutputPath" style="margin-top: 20px">
