@@ -70,3 +70,4 @@ export class UploadComponent {
     }, 4000);
   }
 }
+
