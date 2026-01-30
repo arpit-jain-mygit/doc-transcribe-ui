@@ -12,3 +12,4 @@ import { UploadComponent } from './upload/upload';
   `,
 })
 export class AppComponent {}
+
