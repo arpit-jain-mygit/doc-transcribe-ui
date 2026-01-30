@@ -1,10 +1,15 @@
 import { Component } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-upload',
   standalone: true,
+
+  // 🔥🔥🔥 THIS LINE WAS MISSING 🔥🔥🔥
+  imports: [CommonModule],
+
   templateUrl: './upload.component.html',
 })
 export class UploadComponent {
@@ -15,7 +20,6 @@ export class UploadComponent {
   progress = 0;
   stage?: string;
 
-  // 🔥 IMPORTANT
   outputPath?: string;
   safeOutputPath?: SafeUrl;
 
@@ -45,7 +49,6 @@ export class UploadComponent {
         this.progress = 0;
         this.outputPath = undefined;
         this.safeOutputPath = undefined;
-
         this.startPolling();
       },
       error: (err) => {
@@ -67,10 +70,8 @@ export class UploadComponent {
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
 
-          // ✅ THIS IS THE FIX
           if (res.output_path) {
             this.outputPath = res.output_path;
-
             this.safeOutputPath =
               this.sanitizer.bypassSecurityTrustUrl(res.output_path);
           }
