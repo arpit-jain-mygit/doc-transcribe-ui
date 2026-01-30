@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: 'https://doc-transcribe-api.onrender.com'
+  API_BASE_URL: 'https://doc-transcribe-api.onrender.com'
 };
