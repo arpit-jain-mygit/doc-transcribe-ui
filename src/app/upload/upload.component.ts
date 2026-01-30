@@ -1,10 +1,12 @@
 import { Component, NgZone } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common'; // ✅ REQUIRED
 
 @Component({
   selector: 'app-upload',
   standalone: true,
+  imports: [CommonModule], // ✅ THIS WAS MISSING
   templateUrl: './upload.component.html',
 })
 export class UploadComponent {
@@ -43,7 +45,6 @@ export class UploadComponent {
         this.jobId = res.job_id;
         this.status = 'QUEUED';
         this.progress = 0;
-        this.outputPath = undefined;
         this.safeOutputPath = undefined;
 
         this.startPolling();
@@ -61,7 +62,6 @@ export class UploadComponent {
     this.pollingTimer = setInterval(() => {
       this.api.status(this.jobId!).subscribe({
         next: (res) => {
-          // 🔴 FORCE ANGULAR CHANGE DETECTION
           this.zone.run(() => {
             this.status = res.status;
             this.stage = res.stage;
