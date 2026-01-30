@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ApiService } from '../services/api.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-upload',
@@ -13,11 +14,17 @@ export class UploadComponent {
   status?: string;
   progress = 0;
   stage?: string;
+
+  // 🔥 IMPORTANT
   outputPath?: string;
+  safeOutputPath?: SafeUrl;
 
   pollingTimer?: any;
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private sanitizer: DomSanitizer
+  ) {}
 
   onFileChange(e: any) {
     this.file = e.target.files?.[0];
@@ -37,6 +44,7 @@ export class UploadComponent {
         this.status = 'QUEUED';
         this.progress = 0;
         this.outputPath = undefined;
+        this.safeOutputPath = undefined;
 
         this.startPolling();
       },
@@ -55,20 +63,20 @@ export class UploadComponent {
         next: (res) => {
           console.log('STATUS RESPONSE', res);
 
-          // ✅ assign FIRST
           this.status = res.status;
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
 
+          // ✅ THIS IS THE FIX
           if (res.output_path) {
             this.outputPath = res.output_path;
+
+            this.safeOutputPath =
+              this.sanitizer.bypassSecurityTrustUrl(res.output_path);
           }
 
-          // ✅ stop polling AFTER Angular has state
           if (res.status === 'COMPLETED' || res.status === 'FAILED') {
-            setTimeout(() => {
-              clearInterval(this.pollingTimer);
-            }, 0);
+            clearInterval(this.pollingTimer);
           }
         },
         error: (err) => {
