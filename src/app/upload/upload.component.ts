@@ -37,6 +37,7 @@ export class UploadComponent {
         this.status = 'QUEUED';
         this.progress = 0;
         this.outputPath = undefined;
+
         this.startPolling();
       },
       error: (err) => {
@@ -54,13 +55,20 @@ export class UploadComponent {
         next: (res) => {
           console.log('STATUS RESPONSE', res);
 
+          // ✅ assign FIRST
           this.status = res.status;
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
-          this.outputPath = res.output_path; // 👈 now arrives
 
+          if (res.output_path) {
+            this.outputPath = res.output_path;
+          }
+
+          // ✅ stop polling AFTER Angular has state
           if (res.status === 'COMPLETED' || res.status === 'FAILED') {
-            clearInterval(this.pollingTimer);
+            setTimeout(() => {
+              clearInterval(this.pollingTimer);
+            }, 0);
           }
         },
         error: (err) => {
@@ -70,4 +78,3 @@ export class UploadComponent {
     }, 4000);
   }
 }
-
