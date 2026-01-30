@@ -1,0 +1,24 @@
+<input type="file" (change)="onFileChange($event)" />
+
+<button
+  (click)="submit('OCR')"
+  [disabled]="!file"
+>
+  OCR
+</button>
+
+<button
+  (click)="submit('TRANSCRIPTION')"
+  [disabled]="!file"
+>
+  Transcribe
+</button>
+
+<div *ngIf="!file">
+  <small>⬅️ Choose a file first</small>
+</div>
+
+<div *ngIf="status">
+  <p>Status: {{ status }}</p>
+  <p>Progress: {{ progress }}%</p>
+</div>
