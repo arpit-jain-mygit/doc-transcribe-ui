@@ -1,49 +1,71 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-upload',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './upload.html',
+  templateUrl: './upload.component.html',
 })
 export class UploadComponent {
   file?: File;
+
   jobId?: string;
   status?: string;
   progress = 0;
+  stage?: string;
+  outputPath?: string;
+
+  pollingTimer?: any;
 
   constructor(private api: ApiService) {}
 
   onFileChange(e: any) {
-    this.file = e.target.files[0];
+    this.file = e.target.files?.[0];
   }
 
-submit(type: 'OCR' | 'TRANSCRIPTION') {
-  if (!this.file) return;
+  submit(type: 'OCR' | 'TRANSCRIPTION') {
+    if (!this.file) {
+      alert('Please choose a file first');
+      return;
+    }
 
-  console.log('Submitting job:', type, this.file.name);
+    console.log(`Submitting job: ${type}`, this.file.name);
 
-  this.api.upload(this.file, type).subscribe(res => {
-    this.jobId = res.job_id;
-    this.status = 'QUEUED';
-    this.poll();
-  });
-}
+    this.api.upload(this.file, type).subscribe({
+      next: (res) => {
+        this.jobId = res.job_id;
+        this.status = 'QUEUED';
+        this.progress = 0;
+        this.outputPath = undefined;
 
-  poll() {
-    const timer = setInterval(() => {
-      if (!this.jobId) return;
+        this.startPolling();
+      },
+      error: (err) => {
+        console.error('Upload failed', err);
+        alert('Upload failed');
+      },
+    });
+  }
 
-      this.api.status(this.jobId).subscribe(res => {
-        this.status = res.status;
-        this.progress = Number(res.progress || 0);
+  startPolling() {
+    if (!this.jobId) return;
 
-        if (res.status === 'COMPLETED' || res.status === 'FAILED') {
-          clearInterval(timer);
-        }
+    this.pollingTimer = setInterval(() => {
+      this.api.status(this.jobId!).subscribe({
+        next: (res) => {
+          this.status = res.status;
+          this.stage = res.stage;
+          this.progress = Number(res.progress || 0);
+          this.outputPath = res.output_path;
+
+          if (res.status === 'COMPLETED' || res.status === 'FAILED') {
+            clearInterval(this.pollingTimer);
+          }
+        },
+        error: (err) => {
+          console.error('Status polling error', err);
+        },
       });
-    }, 2000);
+    }, 4000); // ⏱️ 3s polling (important)
   }
 }

@@ -1,24 +1,27 @@
-<input type="file" (change)="onFileChange($event)" />
+<div style="margin-top: 20px">
+  <input type="file" (change)="onFileChange($event)" />
 
-<button
-  (click)="submit('OCR')"
-  [disabled]="!file"
->
-  OCR
-</button>
+  <div style="margin-top: 10px">
+    <button (click)="submit('OCR')">OCR</button>
+    <button (click)="submit('TRANSCRIPTION')">Transcribe</button>
+  </div>
 
-<button
-  (click)="submit('TRANSCRIPTION')"
-  [disabled]="!file"
->
-  Transcribe
-</button>
+  <!-- STATUS -->
+  <div *ngIf="status" style="margin-top: 20px">
+    <p><b>Status:</b> {{ status }}</p>
+    <p *ngIf="stage"><b>Stage:</b> {{ stage }}</p>
+    <p *ngIf="progress"><b>Progress:</b> {{ progress }}%</p>
 
-<div *ngIf="!file">
-  <small>⬅️ Choose a file first</small>
-</div>
+    <progress
+      *ngIf="progress"
+      [value]="progress"
+      max="100"
+      style="width: 300px"
+    ></progress>
+  </div>
 
-<div *ngIf="status">
-  <p>Status: {{ status }}</p>
-  <p>Progress: {{ progress }}%</p>
+  <!-- OUTPUT -->
+  <div *ngIf="outputPath" style="margin-top: 20px">
+    <a [href]="outputPath" target="_blank">⬇ Download Result</a>
+  </div>
 </div>
