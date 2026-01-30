@@ -37,7 +37,6 @@ export class UploadComponent {
         this.status = 'QUEUED';
         this.progress = 0;
         this.outputPath = undefined;
-
         this.startPolling();
       },
       error: (err) => {
@@ -58,14 +57,9 @@ export class UploadComponent {
           this.status = res.status;
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
+          this.outputPath = res.output_path; // 👈 now arrives
 
-          // FIX: accept BOTH keys
-          this.outputPath = res.output_path || res.output_uri;
-
-          if (
-            res.status?.toUpperCase() === 'COMPLETED' ||
-            res.status?.toUpperCase() === 'FAILED'
-          ) {
+          if (res.status === 'COMPLETED' || res.status === 'FAILED') {
             clearInterval(this.pollingTimer);
           }
         },
