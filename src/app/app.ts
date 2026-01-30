@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UploadComponent } from './upload/upload';
+import { UploadComponent } from './upload/upload.component';
 
 @Component({
   selector: 'app-root',

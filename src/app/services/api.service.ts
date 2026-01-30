@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 export class ApiService {
   private base = environment.API_BASE_URL;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   upload(file: File, type: 'OCR' | 'TRANSCRIPTION') {
     const form = new FormData();
@@ -22,4 +22,5 @@ export class ApiService {
   status(jobId: string) {
     return this.http.get<any>(`${this.base}/status/${jobId}`);
   }
+
 }

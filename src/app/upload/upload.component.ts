@@ -56,7 +56,9 @@ export class UploadComponent {
           this.status = res.status;
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
-          this.outputPath = res.output_path;
+
+          // FIX: accept GCS URI via normalized output_path
+          this.outputPath = res.output_path || res.output_uri;
 
           if (res.status === 'COMPLETED' || res.status === 'FAILED') {
             clearInterval(this.pollingTimer);
@@ -66,6 +68,6 @@ export class UploadComponent {
           console.error('Status polling error', err);
         },
       });
-    }, 4000); // ⏱️ 3s polling (important)
+    }, 4000);
   }
 }
