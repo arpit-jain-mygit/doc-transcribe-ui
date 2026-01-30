@@ -6,6 +6,9 @@ import { UploadComponent } from './upload/upload';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, UploadComponent],
-  templateUrl: './app.html',
+  template: `
+    <h1>Doc Transcribe</h1>
+    <app-upload></app-upload>
+  `,
 })
 export class AppComponent {}
