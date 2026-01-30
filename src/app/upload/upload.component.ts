@@ -53,14 +53,19 @@ export class UploadComponent {
     this.pollingTimer = setInterval(() => {
       this.api.status(this.jobId!).subscribe({
         next: (res) => {
+          console.log('STATUS RESPONSE', res);
+
           this.status = res.status;
           this.stage = res.stage;
           this.progress = Number(res.progress || 0);
 
-          // FIX: accept GCS URI via normalized output_path
+          // FIX: accept BOTH keys
           this.outputPath = res.output_path || res.output_uri;
 
-          if (res.status === 'COMPLETED' || res.status === 'FAILED') {
+          if (
+            res.status?.toUpperCase() === 'COMPLETED' ||
+            res.status?.toUpperCase() === 'FAILED'
+          ) {
             clearInterval(this.pollingTimer);
           }
         },

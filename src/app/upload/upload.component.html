@@ -21,7 +21,8 @@
   </div>
 
   <!-- OUTPUT -->
-  <div *ngIf="status === 'COMPLETED' && outputPath" style="margin-top: 20px">
+  <!-- FIX: show download whenever outputPath exists -->
+  <div *ngIf="outputPath" style="margin-top: 20px">
     <a [href]="outputPath" target="_blank">⬇ Download Result</a>
   </div>
 </div>
