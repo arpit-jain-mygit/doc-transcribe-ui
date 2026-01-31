@@ -28,6 +28,11 @@
 </head>
 
 <body>
+  <div id="g_id_onload" data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+    data-callback="onGoogleSignIn">
+  </div>
+
+  <div class="g_id_signin" data-theme="outline" data-size="large"></div>
 
   <h3>Doc Transcribe</h3>
 
@@ -47,11 +52,30 @@
     <a id="downloadLink" href="" download>⬇ Download Result</a>
   </div>
 
-  <script>
+  <script src="https://accounts.google.com/gsi/client" async defer>
+
     const API = "https://doc-transcribe-api.onrender.com";
     let JOB_ID = null;
     let POLLER = null;
     let FINAL_URL = null;
+
+
+    let ID_TOKEN = null;
+
+    function onGoogleSignIn(resp) {
+      ID_TOKEN = resp.credential;
+      console.log("Google ID token received");
+
+      fetch(`${API}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token: ID_TOKEN })
+      })
+        .then(r => r.json())
+        .then(d => {
+          alert("Signed in as " + d.email);
+        });
+    }
 
     async function upload(type) {
       const file = document.getElementById("file").files[0];
@@ -64,6 +88,9 @@
       const res = await fetch(`${API}/upload`, {
         method: "POST",
         body: fd,
+        headers: {
+          "Authorization": "Bearer " + ID_TOKEN   // ✅ ADD HERE
+        }
       });
 
       if (!res.ok) {
@@ -82,7 +109,11 @@
     }
 
     async function pollStatus() {
-      const res = await fetch(`${API}/status/${JOB_ID}`);
+      const res = await fetch(`${API}/status/${JOB_ID}`, {
+        headers: {
+          "Authorization": "Bearer " + ID_TOKEN
+        }
+      });
       if (!res.ok) return;
 
       const s = await res.json();
