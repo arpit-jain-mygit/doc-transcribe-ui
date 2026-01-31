@@ -1,112 +1,132 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe</title>
 
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { margin-right: 8px; }
-    progress { width: 320px; height: 18px; }
-    a { display: inline-block; margin-top: 12px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    button {
+      margin-right: 8px;
+    }
+
+    progress {
+      width: 320px;
+      height: 18px;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
 <body>
 
-<h3>Doc Transcribe</h3>
+  <h3>Doc Transcribe</h3>
 
-<input type="file" id="file" />
-<button onclick="upload('OCR')">OCR</button>
-<button onclick="upload('TRANSCRIPTION')">Transcribe</button>
+  <input type="file" id="file" />
+  <button onclick="upload('OCR')">OCR</button>
+  <button onclick="upload('TRANSCRIPTION')">Transcribe</button>
 
-<hr>
+  <hr>
 
-<div id="statusBox" style="display:none;">
-  <p><b>Status:</b> <span id="status"></span></p>
-  <p><b>Stage:</b> <span id="stage"></span></p>
-  <progress id="progress" value="0" max="100"></progress>
-</div>
+  <div id="statusBox" style="display:none;">
+    <p><b>Status:</b> <span id="status"></span></p>
+    <p><b>Stage:</b> <span id="stage"></span></p>
+    <progress id="progress" value="0" max="100"></progress>
+  </div>
 
-<div id="downloadBox" style="display:none;">
-  <button id="downloadBtn" style="display:none" onclick="downloadResult()">
-  ⬇ Download Result
-</button>
+  <div id="downloadBox" style="display:none; margin-top:10px;">
+    <a id="downloadLink" href="" download>⬇ Download Result</a>
+  </div>
 
-</div>
+  <script>
+    const API = "https://doc-transcribe-api.onrender.com";
+    let JOB_ID = null;
+    let POLLER = null;
+    let FINAL_URL = null;
 
-<script>
-const API = "https://doc-transcribe-api.onrender.com";
-let JOB_ID = null;
-let POLLER = null;
-let FINAL_URL = null;
+    async function upload(type) {
+      const file = document.getElementById("file").files[0];
+      if (!file) return alert("Select a file");
 
-async function upload(type) {
-  const file = document.getElementById("file").files[0];
-  if (!file) return alert("Select a file");
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("type", type);
 
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("type", type);
+      const res = await fetch(`${API}/upload`, {
+        method: "POST",
+        body: fd,
+      });
 
-  const res = await fetch(`${API}/upload`, {
-    method: "POST",
-    body: fd,
-  });
+      if (!res.ok) {
+        alert(await res.text());
+        return;
+      }
 
-  if (!res.ok) {
-    alert(await res.text());
-    return;
-  }
+      const data = await res.json();
+      JOB_ID = data.job_id;
 
-  const data = await res.json();
-  JOB_ID = data.job_id;
+      document.getElementById("statusBox").style.display = "block";
+      document.getElementById("downloadBox").style.display = "none";
 
-  document.getElementById("statusBox").style.display = "block";
-  document.getElementById("downloadBox").style.display = "none";
+      pollStatus();
+      POLLER = setInterval(pollStatus, 4000);
+    }
 
-  pollStatus();
-  POLLER = setInterval(pollStatus, 4000);
-}
+    async function pollStatus() {
+      const res = await fetch(`${API}/status/${JOB_ID}`);
+      if (!res.ok) return;
 
-async function pollStatus() {
-  const res = await fetch(`${API}/status/${JOB_ID}`);
-  if (!res.ok) return;
+      const s = await res.json();
 
-  const s = await res.json();
+      document.getElementById("status").innerText = s.status || "";
+      document.getElementById("stage").innerText = s.stage || "";
+      document.getElementById("progress").value = Number(s.progress || 0);
 
-  document.getElementById("status").innerText = s.status || "";
-  document.getElementById("stage").innerText = s.stage || "";
-  document.getElementById("progress").value = Number(s.progress || 0);
+      if (s.output_path) {
+        const link = document.getElementById("downloadLink");
+        const box = document.getElementById("downloadBox");
 
-  if (s.output_path) {
-    document.getElementById("downloadLink").href = s.output_path;
-    document.getElementById("downloadBox").style.display = "block";
-    clearInterval(POLLER);
-  }
+        if (link && box) {
+          link.href = s.output_path;
+          link.setAttribute("download", "transcript.txt"); // force download
+          box.style.display = "block";
+          clearInterval(POLLER);
+        }
+      }
 
-  if (s.status === "FAILED") {
-    clearInterval(POLLER);
-    alert("Job failed");
-  }
-}
 
-async function downloadResult() {
-  if (!FINAL_URL) return alert("No file yet");
+      if (s.status === "FAILED") {
+        clearInterval(POLLER);
+        alert("Job failed");
+      }
+    }
 
-  const res = await fetch(FINAL_URL);
-  const blob = await res.blob();
+    async function downloadResult() {
+      if (!FINAL_URL) return alert("No file yet");
 
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "transcript.txt"; // force save
-  document.body.appendChild(a);
-  a.click();
+      const res = await fetch(FINAL_URL);
+      const blob = await res.blob();
 
-  URL.revokeObjectURL(a.href);
-  a.remove();
-}
-</script>
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "transcript.txt"; // force save
+      document.body.appendChild(a);
+      a.click();
+
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }
+  </script>
 
 </body>
+
 </html>
