@@ -10,16 +10,13 @@
       font-family: sans-serif;
       padding: 20px;
     }
-
     button {
       margin-right: 8px;
     }
-
     progress {
       width: 320px;
       height: 18px;
     }
-
     a {
       display: inline-block;
       margin-top: 12px;
@@ -28,7 +25,11 @@
 </head>
 
 <body>
-  <div id="g_id_onload" data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+
+  <!-- GOOGLE SIGN-IN -->
+  <div
+    id="g_id_onload"
+    data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
     data-callback="onGoogleSignIn">
   </div>
 
@@ -49,37 +50,38 @@
   </div>
 
   <div id="downloadBox" style="display:none; margin-top:10px;">
-    <a id="downloadLink" href="" download>⬇ Download Result</a>
+    <a id="downloadLink" download>⬇ Download Result</a>
   </div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer>
+  <!-- GOOGLE SDK (ONLY SCRIPT TAG HERE) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+  <!-- APP CODE -->
+  <script>
     const API = "https://doc-transcribe-api.onrender.com";
-    let JOB_ID = null;
-    let POLLER = null;
-    let FINAL_URL = null;
-
 
     let ID_TOKEN = null;
+    let JOB_ID = null;
+    let POLLER = null;
 
+    // MUST be global
     function onGoogleSignIn(resp) {
       ID_TOKEN = resp.credential;
       console.log("Google ID token received");
-
-      fetch(`${API}/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: ID_TOKEN })
-      })
-        .then(r => r.json())
-        .then(d => {
-          alert("Signed in as " + d.email);
-        });
     }
+    window.onGoogleSignIn = onGoogleSignIn;
 
     async function upload(type) {
+      if (!ID_TOKEN) {
+        alert("Please sign in with Google first");
+        return;
+      }
+
       const file = document.getElementById("file").files[0];
-      if (!file) return alert("Select a file");
+      if (!file) {
+        alert("Select a file");
+        return;
+      }
 
       const fd = new FormData();
       fd.append("file", file);
@@ -89,7 +91,7 @@
         method: "POST",
         body: fd,
         headers: {
-          "Authorization": "Bearer " + ID_TOKEN   // ✅ ADD HERE
+          "Authorization": "Bearer " + ID_TOKEN
         }
       });
 
@@ -114,6 +116,7 @@
           "Authorization": "Bearer " + ID_TOKEN
         }
       });
+
       if (!res.ok) return;
 
       const s = await res.json();
@@ -126,38 +129,19 @@
         const link = document.getElementById("downloadLink");
         const box = document.getElementById("downloadBox");
 
-        if (link && box) {
-          link.href = s.output_path;
-          link.setAttribute("download", "transcript.txt"); // force download
-          box.style.display = "block";
-          clearInterval(POLLER);
-        }
-      }
+        link.href = s.output_path;
+        link.download = "transcript.txt"; // force save
+        box.style.display = "block";
 
+        clearInterval(POLLER);
+      }
 
       if (s.status === "FAILED") {
         clearInterval(POLLER);
         alert("Job failed");
       }
     }
-
-    async function downloadResult() {
-      if (!FINAL_URL) return alert("No file yet");
-
-      const res = await fetch(FINAL_URL);
-      const blob = await res.blob();
-
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "transcript.txt"; // force save
-      document.body.appendChild(a);
-      a.click();
-
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }
   </script>
 
 </body>
-
 </html>
