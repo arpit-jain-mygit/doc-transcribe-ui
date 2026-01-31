@@ -29,7 +29,9 @@
 </div>
 
 <div id="downloadBox" style="display:none;">
-  <a id="downloadLink" download>⬇ Download Result</a>
+  <button id="downloadBtn" style="display:none" onclick="downloadResult()">
+  ⬇ Download Result
+</button>
 
 </div>
 
@@ -37,6 +39,7 @@
 const API = "https://doc-transcribe-api.onrender.com";
 let JOB_ID = null;
 let POLLER = null;
+let FINAL_URL = null;
 
 async function upload(type) {
   const file = document.getElementById("file").files[0];
@@ -86,6 +89,22 @@ async function pollStatus() {
     clearInterval(POLLER);
     alert("Job failed");
   }
+}
+
+async function downloadResult() {
+  if (!FINAL_URL) return alert("No file yet");
+
+  const res = await fetch(FINAL_URL);
+  const blob = await res.blob();
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "transcript.txt"; // force save
+  document.body.appendChild(a);
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+  a.remove();
 }
 </script>
 
