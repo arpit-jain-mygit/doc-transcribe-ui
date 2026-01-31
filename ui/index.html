@@ -35,7 +35,6 @@
 
   <div class="g_id_signin" data-theme="outline" data-size="large"></div>
 
-  <!-- ✅ PATCH: LOGOUT -->
   <button onclick="logout()">Logout</button>
 
   <h3>Doc Transcribe</h3>
@@ -52,6 +51,12 @@
     <progress id="progress" value="0" max="100"></progress>
   </div>
 
+  <!-- APPROVAL -->
+  <div id="approvalBox" style="display:none; margin-top:10px;">
+    <button onclick="approve()">✅ Approve Result</button>
+  </div>
+
+  <!-- DOWNLOAD -->
   <div id="downloadBox" style="display:none; margin-top:10px;">
     <a id="downloadLink" download>⬇ Download Result</a>
   </div>
@@ -67,7 +72,9 @@
     let JOB_ID = null;
     let POLLER = null;
 
-    // MUST be global
+    // --------------------------------------------------
+    // GOOGLE SIGN-IN
+    // --------------------------------------------------
     function onGoogleSignIn(resp) {
       ID_TOKEN = resp.credential;
       console.log("Google ID token received");
@@ -75,13 +82,15 @@
     }
     window.onGoogleSignIn = onGoogleSignIn;
 
-    // ✅ PATCH: LOGOUT HANDLER
     function logout() {
       ID_TOKEN = null;
       google.accounts.id.disableAutoSelect();
       alert("Logged out");
     }
 
+    // --------------------------------------------------
+    // UPLOAD
+    // --------------------------------------------------
     async function upload(type) {
       if (!ID_TOKEN) {
         alert("Please sign in with Google first");
@@ -116,11 +125,15 @@
 
       document.getElementById("statusBox").style.display = "block";
       document.getElementById("downloadBox").style.display = "none";
+      document.getElementById("approvalBox").style.display = "none";
 
       pollStatus();
       POLLER = setInterval(pollStatus, 4000);
     }
 
+    // --------------------------------------------------
+    // STATUS POLLING
+    // --------------------------------------------------
     async function pollStatus() {
       const res = await fetch(`${API}/status/${JOB_ID}`, {
         headers: {
@@ -136,6 +149,17 @@
       document.getElementById("stage").innerText = s.stage || "";
       document.getElementById("progress").value = Number(s.progress || 0);
 
+      // --------------------------------------------------
+      // APPROVAL LOGIC
+      // --------------------------------------------------
+      if (s.status === "COMPLETED" && s.approved === "false") {
+        document.getElementById("approvalBox").style.display = "block";
+        document.getElementById("downloadBox").style.display = "none";
+      }
+
+      // --------------------------------------------------
+      // DOWNLOAD LOGIC
+      // --------------------------------------------------
       if (s.output_path) {
         const link = document.getElementById("downloadLink");
         const box = document.getElementById("downloadBox");
@@ -144,6 +168,7 @@
         link.download = "transcript.txt";
         box.style.display = "block";
 
+        document.getElementById("approvalBox").style.display = "none";
         clearInterval(POLLER);
       }
 
@@ -151,6 +176,26 @@
         clearInterval(POLLER);
         alert("Job failed");
       }
+    }
+
+    // --------------------------------------------------
+    // APPROVE
+    // --------------------------------------------------
+    async function approve() {
+      const res = await fetch(`${API}/approve/${JOB_ID}`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + ID_TOKEN
+        }
+      });
+
+      if (!res.ok) {
+        alert("Approval failed");
+        return;
+      }
+
+      alert("Approved");
+      pollStatus();
     }
   </script>
 
