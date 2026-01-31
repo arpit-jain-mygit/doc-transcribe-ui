@@ -6,21 +6,10 @@
   <title>Doc Transcribe</title>
 
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    button {
-      margin-right: 8px;
-    }
-    progress {
-      width: 320px;
-      height: 18px;
-    }
-    a {
-      display: inline-block;
-      margin-top: 12px;
-    }
+    body { font-family: sans-serif; padding: 20px; }
+    button { margin-right: 8px; }
+    progress { width: 320px; height: 18px; }
+    a { display: inline-block; margin-top: 12px; }
   </style>
 </head>
 
@@ -51,33 +40,20 @@
     <progress id="progress" value="0" max="100"></progress>
   </div>
 
-  <!-- APPROVAL -->
-  <div id="approvalBox" style="display:none; margin-top:10px;">
-    <button onclick="approve()">✅ Approve Result</button>
-  </div>
-
-  <!-- DOWNLOAD -->
-  <div id="downloadBox" style="display:none; margin-top:10px;">
+  <div id="downloadBox" style="display:none;">
     <a id="downloadLink" download>⬇ Download Result</a>
   </div>
 
-  <!-- GOOGLE SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- APP CODE -->
   <script>
     const API = "https://doc-transcribe-api.onrender.com";
-
     let ID_TOKEN = null;
     let JOB_ID = null;
     let POLLER = null;
 
-    // --------------------------------------------------
-    // GOOGLE SIGN-IN
-    // --------------------------------------------------
     function onGoogleSignIn(resp) {
       ID_TOKEN = resp.credential;
-      console.log("Google ID token received");
       alert("Signed in");
     }
     window.onGoogleSignIn = onGoogleSignIn;
@@ -88,12 +64,9 @@
       alert("Logged out");
     }
 
-    // --------------------------------------------------
-    // UPLOAD
-    // --------------------------------------------------
     async function upload(type) {
       if (!ID_TOKEN) {
-        alert("Please sign in with Google first");
+        alert("Sign in first");
         return;
       }
 
@@ -116,7 +89,10 @@
       });
 
       if (!res.ok) {
-        alert(await res.text());
+        const t = await res.text();
+        alert(t.includes("USER_NOT_APPROVED")
+          ? "Your account is pending approval"
+          : t);
         return;
       }
 
@@ -125,77 +101,30 @@
 
       document.getElementById("statusBox").style.display = "block";
       document.getElementById("downloadBox").style.display = "none";
-      document.getElementById("approvalBox").style.display = "none";
 
       pollStatus();
       POLLER = setInterval(pollStatus, 4000);
     }
 
-    // --------------------------------------------------
-    // STATUS POLLING
-    // --------------------------------------------------
     async function pollStatus() {
       const res = await fetch(`${API}/status/${JOB_ID}`, {
-        headers: {
-          "Authorization": "Bearer " + ID_TOKEN
-        }
+        headers: { "Authorization": "Bearer " + ID_TOKEN }
       });
 
       if (!res.ok) return;
 
       const s = await res.json();
-
       document.getElementById("status").innerText = s.status || "";
       document.getElementById("stage").innerText = s.stage || "";
       document.getElementById("progress").value = Number(s.progress || 0);
 
-      // --------------------------------------------------
-      // APPROVAL LOGIC
-      // --------------------------------------------------
-      if (s.status === "COMPLETED" && s.approved === "false") {
-        document.getElementById("approvalBox").style.display = "block";
-        document.getElementById("downloadBox").style.display = "none";
-      }
-
-      // --------------------------------------------------
-      // DOWNLOAD LOGIC
-      // --------------------------------------------------
       if (s.output_path) {
         const link = document.getElementById("downloadLink");
-        const box = document.getElementById("downloadBox");
-
         link.href = s.output_path;
         link.download = "transcript.txt";
-        box.style.display = "block";
-
-        document.getElementById("approvalBox").style.display = "none";
+        document.getElementById("downloadBox").style.display = "block";
         clearInterval(POLLER);
       }
-
-      if (s.status === "FAILED") {
-        clearInterval(POLLER);
-        alert("Job failed");
-      }
-    }
-
-    // --------------------------------------------------
-    // APPROVE
-    // --------------------------------------------------
-    async function approve() {
-      const res = await fetch(`${API}/approve/${JOB_ID}`, {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + ID_TOKEN
-        }
-      });
-
-      if (!res.ok) {
-        alert("Approval failed");
-        return;
-      }
-
-      alert("Approved");
-      pollStatus();
     }
   </script>
 
