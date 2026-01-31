@@ -1,76 +1,70 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe>>></title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { margin-right: 8px; }
-    progress { width: 320px; height: 18px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    button {
+      margin-right: 8px;
+    }
+
+    progress {
+      width: 320px;
+      height: 18px;
+    }
   </style>
 </head>
+
 <body>
 
-<h3>Doc Transcribe >>>>>>>>>>></h3>
+  <h3>Doc Transcribe >>>>>>>>>>></h3>
 
-<input type="file" id="file" />
+  <input type="file" id="file" />
 
-<br><br>
+  <br><br>
 
-<button onclick="submitJob('OCR')">OCR</button>
-<button onclick="submitJob('TRANSCRIPTION')">Transcribe</button>
+  <button onclick="submitJob('OCR')">OCR</button>
+  <button onclick="submitJob('TRANSCRIPTION')">Transcribe</button>
 
-<hr>
+  <hr>
 
-<div id="statusBox" style="display:none;">
-  <p><b>Status:</b> <span id="status"></span></p>
-  <p><b>Stage:</b> <span id="stage"></span></p>
-  <progress id="progress" value="0" max="100"></progress>
-</div>
+  <div id="statusBox" style="display:none;">
+    <p><b>Status:</b> <span id="status"></span></p>
+    <p><b>Stage:</b> <span id="stage"></span></p>
+    <progress id="progress" value="0" max="100"></progress>
+  </div>
 
-<script>
-const API = "https://doc-transcribe-api.onrender.com"; // CHANGE LATER
-let jobId = null;
-let timer = null;
+  <script>
+    const API = "https://doc-transcribe-api.onrender.com";
 
-function submitJob(type) {
-  const file = document.getElementById("file").files[0];
-  if (!file) return alert("Select a file");
+    async function upload(type) {
+      const fileInput = document.getElementById("file");
+      if (!fileInput.files.length) {
+        alert("Select a file");
+        return;
+      }
 
-  const form = new FormData();
-  form.append("file", file);
-  form.append("type", type);
+      const form = new FormData();
+      form.append("file", fileInput.files[0]); // MUST be "file"
+      form.append("type", type);               // MUST be "type"
 
-  fetch(API + "/upload", { method: "POST", body: form })
-    .then(r => r.json())
-    .then(res => {
-      jobId = res.job_id;
-      document.getElementById("statusBox").style.display = "block";
-      poll();
-    })
-    .catch(() => alert("Upload failed"));
-}
+      const res = await fetch(`${API}/upload`, {
+        method: "POST",
+        body: form,          // ✅ DO NOT set headers
+      });
 
-function poll() {
-  if (timer) clearInterval(timer);
-  timer = setInterval(() => {
-    fetch(API + "/status/" + jobId)
-      .then(r => r.json())
-      .then(update)
-      .catch(console.error);
-  }, 3000);
-}
+      const data = await res.json();
+      console.log(data);
+    }
+  </script>
 
-function update(d) {
-  document.getElementById("status").textContent = d.status || "";
-  document.getElementById("stage").textContent = d.stage || "";
-  document.getElementById("progress").value = d.progress || 0;
-
-  if (d.status === "COMPLETED" || d.status === "FAILED") {
-    clearInterval(timer);
-  }
-}
-</script>
 
 </body>
+
 </html>
