@@ -25,11 +25,8 @@
 
   <h3>Doc Transcribe >>>>>>>>>>></h3>
 
-  <input type="file" id="file" />
-
-  <br><br>
-
-  <button onclick="upload('OCR')">OCR</button>
+<input type="file" id="file" />
+<button onclick="upload('OCR')">OCR</button>
 <button onclick="upload('TRANSCRIPTION')">Transcribe</button>
 
   <hr>
@@ -42,28 +39,30 @@
   
 
   <script>
-    const API = "https://doc-transcribe-api.onrender.com";
+const API = "https://doc-transcribe-api.onrender.com";
 
-    async function upload(type) {
-      const fileInput = document.getElementById("file");
-      if (!fileInput.files.length) {
-        alert("Select a file");
-        return;
-      }
+async function upload(type) {
+  const file = document.getElementById("file").files[0];
+  if (!file) return alert("Select a file");
 
-      const form = new FormData();
-      form.append("file", fileInput.files[0]); // MUST be "file"
-      form.append("type", type);               // MUST be "type"
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("type", type);
 
-      const res = await fetch(`${API}/upload`, {
-        method: "POST",
-        body: form,          // ✅ DO NOT set headers
-      });
+  const res = await fetch(`${API}/upload`, {
+    method: "POST",
+    body: fd,
+  });
 
-      const data = await res.json();
-      console.log(data);
-    }
-  </script>
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(t);
+  }
+
+  const data = await res.json();
+  alert("JOB ID: " + data.job_id);
+}
+</script>
 
 
 </body>
