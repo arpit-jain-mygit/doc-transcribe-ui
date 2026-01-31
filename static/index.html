@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Doc Transcribe (Minimal)</title>
+</head>
+<body>
+
+<h2>Doc Transcribe</h2>
+
+<input type="file" id="file" />
+<br/><br/>
+
+<button onclick="submit('OCR')">OCR</button>
+<button onclick="submit('TRANSCRIPTION')">Transcribe</button>
+
+<pre id="status"></pre>
+
+<div id="download" style="margin-top:20px;"></div>
+
+<script>
+const API_BASE = "http://localhost:8080"; // or your deployed API
+
+let jobId = null;
+let pollTimer = null;
+
+function log(msg) {
+  document.getElementById("status").textContent += msg + "\n";
+}
+
+async function submit(type) {
+  const file = document.getElementById("file").files[0];
+  if (!file) {
+    alert("Choose a file first");
+    return;
+  }
+
+  log(`Submitting job: ${type}`);
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("type", type);
+
+  const res = await fetch(`${API_BASE}/upload`, {
+    method: "POST",
+    body: form
+  });
+
+  const data = await res.json();
+  jobId = data.job_id;
+
+  log(`Job ID: ${jobId}`);
+  startPolling();
+}
+
+function startPolling() {
+  pollTimer = setInterval(async () => {
+    const res = await fetch(`${API_BASE}/status/${jobId}`);
+    const data = await res.json();
+
+    log(JSON.stringify(data, null, 2));
+
+    if (data.output_path) {
+      showDownload(data.output_path);
+    }
+
+    if (data.status === "COMPLETED" || data.status === "FAILED") {
+      clearInterval(pollTimer);
+    }
+  }, 4000);
+}
+
+function showDownload(url) {
+  document.getElementById("download").innerHTML = `
+    <a href="${url}" target="_blank" rel="noopener">
+      ⬇ Download Result
+    </a>
+  `;
+}
+</script>
+
+</body>
+</html>
