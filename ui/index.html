@@ -33,7 +33,7 @@
     }
 
     .container {
-      max-width: 820px;
+      max-width: 980px;
       margin: 0 auto;
     }
 
@@ -62,8 +62,8 @@
     button {
       border: 1px solid var(--border);
       background: white;
-      padding: 8px 18px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 15px;
     }
@@ -94,9 +94,23 @@
 
     .upload-row {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
       flex-wrap: wrap;
+    }
+
+    /* 🔲 SIDE-BY-SIDE UPLOAD GRID */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .status-row {
@@ -194,24 +208,29 @@
     ⏳ Your account is pending approval. Uploads are disabled until approval.
   </div>
 
-  <!-- 🧾 OCR CARD -->
-  <div class="card">
-    <h2>OCR</h2>
-    <div class="upload-row">
-      <input type="file" id="ocrFile" />
-      <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">Run OCR</button>
-    </div>
-  </div>
+  <!-- ⬜ SIDE-BY-SIDE UPLOADS -->
+  <div class="upload-grid">
 
-  <!-- 🎙 TRANSCRIPTION CARD -->
-  <div class="card">
-    <h2>Transcription</h2>
-    <div class="upload-row">
-      <input type="file" id="transcribeFile" />
-      <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
-        Transcribe
-      </button>
+    <div class="card">
+      <h2>OCR</h2>
+      <div class="upload-row">
+        <input type="file" id="ocrFile" />
+        <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">
+          Run OCR
+        </button>
+      </div>
     </div>
+
+    <div class="card">
+      <h2>Transcription</h2>
+      <div class="upload-row">
+        <input type="file" id="transcribeFile" />
+        <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+          Transcribe
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <div id="statusBox" class="card" style="display:none;">
@@ -404,9 +423,8 @@ async function loadJobs() {
   }
 
   hidePending();
-  const jobs = await res.json();
-  jobs.innerHTML = "";
 
+  const jobs = await res.json();
   const box = document.getElementById("jobs");
   box.innerHTML = "";
 
