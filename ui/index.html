@@ -1,22 +1,35 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe</title>
 
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { margin-right: 8px; }
-    progress { width: 320px; height: 18px; }
-    a { display: inline-block; margin-top: 12px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    button {
+      margin-right: 8px;
+    }
+
+    progress {
+      width: 320px;
+      height: 18px;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
 <body>
 
-  <div
-    id="g_id_onload"
-    data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+  <div id="g_id_onload" data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
     data-callback="onGoogleSignIn">
   </div>
   <div class="g_id_signin"></div>
@@ -91,7 +104,12 @@
       const res = await fetch(`${API}/status/${JOB_ID}`, {
         headers: { "Authorization": "Bearer " + ID_TOKEN }
       });
-
+      if (res.status === 401 || res.status === 403) {
+        clearInterval(POLLER);
+        alert("Session expired. Please sign in again.");
+        logout();
+        return;
+      }
       const s = await res.json();
 
       status.innerText = s.status;
@@ -108,4 +126,5 @@
   </script>
 
 </body>
+
 </html>
