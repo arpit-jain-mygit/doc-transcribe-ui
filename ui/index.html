@@ -1,130 +1,136 @@
 <!doctype html>
 <html>
-
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe</title>
 
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-
-    button {
-      margin-right: 8px;
-    }
-
-    progress {
-      width: 320px;
-      height: 18px;
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 12px;
-    }
+    body { font-family: sans-serif; padding: 20px; }
+    button { margin-right: 8px; }
+    progress { width: 320px; height: 18px; }
+    a { display: inline-block; margin-top: 6px; }
+    .job { border-bottom: 1px solid #ddd; padding: 8px 0; }
   </style>
 </head>
 
 <body>
 
-  <div id="g_id_onload" data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
-    data-callback="onGoogleSignIn">
-  </div>
-  <div class="g_id_signin"></div>
+<div id="g_id_onload"
+  data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+  data-callback="onGoogleSignIn"></div>
 
-  <button onclick="logout()">Logout</button>
+<div class="g_id_signin"></div>
 
-  <h3>Doc Transcribe</h3>
+<button onclick="logout()">Logout</button>
 
-  <input type="file" id="file" />
-  <button onclick="upload('OCR')">OCR</button>
-  <button onclick="upload('TRANSCRIPTION')">Transcribe</button>
+<h3>Doc Transcribe</h3>
 
-  <hr>
+<input type="file" id="file" />
+<button onclick="upload('OCR')">OCR</button>
+<button onclick="upload('TRANSCRIPTION')">Transcribe</button>
 
-  <div id="statusBox" style="display:none;">
-    <p><b>Status:</b> <span id="status"></span></p>
-    <p><b>Stage:</b> <span id="stage"></span></p>
-    <progress id="progress" value="0" max="100"></progress>
-  </div>
+<hr>
 
-  <div id="downloadBox" style="display:none;">
-    <a id="downloadLink" download>⬇ Download Result</a>
-  </div>
+<div id="statusBox" style="display:none;">
+  <p><b>Status:</b> <span id="status"></span></p>
+  <p><b>Stage:</b> <span id="stage"></span></p>
+  <progress id="progress" value="0" max="100"></progress>
+</div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="downloadBox" style="display:none;">
+  <a id="downloadLink" download>⬇ Download Result</a>
+</div>
 
-  <script>
-    const API = "https://doc-transcribe-api.onrender.com";
-    let ID_TOKEN = null;
-    let JOB_ID = null;
-    let POLLER = null;
+<hr>
+<h3>My Jobs</h3>
+<button onclick="loadJobs()">🔄 Refresh</button>
+<div id="jobs"></div>
 
-    function onGoogleSignIn(resp) {
-      ID_TOKEN = resp.credential;
-      alert("Signed in");
-    }
-    window.onGoogleSignIn = onGoogleSignIn;
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    function logout() {
-      ID_TOKEN = null;
-      google.accounts.id.disableAutoSelect();
-      alert("Logged out");
-    }
+<script>
+const API = "https://doc-transcribe-api.onrender.com";
+let ID_TOKEN = null;
+let JOB_ID = null;
+let POLLER = null;
 
-    async function upload(type) {
-      if (!ID_TOKEN) return alert("Sign in first");
+function onGoogleSignIn(resp) {
+  ID_TOKEN = resp.credential;
+  loadJobs();
+}
+window.onGoogleSignIn = onGoogleSignIn;
 
-      const file = document.getElementById("file").files[0];
-      if (!file) return alert("Select a file");
+function logout() {
+  ID_TOKEN = null;
+  google.accounts.id.disableAutoSelect();
+  alert("Logged out");
+}
 
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("type", type);
+async function upload(type) {
+  if (!ID_TOKEN) return alert("Sign in first");
+  const file = document.getElementById("file").files[0];
+  if (!file) return alert("Select file");
 
-      const res = await fetch(`${API}/upload`, {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + ID_TOKEN },
-        body: fd
-      });
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("type", type);
 
-      const data = await res.json();
-      JOB_ID = data.job_id;
+  const res = await fetch(`${API}/upload`, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + ID_TOKEN },
+    body: fd
+  });
 
-      document.getElementById("statusBox").style.display = "block";
-      document.getElementById("downloadBox").style.display = "none";
+  const data = await res.json();
+  JOB_ID = data.job_id;
 
-      pollStatus();
-      POLLER = setInterval(pollStatus, 4000);
-    }
+  document.getElementById("statusBox").style.display = "block";
+  pollStatus();
+  POLLER = setInterval(pollStatus, 4000);
+}
 
-    async function pollStatus() {
-      const res = await fetch(`${API}/status/${JOB_ID}`, {
-        headers: { "Authorization": "Bearer " + ID_TOKEN }
-      });
-      if (res.status === 401 || res.status === 403) {
-        clearInterval(POLLER);
-        alert("Session expired. Please sign in again.");
-        logout();
-        return;
-      }
-      const s = await res.json();
+async function pollStatus() {
+  const res = await fetch(`${API}/status/${JOB_ID}`, {
+    headers: { Authorization: "Bearer " + ID_TOKEN }
+  });
+  const s = await res.json();
 
-      status.innerText = s.status;
-      stage.innerText = s.stage || "";
-      progress.value = Number(s.progress || 0);
+  status.innerText = s.status;
+  stage.innerText = s.stage || "";
+  progress.value = Number(s.progress || 0);
 
-      if (s.output_path) {
-        downloadLink.href = s.output_path;
-        downloadLink.download = "transcript.txt";
-        downloadBox.style.display = "block";
-        clearInterval(POLLER);
-      }
-    }
-  </script>
+  if (s.output_path) {
+    downloadLink.href = s.output_path;
+    downloadLink.download = "transcript.txt";
+    downloadBox.style.display = "block";
+    clearInterval(POLLER);
+    loadJobs();
+  }
+}
+
+async function loadJobs() {
+  if (!ID_TOKEN) return;
+
+  const res = await fetch(`${API}/jobs`, {
+    headers: { Authorization: "Bearer " + ID_TOKEN }
+  });
+
+  const jobs = await res.json();
+  const box = document.getElementById("jobs");
+  box.innerHTML = "";
+
+  jobs.forEach(j => {
+    const div = document.createElement("div");
+    div.className = "job";
+    div.innerHTML = `
+      <div><b>${j.job_type}</b> — ${j.status}</div>
+      <div>${j.updated_at || ""}</div>
+      ${j.output_path ? `<a href="${j.output_path}" download>⬇ Download</a>` : ""}
+    `;
+    box.appendChild(div);
+  });
+}
+</script>
 
 </body>
-
 </html>
