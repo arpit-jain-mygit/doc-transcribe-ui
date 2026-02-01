@@ -170,16 +170,10 @@
 
 <div class="container">
 
-  <!-- 🔧 FIX: Explicit Google Sign-In config -->
-  <div
-    id="g_id_onload"
-    data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
-    data-callback="onGoogleSignIn"
-    data-auto_select="false"
-    data-itp_support="false">
+  <!-- 🔐 AUTH BOX (HIDDEN BY DEFAULT) -->
+  <div id="authBox" style="display:none; margin-bottom:24px;">
+    <div id="google-signin-btn"></div>
   </div>
-
-  <div class="g_id_signin"></div>
 
   <div class="top-bar">
     <h1>Doc Transcribe</h1>
@@ -227,7 +221,7 @@ let JOB_ID = null;
 let POLLER = null;
 
 /* =========================
-   TOAST HELPERS
+   TOAST
    ========================= */
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
@@ -238,32 +232,60 @@ function toast(message, type = "info") {
   setTimeout(() => div.remove(), 4000);
 }
 
-/* 🔧 FIX: Explicit sign-in callback */
+/* =========================
+   GOOGLE SIGN-IN (MANUAL)
+   ========================= */
+function renderGoogleButton() {
+  const box = document.getElementById("authBox");
+  box.style.display = "block";
+
+  google.accounts.id.initialize({
+    client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
+    callback: onGoogleSignIn,
+    auto_select: false
+  });
+
+  google.accounts.id.renderButton(
+    document.getElementById("google-signin-btn"),
+    {
+      theme: "outline",
+      size: "large",
+      text: "signin_with"
+    }
+  );
+
+  google.accounts.id.cancel();
+}
+
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
+  document.getElementById("authBox").style.display = "none";
   toast("Signed in successfully", "success");
   loadJobs();
 }
-window.onGoogleSignIn = onGoogleSignIn;
 
-/* 🔧 FIX: Clear remembered account */
+/* =========================
+   LOGOUT
+   ========================= */
 function logout() {
   ID_TOKEN = null;
   google.accounts.id.disableAutoSelect();
+  google.accounts.id.cancel();
   toast("Logged out", "info");
+  renderGoogleButton(); // 🔥 ONLY NOW SHOW SIGN-IN
 }
 
+/* =========================
+   REST OF YOUR LOGIC (UNCHANGED)
+   ========================= */
 async function upload(type) {
   if (!ID_TOKEN) return toast("Please sign in first", "error");
-
   const file = document.getElementById("file").files[0];
   if (!file) return toast("Please select a file", "error");
 
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
-
-  toast("Upload started…", "info");
 
   const res = await fetch(`${API}/upload`, {
     method: "POST",
