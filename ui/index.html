@@ -170,9 +170,15 @@
 
 <div class="container">
 
-  <div id="g_id_onload"
+  <!-- 🔧 FIX: Explicit Google Sign-In config -->
+  <div
+    id="g_id_onload"
     data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
-    data-callback="onGoogleSignIn"></div>
+    data-callback="onGoogleSignIn"
+    data-auto_select="false"
+    data-itp_support="false">
+  </div>
+
   <div class="g_id_signin"></div>
 
   <div class="top-bar">
@@ -232,6 +238,7 @@ function toast(message, type = "info") {
   setTimeout(() => div.remove(), 4000);
 }
 
+/* 🔧 FIX: Explicit sign-in callback */
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
   toast("Signed in successfully", "success");
@@ -239,6 +246,7 @@ function onGoogleSignIn(resp) {
 }
 window.onGoogleSignIn = onGoogleSignIn;
 
+/* 🔧 FIX: Clear remembered account */
 function logout() {
   ID_TOKEN = null;
   google.accounts.id.disableAutoSelect();
