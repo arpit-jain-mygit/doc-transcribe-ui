@@ -14,11 +14,11 @@
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
       --success: #16a34a;
+      --error: #dc2626;
+      --info: #0284c7;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -34,20 +34,8 @@
       margin: 0 auto;
     }
 
-    h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-
-    p {
-      margin: 0;
-      color: var(--muted);
-    }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    h2 { font-size: 18px; margin-bottom: 12px; }
 
     hr {
       border: none;
@@ -55,7 +43,6 @@
       margin: 24px 0;
     }
 
-    /* Buttons */
     button {
       border: 1px solid var(--border);
       background: white;
@@ -65,9 +52,7 @@
       font-size: 14px;
     }
 
-    button:hover {
-      background: #f3f4f6;
-    }
+    button:hover { background: #f3f4f6; }
 
     .btn-primary {
       background: var(--primary);
@@ -75,13 +60,7 @@
       border-color: var(--primary);
     }
 
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background: white;
-    }
+    .btn-primary:hover { background: var(--primary-hover); }
 
     .btn-danger {
       color: #b91c1c;
@@ -89,7 +68,6 @@
       background: #fff5f5;
     }
 
-    /* Cards */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -98,7 +76,6 @@
       margin-bottom: 16px;
     }
 
-    /* Upload */
     .upload-row {
       display: flex;
       gap: 12px;
@@ -106,11 +83,6 @@
       flex-wrap: wrap;
     }
 
-    input[type="file"] {
-      font-size: 14px;
-    }
-
-    /* Status */
     .status-row {
       display: flex;
       justify-content: space-between;
@@ -124,7 +96,6 @@
       margin-top: 6px;
     }
 
-    /* Download */
     .download a {
       display: inline-block;
       margin-top: 12px;
@@ -133,26 +104,15 @@
       text-decoration: none;
     }
 
-    /* Jobs */
     .job {
       padding: 12px 0;
       border-bottom: 1px solid var(--border);
     }
 
-    .job:last-child {
-      border-bottom: none;
-    }
+    .job:last-child { border-bottom: none; }
 
-    .job-title {
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .job-meta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+    .job-title { font-weight: 600; font-size: 14px; }
+    .job-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
     .job a {
       display: inline-block;
@@ -168,18 +128,51 @@
       align-items: center;
       margin-bottom: 24px;
     }
+
+    /* =========================
+       TOAST NOTIFICATIONS
+       ========================= */
+    #toasts {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      min-width: 260px;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      animation: slideIn 0.25s ease-out;
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+    .toast.info { background: var(--info); }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 
 <body>
 
+<div id="toasts"></div>
+
 <div class="container">
 
-  <!-- Google Sign-In -->
   <div id="g_id_onload"
     data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
-    data-callback="onGoogleSignIn">
-  </div>
+    data-callback="onGoogleSignIn"></div>
   <div class="g_id_signin"></div>
 
   <div class="top-bar">
@@ -187,7 +180,6 @@
     <button class="btn-danger" onclick="logout()">Logout</button>
   </div>
 
-  <!-- Upload -->
   <div class="card">
     <h2>Upload</h2>
     <div class="upload-row">
@@ -197,7 +189,6 @@
     </div>
   </div>
 
-  <!-- Status -->
   <div id="statusBox" class="card" style="display:none;">
     <h2>Processing</h2>
     <div class="status-row">
@@ -211,11 +202,10 @@
     </div>
   </div>
 
-  <!-- Jobs -->
   <div class="card">
     <div class="top-bar" style="margin-bottom:12px;">
       <h2>My Jobs</h2>
-      <button class="btn-secondary" onclick="loadJobs()">🔄 Refresh</button>
+      <button onclick="loadJobs()">🔄 Refresh</button>
     </div>
     <div id="jobs"></div>
   </div>
@@ -230,8 +220,21 @@ let ID_TOKEN = null;
 let JOB_ID = null;
 let POLLER = null;
 
+/* =========================
+   TOAST HELPERS
+   ========================= */
+function toast(message, type = "info") {
+  const box = document.getElementById("toasts");
+  const div = document.createElement("div");
+  div.className = `toast ${type}`;
+  div.textContent = message;
+  box.appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
+  toast("Signed in successfully", "success");
   loadJobs();
 }
 window.onGoogleSignIn = onGoogleSignIn;
@@ -239,18 +242,20 @@ window.onGoogleSignIn = onGoogleSignIn;
 function logout() {
   ID_TOKEN = null;
   google.accounts.id.disableAutoSelect();
-  alert("Logged out");
+  toast("Logged out", "info");
 }
 
 async function upload(type) {
-  if (!ID_TOKEN) return alert("Sign in first");
+  if (!ID_TOKEN) return toast("Please sign in first", "error");
 
   const file = document.getElementById("file").files[0];
-  if (!file) return alert("Select file");
+  if (!file) return toast("Please select a file", "error");
 
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
+
+  toast("Upload started…", "info");
 
   const res = await fetch(`${API}/upload`, {
     method: "POST",
@@ -283,6 +288,7 @@ async function pollStatus() {
     downloadLink.download = "transcript.txt";
     downloadBox.style.display = "block";
     clearInterval(POLLER);
+    toast("Transcription completed 🎉", "success");
     loadJobs();
   }
 }
