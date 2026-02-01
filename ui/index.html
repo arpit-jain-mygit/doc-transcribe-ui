@@ -197,22 +197,46 @@
     .toast.error { background: var(--error); }
     .toast.info { background: var(--info); }
 
-    /* ✅ DRAG & DROP — ADD ONLY */
+    /* ===============================
+       ADDITIVE DRAG & DROP STYLES
+       =============================== */
+
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 10px 14px;
       display: inline-flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
       background: #fafafa;
       transition: all 0.15s ease;
+      min-width: 260px;
     }
 
     .drop-zone.dragover {
       border-color: var(--primary);
       background: #eef4ff;
+    }
+
+    .drop-zone.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f3f4f6;
+    }
+
+    .drop-zone .filename {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    /* hide native file input UI */
+    .drop-zone input[type="file"] {
+      display: none;
     }
   </style>
 </head>
@@ -254,8 +278,10 @@
       <h2>PDF to Hindi Text</h2>
       <div class="upload-row">
         <div class="drop-zone" id="ocrDrop">
-          <input type="file" id="ocrFile" accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
-          <span>Drag PDF / Image or click</span>
+          <input type="file" id="ocrFile"
+            accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
+          <span class="label">Drag PDF / Image or click</span>
+          <span class="filename" id="ocrFilename"></span>
         </div>
         <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">
           Convert
@@ -268,10 +294,13 @@
       <h2>Video/Audio to Hindi Text</h2>
       <div class="upload-row">
         <div class="drop-zone" id="transcribeDrop">
-          <input type="file" id="transcribeFile" accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
-          <span>Drag audio/video or click</span>
+          <input type="file" id="transcribeFile"
+            accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
+          <span class="label">Drag audio/video or click</span>
+          <span class="filename" id="transcribeFilename"></span>
         </div>
-        <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+        <button class="btn-primary"
+          onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
           Convert
         </button>
       </div>
@@ -339,11 +368,15 @@ function toast(message, type="info") {
 function showPending() {
   IS_PENDING = true;
   approvalBanner.style.display = "block";
+  document.querySelectorAll(".drop-zone")
+    .forEach(z => z.classList.add("disabled"));
 }
 
 function hidePending() {
   IS_PENDING = false;
   approvalBanner.style.display = "none";
+  document.querySelectorAll(".drop-zone")
+    .forEach(z => z.classList.remove("disabled"));
 }
 
 /* auth */
@@ -483,16 +516,28 @@ function waitForGoogleAndRender() {
 document.addEventListener("DOMContentLoaded", waitForGoogleAndRender);
 </script>
 
-<!-- ✅ DRAG & DROP SCRIPT — ADD ONLY -->
+<!-- ===============================
+     DRAG & DROP BINDINGS (ADD ONLY)
+     =============================== -->
 <script>
-function attachDragDrop(zoneId, inputId) {
+function attachDragDrop(zoneId, inputId, nameId) {
   const zone = document.getElementById(zoneId);
   const input = document.getElementById(inputId);
+  const name = document.getElementById(nameId);
   if (!zone || !input) return;
 
-  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("click", () => {
+    if (!zone.classList.contains("disabled")) input.click();
+  });
+
+  input.addEventListener("change", () => {
+    if (input.files.length) {
+      name.textContent = input.files[0].name;
+    }
+  });
 
   zone.addEventListener("dragover", e => {
+    if (zone.classList.contains("disabled")) return;
     e.preventDefault();
     zone.classList.add("dragover");
   });
@@ -502,6 +547,7 @@ function attachDragDrop(zoneId, inputId) {
   });
 
   zone.addEventListener("drop", e => {
+    if (zone.classList.contains("disabled")) return;
     e.preventDefault();
     zone.classList.remove("dragover");
     if (e.dataTransfer.files.length) {
@@ -512,8 +558,8 @@ function attachDragDrop(zoneId, inputId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  attachDragDrop("ocrDrop", "ocrFile");
-  attachDragDrop("transcribeDrop", "transcribeFile");
+  attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
+  attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
 });
 </script>
 
