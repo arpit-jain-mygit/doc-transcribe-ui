@@ -280,37 +280,50 @@ function logout() {
   google.accounts.id.cancel();
 
   toast("Logged out", "info");
-  renderGoogleButton(); // show sign-in button only now
+  renderGoogleButton();
 }
+
 
 
 /* =========================
    REST OF YOUR LOGIC (UNCHANGED)
    ========================= */
 async function upload(type) {
-  if (!ID_TOKEN) return toast("Please sign in first", "error");
+  if (!ID_TOKEN) {
+    toast("Please sign in first", "error");
+    return;
+  }
 
   const file = document.getElementById("file").files[0];
-  if (!file) return toast("Please select a file", "error");
+  if (!file) {
+    toast("Please select a file", "error");
+    return;
+  }
 
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
 
-  const res = await fetch(`${API}/upload`, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + ID_TOKEN },
-    body: fd
-  });
+  let res;
+  try {
+    res = await fetch(`${API}/upload`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + ID_TOKEN },
+      body: fd
+    });
+  } catch {
+    toast("Network error", "error");
+    return;
+  }
 
-  // ⛔ 401 → expired login
+  // ⛔ AUTH FAILED
   if (res.status === 401) {
     toast("Session expired. Please sign in again.", "error");
     logout();
     return;
   }
 
-  // ⛔ 403 → pending approval
+  // ⛔ REDIS APPROVAL PENDING
   if (res.status === 403) {
     toast("Your account is pending approval", "info");
     return;
@@ -322,6 +335,13 @@ async function upload(type) {
   }
 
   const data = await res.json();
+
+  // 🔒 ABSOLUTE GUARD
+  if (!data.job_id) {
+    toast("Job ID missing. Upload aborted.", "error");
+    return;
+  }
+
   JOB_ID = data.job_id;
 
   document.getElementById("statusBox").style.display = "block";
@@ -332,33 +352,26 @@ async function upload(type) {
 }
 
 
+
 async function pollStatus() {
-  // 🔒 HARD GUARD
+  // 🔒 HARD STOP
   if (!ID_TOKEN || !JOB_ID) {
     clearInterval(POLLER);
+    POLLER = null;
     return;
   }
 
-  let res;
-  try {
-    res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: { Authorization: "Bearer " + ID_TOKEN }
-    });
-  } catch (e) {
-    toast("Network error", "error");
-    clearInterval(POLLER);
-    return;
-  }
+  const res = await fetch(`${API}/status/${JOB_ID}`, {
+    headers: { Authorization: "Bearer " + ID_TOKEN }
+  });
 
-  // ⛔ 401 → NOT LOGGED IN
   if (res.status === 401) {
     clearInterval(POLLER);
     toast("Session expired. Please sign in again.", "error");
-    logout();              // forces sign-in button
+    logout();
     return;
   }
 
-  // ⛔ 403 → PENDING APPROVAL
   if (res.status === 403) {
     clearInterval(POLLER);
     toast("Your account is pending approval", "info");
@@ -378,10 +391,12 @@ async function pollStatus() {
     downloadLink.download = "transcript.txt";
     downloadBox.style.display = "block";
     clearInterval(POLLER);
+    POLLER = null;
     toast("Transcription completed 🎉", "success");
     loadJobs();
   }
 }
+
 
 async function loadJobs() {
   if (!ID_TOKEN) return;
