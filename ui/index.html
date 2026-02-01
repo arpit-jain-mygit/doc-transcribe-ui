@@ -40,7 +40,6 @@
     h1 { font-size: 24px; margin-bottom: 8px; }
     h2 { font-size: 18px; margin-bottom: 12px; }
 
-    /* ✅ WELCOME BANNER */
     #welcomeBanner {
       font-size: 14px;
       color: var(--muted);
@@ -48,7 +47,6 @@
       display: none;
     }
 
-    /* 🟡 PENDING APPROVAL BANNER */
     #approvalBanner {
       display: none;
       margin-bottom: 16px;
@@ -61,19 +59,13 @@
       font-weight: 500;
     }
 
-    hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-
     button {
       border: 1px solid var(--border);
       background: white;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 8px 18px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     button:hover { background: #f3f4f6; }
@@ -95,14 +87,14 @@
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
     }
 
     .upload-row {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -177,11 +169,6 @@
     .toast.success { background: var(--success); }
     .toast.error { background: var(--error); }
     .toast.info { background: var(--info); }
-
-    @keyframes slideIn {
-      from { transform: translateY(-10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
   </style>
 </head>
 
@@ -191,7 +178,6 @@
 
 <div class="container">
 
-  <!-- 🔐 AUTH BOX (HIDDEN BY DEFAULT) -->
   <div id="authBox" style="display:none; margin-bottom:24px;">
     <div id="google-signin-btn"></div>
   </div>
@@ -204,38 +190,25 @@
     <button class="btn-danger" onclick="logout()">Logout</button>
   </div>
 
-  <!-- 🟡 PENDING APPROVAL BANNER -->
   <div id="approvalBanner">
     ⏳ Your account is pending approval. Uploads are disabled until approval.
   </div>
 
-  <!-- ORIGINAL UPLOAD CARD (UNCHANGED) -->
-  <div class="card">
-    <h2>Upload</h2>
-    <div class="upload-row">
-      <input type="file" id="file" />
-      <button class="btn-primary" onclick="upload('OCR')">OCR</button>
-      <button class="btn-primary" onclick="upload('TRANSCRIPTION')">Transcribe</button>
-    </div>
-  </div>
-
-  <!-- ✅ ADDED OCR CARD -->
+  <!-- 🧾 OCR CARD -->
   <div class="card">
     <h2>OCR</h2>
     <div class="upload-row">
       <input type="file" id="ocrFile" />
-      <button class="btn-primary" onclick="proxyUpload('OCR','ocrFile')">
-        Run OCR
-      </button>
+      <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">Run OCR</button>
     </div>
   </div>
 
-  <!-- ✅ ADDED TRANSCRIPTION CARD -->
+  <!-- 🎙 TRANSCRIPTION CARD -->
   <div class="card">
     <h2>Transcription</h2>
     <div class="upload-row">
       <input type="file" id="transcribeFile" />
-      <button class="btn-primary" onclick="proxyUpload('TRANSCRIPTION','transcribeFile')">
+      <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
         Transcribe
       </button>
     </div>
@@ -266,23 +239,6 @@
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-<!-- ✅ ADDITIVE HELPER -->
-<script>
-function proxyUpload(type, sourceInputId) {
-  const src = document.getElementById(sourceInputId);
-  const hidden = document.getElementById("file");
-
-  if (!src || !src.files.length) {
-    toast("Please select a file", "error");
-    return;
-  }
-
-  hidden.files = src.files;
-  upload(type);
-}
-</script>
-
-<!-- 🔽 ORIGINAL SCRIPT (UNCHANGED) -->
 <script>
 const API = "https://doc-transcribe-api.onrender.com";
 let ID_TOKEN = null;
@@ -291,19 +247,9 @@ let POLLER = null;
 let USER_EMAIL = null;
 let IS_PENDING = false;
 
-/* ---------------- UI HELPERS ---------------- */
+/* ---------- helpers ---------- */
 
-function showPending() {
-  IS_PENDING = true;
-  document.getElementById("approvalBanner").style.display = "block";
-}
-
-function hidePending() {
-  IS_PENDING = false;
-  document.getElementById("approvalBanner").style.display = "none";
-}
-
-function toast(message, type = "info") {
+function toast(message, type="info") {
   const box = document.getElementById("toasts");
   const div = document.createElement("div");
   div.className = `toast ${type}`;
@@ -312,11 +258,20 @@ function toast(message, type = "info") {
   setTimeout(() => div.remove(), 4000);
 }
 
-/* ---------------- AUTH ---------------- */
+function showPending() {
+  IS_PENDING = true;
+  approvalBanner.style.display = "block";
+}
+
+function hidePending() {
+  IS_PENDING = false;
+  approvalBanner.style.display = "none";
+}
+
+/* ---------- auth ---------- */
 
 function renderGoogleButton() {
-  const box = document.getElementById("authBox");
-  box.style.display = "block";
+  authBox.style.display = "block";
 
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
@@ -326,10 +281,8 @@ function renderGoogleButton() {
 
   google.accounts.id.renderButton(
     document.getElementById("google-signin-btn"),
-    { theme: "outline", size: "large", text: "signin_with" }
+    { theme: "outline", size: "large" }
   );
-
-  google.accounts.id.cancel();
 }
 
 function onGoogleSignIn(resp) {
@@ -340,75 +293,51 @@ function onGoogleSignIn(resp) {
     USER_EMAIL = payload.email || "";
   } catch {}
 
-  const banner = document.getElementById("welcomeBanner");
-  if (USER_EMAIL) {
-    banner.innerText = `Welcome, ${USER_EMAIL}`;
-    banner.style.display = "block";
-  }
-
-  document.getElementById("authBox").style.display = "none";
+  welcomeBanner.innerText = `Welcome, ${USER_EMAIL}`;
+  welcomeBanner.style.display = "block";
+  authBox.style.display = "none";
   hidePending();
+
   toast("Signed in successfully", "success");
   loadJobs();
 }
 
 function logout() {
   ID_TOKEN = null;
-  JOB_ID = null;
   USER_EMAIL = null;
+  JOB_ID = null;
   hidePending();
-
-  document.getElementById("welcomeBanner").style.display = "none";
-
-  if (POLLER) {
-    clearInterval(POLLER);
-    POLLER = null;
-  }
-
-  google.accounts.id.disableAutoSelect();
-  google.accounts.id.cancel();
-
+  welcomeBanner.style.display = "none";
   toast("Logged out", "info");
   renderGoogleButton();
 }
 
-/* ---------------- CORE LOGIC ---------------- */
+/* ---------- upload ---------- */
 
-async function upload(type) {
-  if (!ID_TOKEN) {
-    toast("Please sign in first", "error");
-    return;
-  }
-
-  if (IS_PENDING) {
-    toast("Account pending approval", "info");
-    return;
-  }
-
-  const file = document.getElementById("file").files[0];
-  if (!file) {
+function uploadFrom(type, inputId) {
+  const input = document.getElementById(inputId);
+  if (!input.files.length) {
     toast("Please select a file", "error");
     return;
   }
+  upload(type, input.files[0]);
+}
+
+async function upload(type, file) {
+  if (!ID_TOKEN) return toast("Please sign in first", "error");
+  if (IS_PENDING) return toast("Account pending approval", "info");
 
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
 
-  let res;
-  try {
-    res = await fetch(`${API}/upload`, {
-      method: "POST",
-      headers: { Authorization: "Bearer " + ID_TOKEN },
-      body: fd
-    });
-  } catch {
-    toast("Network error", "error");
-    return;
-  }
+  const res = await fetch(`${API}/upload`, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + ID_TOKEN },
+    body: fd
+  });
 
   if (res.status === 401) {
-    toast("Session expired. Please sign in again.", "error");
     logout();
     return;
   }
@@ -421,65 +350,46 @@ async function upload(type) {
 
   hidePending();
 
-  if (!res.ok) {
-    toast("Upload failed", "error");
-    return;
-  }
-
   const data = await res.json();
   JOB_ID = data.job_id;
 
-  document.getElementById("statusBox").style.display = "block";
-  document.getElementById("downloadBox").style.display = "none";
+  statusBox.style.display = "block";
+  downloadBox.style.display = "none";
 
   pollStatus();
   POLLER = setInterval(pollStatus, 4000);
 }
 
+/* ---------- status ---------- */
+
 async function pollStatus() {
-  if (!ID_TOKEN || !JOB_ID) {
-    clearInterval(POLLER);
-    POLLER = null;
-    return;
-  }
+  if (!JOB_ID) return;
 
   const res = await fetch(`${API}/status/${JOB_ID}`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
 
-  if (res.status === 401) {
-    clearInterval(POLLER);
-    toast("Session expired. Please sign in again.", "error");
-    logout();
-    return;
-  }
-
   if (res.status === 403) {
-    clearInterval(POLLER);
     showPending();
-    toast("Your account is pending approval", "info");
+    clearInterval(POLLER);
     return;
   }
-
-  hidePending();
-
-  if (!res.ok) return;
 
   const s = await res.json();
   status.innerText = s.status || "";
   stage.innerText = s.stage || "";
-  progress.value = Number(s.progress || 0);
+  progress.value = s.progress || 0;
 
   if (s.output_path) {
     downloadLink.href = s.output_path;
-    downloadLink.download = "transcript.txt";
     downloadBox.style.display = "block";
     clearInterval(POLLER);
-    POLLER = null;
-    toast("Transcription completed 🎉", "success");
+    toast("Completed 🎉", "success");
     loadJobs();
   }
 }
+
+/* ---------- jobs ---------- */
 
 async function loadJobs() {
   if (!ID_TOKEN) return;
@@ -494,8 +404,9 @@ async function loadJobs() {
   }
 
   hidePending();
-
   const jobs = await res.json();
+  jobs.innerHTML = "";
+
   const box = document.getElementById("jobs");
   box.innerHTML = "";
 
