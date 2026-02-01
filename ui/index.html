@@ -1,6 +1,5 @@
 <!doctype html>
 <html>
-
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe</title>
@@ -15,14 +14,12 @@
 
 <body>
 
-  <!-- GOOGLE SIGN-IN -->
   <div
     id="g_id_onload"
-    data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+    data-client_id="YOUR_GOOGLE_CLIENT_ID"
     data-callback="onGoogleSignIn">
   </div>
-
-  <div class="g_id_signin" data-theme="outline" data-size="large"></div>
+  <div class="g_id_signin"></div>
 
   <button onclick="logout()">Logout</button>
 
@@ -65,16 +62,10 @@
     }
 
     async function upload(type) {
-      if (!ID_TOKEN) {
-        alert("Sign in first");
-        return;
-      }
+      if (!ID_TOKEN) return alert("Sign in first");
 
       const file = document.getElementById("file").files[0];
-      if (!file) {
-        alert("Select a file");
-        return;
-      }
+      if (!file) return alert("Select a file");
 
       const fd = new FormData();
       fd.append("file", file);
@@ -82,19 +73,9 @@
 
       const res = await fetch(`${API}/upload`, {
         method: "POST",
-        body: fd,
-        headers: {
-          "Authorization": "Bearer " + ID_TOKEN
-        }
+        headers: { "Authorization": "Bearer " + ID_TOKEN },
+        body: fd
       });
-
-      if (!res.ok) {
-        const t = await res.text();
-        alert(t.includes("USER_NOT_APPROVED")
-          ? "Your account is pending approval"
-          : t);
-        return;
-      }
 
       const data = await res.json();
       JOB_ID = data.job_id;
@@ -111,18 +92,16 @@
         headers: { "Authorization": "Bearer " + ID_TOKEN }
       });
 
-      if (!res.ok) return;
-
       const s = await res.json();
-      document.getElementById("status").innerText = s.status || "";
-      document.getElementById("stage").innerText = s.stage || "";
-      document.getElementById("progress").value = Number(s.progress || 0);
+
+      status.innerText = s.status;
+      stage.innerText = s.stage || "";
+      progress.value = Number(s.progress || 0);
 
       if (s.output_path) {
-        const link = document.getElementById("downloadLink");
-        link.href = s.output_path;
-        link.download = "transcript.txt";
-        document.getElementById("downloadBox").style.display = "block";
+        downloadLink.href = s.output_path;
+        downloadLink.download = "transcript.txt";
+        downloadBox.style.display = "block";
         clearInterval(POLLER);
       }
     }
