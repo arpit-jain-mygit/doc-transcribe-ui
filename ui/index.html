@@ -269,17 +269,27 @@ function onGoogleSignIn(resp) {
    ========================= */
 function logout() {
   ID_TOKEN = null;
+  JOB_ID = null;
+
+  if (POLLER) {
+    clearInterval(POLLER);
+    POLLER = null;
+  }
+
   google.accounts.id.disableAutoSelect();
   google.accounts.id.cancel();
+
   toast("Logged out", "info");
-  renderGoogleButton(); // 🔥 ONLY NOW SHOW SIGN-IN
+  renderGoogleButton(); // show sign-in button only now
 }
+
 
 /* =========================
    REST OF YOUR LOGIC (UNCHANGED)
    ========================= */
 async function upload(type) {
   if (!ID_TOKEN) return toast("Please sign in first", "error");
+
   const file = document.getElementById("file").files[0];
   if (!file) return toast("Please select a file", "error");
 
@@ -293,6 +303,24 @@ async function upload(type) {
     body: fd
   });
 
+  // ⛔ 401 → expired login
+  if (res.status === 401) {
+    toast("Session expired. Please sign in again.", "error");
+    logout();
+    return;
+  }
+
+  // ⛔ 403 → pending approval
+  if (res.status === 403) {
+    toast("Your account is pending approval", "info");
+    return;
+  }
+
+  if (!res.ok) {
+    toast("Upload failed", "error");
+    return;
+  }
+
   const data = await res.json();
   JOB_ID = data.job_id;
 
@@ -303,13 +331,45 @@ async function upload(type) {
   POLLER = setInterval(pollStatus, 4000);
 }
 
+
 async function pollStatus() {
-  const res = await fetch(`${API}/status/${JOB_ID}`, {
-    headers: { Authorization: "Bearer " + ID_TOKEN }
-  });
+  // 🔒 HARD GUARD
+  if (!ID_TOKEN || !JOB_ID) {
+    clearInterval(POLLER);
+    return;
+  }
+
+  let res;
+  try {
+    res = await fetch(`${API}/status/${JOB_ID}`, {
+      headers: { Authorization: "Bearer " + ID_TOKEN }
+    });
+  } catch (e) {
+    toast("Network error", "error");
+    clearInterval(POLLER);
+    return;
+  }
+
+  // ⛔ 401 → NOT LOGGED IN
+  if (res.status === 401) {
+    clearInterval(POLLER);
+    toast("Session expired. Please sign in again.", "error");
+    logout();              // forces sign-in button
+    return;
+  }
+
+  // ⛔ 403 → PENDING APPROVAL
+  if (res.status === 403) {
+    clearInterval(POLLER);
+    toast("Your account is pending approval", "info");
+    return;
+  }
+
+  if (!res.ok) return;
+
   const s = await res.json();
 
-  status.innerText = s.status;
+  status.innerText = s.status || "";
   stage.innerText = s.stage || "";
   progress.value = Number(s.progress || 0);
 
