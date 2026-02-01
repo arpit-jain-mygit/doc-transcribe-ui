@@ -47,7 +47,6 @@
       display: none;
     }
 
-    /* 🪔📜 INTRO MESSAGE — ADDED */
     #appIntro {
       margin-top: 6px;
       margin-bottom: 14px;
@@ -221,7 +220,11 @@
 
       <div id="welcomeBanner"></div>
     </div>
-    <button class="btn-danger" onclick="logout()">Logout</button>
+
+    <!-- existing button, only id + default hidden ADDED -->
+    <button id="logoutBtn" class="btn-danger" onclick="logout()" style="display:none;">
+      Logout
+    </button>
   </div>
 
   <div id="approvalBanner">
@@ -289,6 +292,17 @@ let POLLER = null;
 let USER_EMAIL = null;
 let IS_PENDING = false;
 
+/* 🔐 UI STATE HELPERS — ADDED ONLY */
+function showLoggedInUI() {
+  logoutBtn.style.display = "inline-block";
+  authBox.style.display = "none";
+}
+
+function showLoggedOutUI() {
+  logoutBtn.style.display = "none";
+  authBox.style.display = "block";
+}
+
 /* helpers */
 function toast(message, type="info") {
   const box = document.getElementById("toasts");
@@ -312,6 +326,8 @@ function hidePending() {
 /* auth */
 function renderGoogleButton() {
   authBox.style.display = "block";
+  showLoggedOutUI();   // ADDITIVE
+
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
     callback: onGoogleSignIn,
@@ -331,7 +347,8 @@ function onGoogleSignIn(resp) {
   } catch {}
   welcomeBanner.innerText = `Welcome, ${USER_EMAIL}`;
   welcomeBanner.style.display = "block";
-  authBox.style.display = "none";
+
+  showLoggedInUI();    // ADDITIVE
   hidePending();
   toast("Signed in successfully", "success");
   loadJobs();
@@ -343,6 +360,8 @@ function logout() {
   JOB_ID = null;
   hidePending();
   welcomeBanner.style.display = "none";
+
+  showLoggedOutUI();   // ADDITIVE
   toast("Logged out", "info");
   renderGoogleButton();
 }
