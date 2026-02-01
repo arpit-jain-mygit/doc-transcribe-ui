@@ -1,50 +1,226 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Doc Transcribe</title>
 
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { margin-right: 8px; }
-    progress { width: 320px; height: 18px; }
-    a { display: inline-block; margin-top: 6px; }
-    .job { border-bottom: 1px solid #ddd; padding: 8px 0; }
+    :root {
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* Buttons */
+    button {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #f3f4f6;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: white;
+    }
+
+    .btn-danger {
+      color: #b91c1c;
+      border-color: #fecaca;
+      background: #fff5f5;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* Upload */
+    .upload-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"] {
+      font-size: 14px;
+    }
+
+    /* Status */
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    progress {
+      width: 100%;
+      height: 16px;
+      margin-top: 6px;
+    }
+
+    /* Download */
+    .download a {
+      display: inline-block;
+      margin-top: 12px;
+      color: var(--success);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* Jobs */
+    .job {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .job:last-child {
+      border-bottom: none;
+    }
+
+    .job-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .job-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .job a {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
   </style>
 </head>
 
 <body>
 
-<div id="g_id_onload"
-  data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
-  data-callback="onGoogleSignIn"></div>
+<div class="container">
 
-<div class="g_id_signin"></div>
+  <!-- Google Sign-In -->
+  <div id="g_id_onload"
+    data-client_id="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com"
+    data-callback="onGoogleSignIn">
+  </div>
+  <div class="g_id_signin"></div>
 
-<button onclick="logout()">Logout</button>
+  <div class="top-bar">
+    <h1>Doc Transcribe</h1>
+    <button class="btn-danger" onclick="logout()">Logout</button>
+  </div>
 
-<h3>Doc Transcribe</h3>
+  <!-- Upload -->
+  <div class="card">
+    <h2>Upload</h2>
+    <div class="upload-row">
+      <input type="file" id="file" />
+      <button class="btn-primary" onclick="upload('OCR')">OCR</button>
+      <button class="btn-primary" onclick="upload('TRANSCRIPTION')">Transcribe</button>
+    </div>
+  </div>
 
-<input type="file" id="file" />
-<button onclick="upload('OCR')">OCR</button>
-<button onclick="upload('TRANSCRIPTION')">Transcribe</button>
+  <!-- Status -->
+  <div id="statusBox" class="card" style="display:none;">
+    <h2>Processing</h2>
+    <div class="status-row">
+      <div>Status: <b><span id="status"></span></b></div>
+      <div><span id="stage"></span></div>
+    </div>
+    <progress id="progress" value="0" max="100"></progress>
 
-<hr>
+    <div id="downloadBox" class="download" style="display:none;">
+      <a id="downloadLink" download>⬇ Download Result</a>
+    </div>
+  </div>
 
-<div id="statusBox" style="display:none;">
-  <p><b>Status:</b> <span id="status"></span></p>
-  <p><b>Stage:</b> <span id="stage"></span></p>
-  <progress id="progress" value="0" max="100"></progress>
+  <!-- Jobs -->
+  <div class="card">
+    <div class="top-bar" style="margin-bottom:12px;">
+      <h2>My Jobs</h2>
+      <button class="btn-secondary" onclick="loadJobs()">🔄 Refresh</button>
+    </div>
+    <div id="jobs"></div>
+  </div>
+
 </div>
-
-<div id="downloadBox" style="display:none;">
-  <a id="downloadLink" download>⬇ Download Result</a>
-</div>
-
-<hr>
-<h3>My Jobs</h3>
-<button onclick="loadJobs()">🔄 Refresh</button>
-<div id="jobs"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -68,6 +244,7 @@ function logout() {
 
 async function upload(type) {
   if (!ID_TOKEN) return alert("Sign in first");
+
   const file = document.getElementById("file").files[0];
   if (!file) return alert("Select file");
 
@@ -85,6 +262,8 @@ async function upload(type) {
   JOB_ID = data.job_id;
 
   document.getElementById("statusBox").style.display = "block";
+  document.getElementById("downloadBox").style.display = "none";
+
   pollStatus();
   POLLER = setInterval(pollStatus, 4000);
 }
@@ -123,8 +302,8 @@ async function loadJobs() {
     const div = document.createElement("div");
     div.className = "job";
     div.innerHTML = `
-      <div><b>${j.job_type}</b> — ${j.status}</div>
-      <div>${j.updated_at || ""}</div>
+      <div class="job-title">${j.job_type} — ${j.status}</div>
+      <div class="job-meta">${j.updated_at || ""}</div>
       ${j.output_path ? `<a href="${j.output_path}" download>⬇ Download</a>` : ""}
     `;
     box.appendChild(div);
