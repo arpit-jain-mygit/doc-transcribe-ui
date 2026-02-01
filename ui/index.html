@@ -221,7 +221,6 @@
       <div id="welcomeBanner"></div>
     </div>
 
-    <!-- existing button, only id + default hidden ADDED -->
     <button id="logoutBtn" class="btn-danger" onclick="logout()" style="display:none;">
       Logout
     </button>
@@ -292,7 +291,7 @@ let POLLER = null;
 let USER_EMAIL = null;
 let IS_PENDING = false;
 
-/* 🔐 UI STATE HELPERS — ADDED ONLY */
+/* 🔐 UI STATE HELPERS */
 function showLoggedInUI() {
   logoutBtn.style.display = "inline-block";
   authBox.style.display = "none";
@@ -325,14 +324,14 @@ function hidePending() {
 
 /* auth */
 function renderGoogleButton() {
-  authBox.style.display = "block";
-  showLoggedOutUI();   // ADDITIVE
+  showLoggedOutUI();
 
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
     callback: onGoogleSignIn,
     auto_select: false
   });
+
   google.accounts.id.renderButton(
     document.getElementById("google-signin-btn"),
     { theme: "outline", size: "large" }
@@ -345,10 +344,11 @@ function onGoogleSignIn(resp) {
     const payload = JSON.parse(atob(resp.credential.split(".")[1]));
     USER_EMAIL = payload.email || "";
   } catch {}
+
   welcomeBanner.innerText = `Welcome, ${USER_EMAIL}`;
   welcomeBanner.style.display = "block";
 
-  showLoggedInUI();    // ADDITIVE
+  showLoggedInUI();
   hidePending();
   toast("Signed in successfully", "success");
   loadJobs();
@@ -361,7 +361,7 @@ function logout() {
   hidePending();
   welcomeBanner.style.display = "none";
 
-  showLoggedOutUI();   // ADDITIVE
+  showLoggedOutUI();
   toast("Logged out", "info");
   renderGoogleButton();
 }
@@ -446,13 +446,17 @@ async function loadJobs() {
     box.appendChild(div);
   });
 }
-/* 🔁 INITIAL RENDER — ADDED */
-document.addEventListener("DOMContentLoaded", () => {
-  if (!ID_TOKEN) {
-    renderGoogleButton();
-  }
-});
 
+/* ✅ SAFE INITIAL RENDER — ADDED (NO CUTS) */
+function waitForGoogleAndRender() {
+  if (window.google && google.accounts && google.accounts.id) {
+    renderGoogleButton();
+  } else {
+    setTimeout(waitForGoogleAndRender, 50);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", waitForGoogleAndRender);
 </script>
 
 </body>
