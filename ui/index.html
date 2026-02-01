@@ -446,6 +446,13 @@ async function loadJobs() {
     box.appendChild(div);
   });
 }
+/* 🔁 INITIAL RENDER — ADDED */
+document.addEventListener("DOMContentLoaded", () => {
+  if (!ID_TOKEN) {
+    renderGoogleButton();
+  }
+});
+
 </script>
 
 </body>
