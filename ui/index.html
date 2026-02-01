@@ -209,12 +209,35 @@
     ⏳ Your account is pending approval. Uploads are disabled until approval.
   </div>
 
+  <!-- ORIGINAL UPLOAD CARD (UNCHANGED) -->
   <div class="card">
     <h2>Upload</h2>
     <div class="upload-row">
       <input type="file" id="file" />
       <button class="btn-primary" onclick="upload('OCR')">OCR</button>
       <button class="btn-primary" onclick="upload('TRANSCRIPTION')">Transcribe</button>
+    </div>
+  </div>
+
+  <!-- ✅ ADDED OCR CARD -->
+  <div class="card">
+    <h2>OCR</h2>
+    <div class="upload-row">
+      <input type="file" id="ocrFile" />
+      <button class="btn-primary" onclick="proxyUpload('OCR','ocrFile')">
+        Run OCR
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ ADDED TRANSCRIPTION CARD -->
+  <div class="card">
+    <h2>Transcription</h2>
+    <div class="upload-row">
+      <input type="file" id="transcribeFile" />
+      <button class="btn-primary" onclick="proxyUpload('TRANSCRIPTION','transcribeFile')">
+        Transcribe
+      </button>
     </div>
   </div>
 
@@ -243,6 +266,23 @@
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+<!-- ✅ ADDITIVE HELPER -->
+<script>
+function proxyUpload(type, sourceInputId) {
+  const src = document.getElementById(sourceInputId);
+  const hidden = document.getElementById("file");
+
+  if (!src || !src.files.length) {
+    toast("Please select a file", "error");
+    return;
+  }
+
+  hidden.files = src.files;
+  upload(type);
+}
+</script>
+
+<!-- 🔽 ORIGINAL SCRIPT (UNCHANGED) -->
 <script>
 const API = "https://doc-transcribe-api.onrender.com";
 let ID_TOKEN = null;
