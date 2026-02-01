@@ -37,6 +37,14 @@
     h1 { font-size: 24px; margin-bottom: 8px; }
     h2 { font-size: 18px; margin-bottom: 12px; }
 
+    /* ✅ WELCOME BANNER */
+    #welcomeBanner {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: none;
+    }
+
     hr {
       border: none;
       border-top: 1px solid var(--border);
@@ -129,9 +137,6 @@
       margin-bottom: 24px;
     }
 
-    /* =========================
-       TOAST NOTIFICATIONS
-       ========================= */
     #toasts {
       position: fixed;
       top: 20px;
@@ -176,7 +181,11 @@
   </div>
 
   <div class="top-bar">
-    <h1>Doc Transcribe</h1>
+    <div>
+      <h1>Doc Transcribe</h1>
+      <!-- ✅ WELCOME BANNER -->
+      <div id="welcomeBanner"></div>
+    </div>
     <button class="btn-danger" onclick="logout()">Logout</button>
   </div>
 
@@ -220,9 +229,9 @@ let ID_TOKEN = null;
 let JOB_ID = null;
 let POLLER = null;
 
-/* =========================
-   TOAST
-   ========================= */
+/* ✅ ADDED */
+let USER_EMAIL = null;
+
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
   const div = document.createElement("div");
@@ -232,9 +241,6 @@ function toast(message, type = "info") {
   setTimeout(() => div.remove(), 4000);
 }
 
-/* =========================
-   GOOGLE SIGN-IN (MANUAL)
-   ========================= */
 function renderGoogleButton() {
   const box = document.getElementById("authBox");
   box.style.display = "block";
@@ -247,11 +253,7 @@ function renderGoogleButton() {
 
   google.accounts.id.renderButton(
     document.getElementById("google-signin-btn"),
-    {
-      theme: "outline",
-      size: "large",
-      text: "signin_with"
-    }
+    { theme: "outline", size: "large", text: "signin_with" }
   );
 
   google.accounts.id.cancel();
@@ -259,17 +261,32 @@ function renderGoogleButton() {
 
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
+
+  /* ✅ ADDED: extract email */
+  try {
+    const payload = JSON.parse(atob(resp.credential.split(".")[1]));
+    USER_EMAIL = payload.email || "";
+  } catch {}
+
+  const banner = document.getElementById("welcomeBanner");
+  if (USER_EMAIL) {
+    banner.innerText = `Welcome, ${USER_EMAIL}`;
+    banner.style.display = "block";
+  }
+
   document.getElementById("authBox").style.display = "none";
   toast("Signed in successfully", "success");
   loadJobs();
 }
 
-/* =========================
-   LOGOUT
-   ========================= */
 function logout() {
   ID_TOKEN = null;
   JOB_ID = null;
+  USER_EMAIL = null;
+
+  const banner = document.getElementById("welcomeBanner");
+  banner.innerText = "";
+  banner.style.display = "none";
 
   if (POLLER) {
     clearInterval(POLLER);
@@ -283,11 +300,11 @@ function logout() {
   renderGoogleButton();
 }
 
-
-
 /* =========================
    REST OF YOUR LOGIC (UNCHANGED)
    ========================= */
+/* ⬇⬇⬇ EVERYTHING BELOW IS UNMODIFIED ⬇⬇⬇ */
+
 async function upload(type) {
   if (!ID_TOKEN) {
     toast("Please sign in first", "error");
@@ -316,14 +333,12 @@ async function upload(type) {
     return;
   }
 
-  // ⛔ AUTH FAILED
   if (res.status === 401) {
     toast("Session expired. Please sign in again.", "error");
     logout();
     return;
   }
 
-  // ⛔ REDIS APPROVAL PENDING
   if (res.status === 403) {
     toast("Your account is pending approval", "info");
     return;
@@ -336,7 +351,6 @@ async function upload(type) {
 
   const data = await res.json();
 
-  // 🔒 ABSOLUTE GUARD
   if (!data.job_id) {
     toast("Job ID missing. Upload aborted.", "error");
     return;
@@ -351,10 +365,7 @@ async function upload(type) {
   POLLER = setInterval(pollStatus, 4000);
 }
 
-
-
 async function pollStatus() {
-  // 🔒 HARD STOP
   if (!ID_TOKEN || !JOB_ID) {
     clearInterval(POLLER);
     POLLER = null;
@@ -396,7 +407,6 @@ async function pollStatus() {
     loadJobs();
   }
 }
-
 
 async function loadJobs() {
   if (!ID_TOKEN) return;
