@@ -16,6 +16,9 @@
       --success: #16a34a;
       --error: #dc2626;
       --info: #0284c7;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --warning-text: #92400e;
     }
 
     * { box-sizing: border-box; }
@@ -43,6 +46,19 @@
       color: var(--muted);
       margin-top: 2px;
       display: none;
+    }
+
+    /* 🟡 PENDING APPROVAL BANNER */
+    #approvalBanner {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+      font-size: 14px;
+      font-weight: 500;
     }
 
     hr {
@@ -183,10 +199,14 @@
   <div class="top-bar">
     <div>
       <h1>Doc Transcribe</h1>
-      <!-- ✅ WELCOME BANNER -->
       <div id="welcomeBanner"></div>
     </div>
     <button class="btn-danger" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- 🟡 PENDING APPROVAL BANNER -->
+  <div id="approvalBanner">
+    ⏳ Your account is pending approval. Uploads are disabled until approval.
   </div>
 
   <div class="card">
@@ -228,9 +248,20 @@ const API = "https://doc-transcribe-api.onrender.com";
 let ID_TOKEN = null;
 let JOB_ID = null;
 let POLLER = null;
-
-/* ✅ ADDED */
 let USER_EMAIL = null;
+let IS_PENDING = false;
+
+/* ---------------- UI HELPERS ---------------- */
+
+function showPending() {
+  IS_PENDING = true;
+  document.getElementById("approvalBanner").style.display = "block";
+}
+
+function hidePending() {
+  IS_PENDING = false;
+  document.getElementById("approvalBanner").style.display = "none";
+}
 
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
@@ -240,6 +271,8 @@ function toast(message, type = "info") {
   box.appendChild(div);
   setTimeout(() => div.remove(), 4000);
 }
+
+/* ---------------- AUTH ---------------- */
 
 function renderGoogleButton() {
   const box = document.getElementById("authBox");
@@ -262,7 +295,6 @@ function renderGoogleButton() {
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
 
-  /* ✅ ADDED: extract email */
   try {
     const payload = JSON.parse(atob(resp.credential.split(".")[1]));
     USER_EMAIL = payload.email || "";
@@ -275,6 +307,7 @@ function onGoogleSignIn(resp) {
   }
 
   document.getElementById("authBox").style.display = "none";
+  hidePending();
   toast("Signed in successfully", "success");
   loadJobs();
 }
@@ -283,10 +316,9 @@ function logout() {
   ID_TOKEN = null;
   JOB_ID = null;
   USER_EMAIL = null;
+  hidePending();
 
-  const banner = document.getElementById("welcomeBanner");
-  banner.innerText = "";
-  banner.style.display = "none";
+  document.getElementById("welcomeBanner").style.display = "none";
 
   if (POLLER) {
     clearInterval(POLLER);
@@ -300,14 +332,16 @@ function logout() {
   renderGoogleButton();
 }
 
-/* =========================
-   REST OF YOUR LOGIC (UNCHANGED)
-   ========================= */
-/* ⬇⬇⬇ EVERYTHING BELOW IS UNMODIFIED ⬇⬇⬇ */
+/* ---------------- CORE LOGIC ---------------- */
 
 async function upload(type) {
   if (!ID_TOKEN) {
     toast("Please sign in first", "error");
+    return;
+  }
+
+  if (IS_PENDING) {
+    toast("Account pending approval", "info");
     return;
   }
 
@@ -340,9 +374,12 @@ async function upload(type) {
   }
 
   if (res.status === 403) {
+    showPending();
     toast("Your account is pending approval", "info");
     return;
   }
+
+  hidePending();
 
   if (!res.ok) {
     toast("Upload failed", "error");
@@ -350,12 +387,6 @@ async function upload(type) {
   }
 
   const data = await res.json();
-
-  if (!data.job_id) {
-    toast("Job ID missing. Upload aborted.", "error");
-    return;
-  }
-
   JOB_ID = data.job_id;
 
   document.getElementById("statusBox").style.display = "block";
@@ -385,14 +416,16 @@ async function pollStatus() {
 
   if (res.status === 403) {
     clearInterval(POLLER);
+    showPending();
     toast("Your account is pending approval", "info");
     return;
   }
 
+  hidePending();
+
   if (!res.ok) return;
 
   const s = await res.json();
-
   status.innerText = s.status || "";
   stage.innerText = s.stage || "";
   progress.value = Number(s.progress || 0);
@@ -414,6 +447,13 @@ async function loadJobs() {
   const res = await fetch(`${API}/jobs`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
+
+  if (res.status === 403) {
+    showPending();
+    return;
+  }
+
+  hidePending();
 
   const jobs = await res.json();
   const box = document.getElementById("jobs");
