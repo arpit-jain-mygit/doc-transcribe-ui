@@ -47,6 +47,16 @@
       display: none;
     }
 
+    /* 🪔📜 INTRO MESSAGE — ADDED */
+    #appIntro {
+      margin-top: 6px;
+      margin-bottom: 14px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #374151;
+      max-width: 840px;
+    }
+
     #approvalBanner {
       display: none;
       margin-bottom: 16px;
@@ -105,7 +115,6 @@
       margin-top: 6px;
     }
 
-    /* side-by-side cards */
     .upload-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -204,6 +213,12 @@
   <div class="top-bar">
     <div>
       <h1>Doc Transcribe</h1>
+
+      <div id="appIntro">
+        🪔📜 इस ऐप के माध्यम से आप जैन प्रवचन, स्तुतियां या प्राचीन ग्रंथों का
+        शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
+      </div>
+
       <div id="welcomeBanner"></div>
     </div>
     <button class="btn-danger" onclick="logout()">Logout</button>
@@ -213,36 +228,23 @@
     ⏳ Your account is pending approval. Uploads are disabled until approval.
   </div>
 
-  <!-- SIDE-BY-SIDE UPLOAD CARDS -->
   <div class="upload-grid">
 
-    <!-- OCR -->
     <div class="card">
       <h2>PDF to Hindi Text</h2>
       <div class="upload-row">
-        <input
-          type="file"
-          id="ocrFile"
-          accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp"
-        />
+        <input type="file" id="ocrFile" accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
         <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">
           Convert
         </button>
       </div>
-      <div class="hint">
-        Supported: PDF
-      </div>
+      <div class="hint">Supported: PDF</div>
     </div>
 
-    <!-- Transcription -->
     <div class="card">
       <h2>video/Audio to Hindi Text</h2>
       <div class="upload-row">
-        <input
-          type="file"
-          id="transcribeFile"
-          accept=".mp3,.wav,.m4a,.mp4,.mov,.webm"
-        />
+        <input type="file" id="transcribeFile" accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
         <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
           Convert
         </button>
@@ -386,7 +388,7 @@ async function upload(type, file) {
   POLLER = setInterval(pollStatus, 4000);
 }
 
-/* status + jobs unchanged */
+/* status */
 async function pollStatus() {
   if (!JOB_ID) return;
   const res = await fetch(`${API}/status/${JOB_ID}`, {
@@ -405,6 +407,7 @@ async function pollStatus() {
   }
 }
 
+/* jobs */
 async function loadJobs() {
   if (!ID_TOKEN) return;
   const res = await fetch(`${API}/jobs`, {
