@@ -110,6 +110,7 @@ function onGoogleSignIn(resp) {
     JSON.stringify({
       token: ID_TOKEN,
       email: USER_EMAIL,
+      picture: payload.picture || null, // ✅ ADD
     })
   );
 
@@ -154,7 +155,8 @@ function restoreSession() {
     USER_EMAIL = email;
 
     userEmail.innerText = USER_EMAIL;
-    userAvatar.src = "https://www.gravatar.com/avatar?d=mp";
+    userAvatar.src = picture || "https://www.gravatar.com/avatar?d=mp";
+
 
     showLoggedInUI();
     loadJobs();
