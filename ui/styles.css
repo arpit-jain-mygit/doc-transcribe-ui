@@ -380,3 +380,26 @@ progress {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* ===============================
+   MOBILE HEADER FIX
+   =============================== */
+@media (max-width: 720px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .user-column {
+    width: 100%;
+    min-width: unset;
+    align-items: center;
+  }
+
+  #google-signin-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
