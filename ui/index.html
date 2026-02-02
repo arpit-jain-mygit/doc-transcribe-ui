@@ -234,9 +234,33 @@
       max-width: 220px;
     }
 
-    /* hide native file input UI */
     .drop-zone input[type="file"] {
       display: none;
+    }
+
+    /* ===============================
+       ADDITIVE THOUGHT SLIDER STYLES
+       =============================== */
+
+    .thought-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      font-size: 15px;
+      color: #374151;
+      display: none;
+      min-height: 54px;
+    }
+
+    .thought-text {
+      animation: thoughtFade 0.6s ease;
+    }
+
+    @keyframes thoughtFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -321,6 +345,11 @@
 
     <div id="downloadBox" class="download" style="display:none;">
       <a id="downloadLink" download>⬇ Download Result</a>
+    </div>
+
+    <!-- ✅ ADDITIVE THOUGHT SLIDER HTML -->
+    <div id="thoughtBox" class="thought-box">
+      <div id="thoughtText" class="thought-text"></div>
     </div>
   </div>
 
@@ -560,6 +589,66 @@ function attachDragDrop(zoneId, inputId, nameId) {
 document.addEventListener("DOMContentLoaded", () => {
   attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
   attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
+});
+</script>
+
+<!-- ===============================
+     THOUGHT SLIDER SCRIPT (ADD ONLY)
+     =============================== -->
+<script>
+const THOUGHTS = [
+  "🪔 शब्दों की शुद्धता ही ज्ञान की रक्षा है।",
+  "📜 हर अक्षर श्रद्धा से संजोया जा रहा है।",
+  "🧘‍♂️ यह प्रक्रिया साधना के समान है।",
+  "🔍 मूल भाव बदले बिना लिप्यंतरण किया जा रहा है।",
+  "⏳ महान ग्रंथ समय लेकर ही प्रकट होते हैं।",
+  "🌸 आपका कार्य सुरक्षित रूप से संसाधित हो रहा है।"
+];
+
+let THOUGHT_TIMER = null;
+let THOUGHT_INDEX = 0;
+
+function startThoughtSlider() {
+  const box = document.getElementById("thoughtBox");
+  const text = document.getElementById("thoughtText");
+  if (!box || THOUGHT_TIMER) return;
+
+  box.style.display = "block";
+  text.textContent = THOUGHTS[0];
+  THOUGHT_INDEX = 1;
+
+  THOUGHT_TIMER = setInterval(() => {
+    text.textContent = THOUGHTS[THOUGHT_INDEX % THOUGHTS.length];
+    text.classList.remove("thought-text");
+    void text.offsetWidth;
+    text.classList.add("thought-text");
+    THOUGHT_INDEX++;
+  }, 4500);
+}
+
+function stopThoughtSlider() {
+  const box = document.getElementById("thoughtBox");
+  if (box) box.style.display = "none";
+  if (THOUGHT_TIMER) clearInterval(THOUGHT_TIMER);
+  THOUGHT_TIMER = null;
+}
+
+/* DOM-BASED WIRING — NO LOGIC TOUCH */
+document.addEventListener("DOMContentLoaded", () => {
+  const statusBox = document.getElementById("statusBox");
+  const downloadBox = document.getElementById("downloadBox");
+
+  const observer = new MutationObserver(() => {
+    if (statusBox.style.display !== "none") {
+      startThoughtSlider();
+    }
+    if (downloadBox.style.display !== "none") {
+      stopThoughtSlider();
+    }
+  });
+
+  observer.observe(statusBox, { attributes: true, attributeFilter: ["style"] });
+  observer.observe(downloadBox, { attributes: true, attributeFilter: ["style"] });
 });
 </script>
 
