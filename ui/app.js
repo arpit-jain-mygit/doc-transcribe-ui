@@ -11,6 +11,8 @@ function stopPolling() {
     clearInterval(POLLER);
     POLLER = null;
   }
+  window.removeEventListener("beforeunload", beforeUnloadHandler);
+
 }
 
 function startPolling() {
@@ -19,6 +21,7 @@ function startPolling() {
   if (!JOB_ID || typeof JOB_ID !== "string") {
     return;
   }
+  window.addEventListener("beforeunload", beforeUnloadHandler);
 
   POLLER = setInterval(() => {
     if (JOB_ID && typeof JOB_ID === "string") {
@@ -441,6 +444,16 @@ function stopThoughtSlider() {
   if (THOUGHT_TIMER) clearInterval(THOUGHT_TIMER);
   THOUGHT_TIMER = null;
 }
+
+function beforeUnloadHandler(e) {
+  // Only warn if a job is actively processing
+  if (JOB_ID && POLLER) {
+    e.preventDefault();
+    e.returnValue = ""; // Required for Chrome / Safari
+    return "";
+  }
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
   stopPolling();
