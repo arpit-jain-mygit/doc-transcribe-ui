@@ -24,24 +24,24 @@ function setProcessing(on) {
   IS_PROCESSING = on;
   document.body.classList.toggle("processing-active", on);
 
-  if (on) {
-    window.onbeforeunload = () =>
-      "Processing is in progress. Are you sure you want to leave?";
-  } else {
-    window.onbeforeunload = null;
-  }
+  window.onbeforeunload = on
+    ? () => "Processing is in progress. Are you sure you want to leave?"
+    : null;
 }
 
 /* =======================
-   AUTH
+   AUTH (BUTTON ONLY — NO ONE TAP)
 ======================= */
 function renderGoogleButton() {
+  // 🔴 HARD KILL ONE TAP (THIS IS THE KEY)
+  google.accounts.id.disableAutoSelect();
+  google.accounts.id.cancel();
+
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
     callback: onGoogleSignIn,
-
-    // ✅ ADD ONLY — FORCE BUTTON, DISABLE ONE TAP
-    itp_support: false
+    auto_select: false,
+    cancel_on_tap_outside: true
   });
 
   google.accounts.id.renderButton(
@@ -57,7 +57,6 @@ function onGoogleSignIn(resp) {
   banner.innerText = "Welcome";
   banner.style.display = "block";
 
-  // hide auth box after login (ADD ONLY, SAFE)
   const authBox = document.getElementById("authBox");
   if (authBox) authBox.style.display = "none";
 }
@@ -68,12 +67,11 @@ function onGoogleSignIn(resp) {
 function uploadFrom(type, inputId) {
   const input = document.getElementById(inputId);
   if (!input.files.length) return toast("Select a file", "error");
+  if (!ID_TOKEN) return toast("Please sign in first", "error");
   upload(type, input.files[0]);
 }
 
 async function upload(type, file) {
-  if (!ID_TOKEN) return toast("Please sign in first", "error");
-
   setProcessing(true);
 
   const fd = new FormData();
@@ -128,14 +126,12 @@ function attach(zoneId, inputId, nameId) {
 }
 
 /* =======================
-   BOOTSTRAP (SAFE, FINAL)
+   BOOTSTRAP (FINAL)
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // ensure auth box is visible BEFORE render
   const authBox = document.getElementById("authBox");
   if (authBox) authBox.style.display = "block";
 
-  // wait for Google GSI safely
   const waitForGoogle = () => {
     if (window.google && google.accounts && google.accounts.id) {
       renderGoogleButton();
