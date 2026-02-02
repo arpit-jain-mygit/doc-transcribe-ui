@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?><Error><Code>SignatureDoesNotMatch</Code><Message>Access denied.</Message><Details>The request signature we calculated does not match the signature you provided. Check your Google secret key and signing method.</Details><StringToSign>GOOG4-RSA-SHA256
+20260202T073251Z
+20260202/auto/storage/goog4_request
+7a48a0e2b8cc846a49a7f5a02cfda436597f6fd03afee4f406676138ff5e00b9</StringToSign><CanonicalRequest>GET
+/doc-transcribe-output-transcribe-serverless/jobs/e794feab3b134b0d9a1a3fbad38d5c71/transcript.txt
+X-Goog-Algorithm=GOOG4-RSA-SHA256&amp;X-Goog-Credential=vertex-gemini-sa%40transcribe-serverless.iam.gserviceaccount.com%2F20260202%2Fauto%2Fstorage%2Fgoog4_request&amp;X-Goog-Date=20260202T073251Z&amp;X-Goog-Expires=3600&amp;X-Goog-SignedHeaders=host
+host:storage.googleapis.com
+
+host
+UNSIGNED-PAYLOAD</CanonicalRequest></Error>

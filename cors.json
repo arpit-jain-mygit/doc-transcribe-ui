@@ -1,0 +1,18 @@
+[
+    {
+        "origin": [
+            "https://super-spoon-r4qvw95ggjjrhp7x4-8080.app.github.dev/",
+            "https://doc-transcribe-ui.vercel.app"
+        ],
+        "responseHeader": [
+            "Content-Type",
+            "Content-Disposition"
+        ],
+        "method": [
+            "GET",
+            "HEAD",
+            "OPTIONS"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]
