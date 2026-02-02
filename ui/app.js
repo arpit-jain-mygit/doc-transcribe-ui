@@ -36,18 +36,16 @@ function setProcessing(on) {
    AUTH
 ======================= */
 function renderGoogleButton() {
-  if (!window.google || !google.accounts || !google.accounts.id) return;
-
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
-    callback: onGoogleSignIn
+    callback: onGoogleSignIn,
+
+    // ✅ ADD ONLY — FORCE BUTTON, DISABLE ONE TAP
+    itp_support: false
   });
 
-  const target = document.getElementById("google-signin-btn");
-  if (!target) return;
-
   google.accounts.id.renderButton(
-    target,
+    document.getElementById("google-signin-btn"),
     { theme: "outline", size: "large" }
   );
 }
@@ -59,6 +57,7 @@ function onGoogleSignIn(resp) {
   banner.innerText = "Welcome";
   banner.style.display = "block";
 
+  // hide auth box after login (ADD ONLY, SAFE)
   const authBox = document.getElementById("authBox");
   if (authBox) authBox.style.display = "none";
 }
@@ -129,27 +128,23 @@ function attach(zoneId, inputId, nameId) {
 }
 
 /* =======================
-   BOOTSTRAP (FIXED)
+   BOOTSTRAP (SAFE, FINAL)
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // Make auth container visible BEFORE rendering Google button
+  // ensure auth box is visible BEFORE render
   const authBox = document.getElementById("authBox");
   if (authBox) authBox.style.display = "block";
 
-  attach("ocrDrop","ocrFile","ocrFilename");
-  attach("transcribeDrop","transcribeFile","transcribeFilename");
-
-  // Wait until Google is actually ready AND container is visible
-  (function waitForGoogle() {
-    if (
-      window.google &&
-      google.accounts &&
-      google.accounts.id &&
-      document.getElementById("google-signin-btn")
-    ) {
+  // wait for Google GSI safely
+  const waitForGoogle = () => {
+    if (window.google && google.accounts && google.accounts.id) {
       renderGoogleButton();
     } else {
       setTimeout(waitForGoogle, 50);
     }
-  })();
+  };
+  waitForGoogle();
+
+  attach("ocrDrop","ocrFile","ocrFilename");
+  attach("transcribeDrop","transcribeFile","transcribeFilename");
 });
