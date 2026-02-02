@@ -558,19 +558,38 @@
 
     async function forceDownload(url) {
       const res = await fetch(url);
+
+      // 1️⃣ Try Content-Disposition (if present)
+      let filename = "transcript.txt";
+      const cd = res.headers.get("Content-Disposition");
+
+      if (cd) {
+        const match = cd.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      } else {
+        // 2️⃣ Fallback: extract from GCS URL path
+        try {
+          const pathname = new URL(url).pathname;
+          filename = pathname.split("/").pop() || filename;
+        } catch { }
+      }
+
       const blob = await res.blob();
 
       const a = document.createElement("a");
       const objectUrl = URL.createObjectURL(blob);
 
       a.href = objectUrl;
-      a.download = "transcript.txt";
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
 
       URL.revokeObjectURL(objectUrl);
       a.remove();
     }
+
 
 
     async function forceDownload(url) {
