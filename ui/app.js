@@ -339,9 +339,6 @@ async function pollStatus() {
     return;
   }
 
-  // 🔥 HARD RESET — kills stale UI text
-  stage.innerText = "";
-
   let res;
   try {
     res = await fetch(`${API}/status/${JOB_ID}`, {
