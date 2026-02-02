@@ -13,10 +13,6 @@
 
   <div class="container">
 
-    <div id="authBox" style="display:none; margin-bottom:24px;">
-      <div id="google-signin-btn"></div>
-    </div>
-
     <div class="top-bar">
       <div>
         <h1>श्रुत एवं जिनवाणी लिप्यंतरण</h1>
@@ -25,13 +21,17 @@
           🪔📜 इस ऐप के माध्यम से आप जैन प्रवचन, स्तुतियां या प्राचीन ग्रंथों का
           शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
         </div>
-
-        <div id="welcomeBanner"></div>
       </div>
 
-      <button id="logoutBtn" class="btn-danger" onclick="logout()" style="display:none;">
-        Logout
-      </button>
+      <div class="user-column">
+        <div id="welcomeBanner"></div>
+        <div id="authBox" style="display:none;">
+          <div id="google-signin-btn"></div>
+        </div>
+        <button id="logoutBtn" class="btn-danger" onclick="logout()" style="display:none;">
+          Logout
+        </button>
+      </div>
     </div>
 
     <div id="approvalBanner">
