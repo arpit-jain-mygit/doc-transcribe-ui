@@ -755,6 +755,23 @@
       observer.observe(statusBox, { attributes: true, attributeFilter: ["style"] });
       observer.observe(downloadBox, { attributes: true, attributeFilter: ["style"] });
     });
+
+
+    document.addEventListener("click", function (e) {
+      const link = e.target.closest(".history-download");
+      if (!link) return;
+
+      e.preventDefault(); // stop new tab navigation
+
+      const url = link.dataset.url;
+      if (!url) {
+        console.warn("History download clicked but no data-url found");
+        return;
+      }
+
+      forceDownload(url);
+    });
+
   </script>
 
 </body>
