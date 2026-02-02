@@ -444,3 +444,7 @@ document.addEventListener("click", function (e) {
 
   forceDownload(url);
 });
+
+// Ensure Google Sign-In renders even on slow mobile loads
+waitForGoogleAndRender();
+
