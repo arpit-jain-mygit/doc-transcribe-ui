@@ -121,3 +121,27 @@ document.addEventListener("DOMContentLoaded", () => {
   attach("ocrDrop","ocrFile","ocrFilename");
   attach("transcribeDrop","transcribeFile","transcribeFilename");
 });
+
+/* =====================================================
+   GOOGLE GSI SAFE RENDER (ADD ONLY — NO CUTS)
+   ===================================================== */
+(function waitForGoogleAndRenderOnce() {
+  let rendered = false;
+
+  const tryRender = () => {
+    if (
+      !rendered &&
+      window.google &&
+      google.accounts &&
+      google.accounts.id &&
+      document.getElementById("google-signin-btn")
+    ) {
+      rendered = true;
+      renderGoogleButton();
+    } else {
+      setTimeout(tryRender, 50);
+    }
+  };
+
+  tryRender();
+})();
