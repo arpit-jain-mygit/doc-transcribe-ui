@@ -252,10 +252,13 @@ async function upload(type, file) {
 
 /* status */
 async function pollStatus() {
+
   if (!JOB_ID || typeof JOB_ID !== "string") {
     return;
   }
 
+  // 🔥 HARD RESET — kills stale UI text
+  stage.innerText = "";
 
   const res = await fetch(`${API}/status/${JOB_ID}`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
