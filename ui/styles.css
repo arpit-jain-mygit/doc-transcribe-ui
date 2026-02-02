@@ -186,10 +186,11 @@ button:disabled {
    =============================== */
 
 .processing-panel {
-  border: 2px solid var(--primary);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.15);
+  position: sticky;
+  top: 16px;
+  z-index: 10;
 }
+
 
 .processing-panel h2 {
   font-size: 22px;
@@ -242,6 +243,7 @@ progress {
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -382,16 +384,26 @@ progress {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.toast.success { background: var(--success); }
-.toast.error { background: var(--error); }
-.toast.info { background: var(--info); }
+.toast.success {
+  background: var(--success);
+}
+
+.toast.error {
+  background: var(--error);
+}
+
+.toast.info {
+  background: var(--info);
+}
 
 /* ===============================
    MOBILE
    =============================== */
 
 @media screen and (max-width: 768px) {
-  body { padding: 16px; }
+  body {
+    padding: 16px;
+  }
 
   .top-bar {
     flex-direction: column;
@@ -420,11 +432,12 @@ progress {
    PROCESSING FOCUS MODE
    =============================== */
 
-body.processing-active .card:not(#statusBox) {
-  opacity: 0.35;
-  filter: blur(1px);
+/* De-emphasize history while processing */
+body.processing-active #jobs {
+  opacity: 0.4;
   pointer-events: none;
 }
+
 
 .processing-focus {
   border: 2px solid var(--primary);

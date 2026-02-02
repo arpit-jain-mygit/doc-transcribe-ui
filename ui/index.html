@@ -88,7 +88,33 @@
 
       </div>
 
-      <!-- HISTORY -->
+      <!-- ========================= -->
+      <!-- PROCESSING HERO SECTION -->
+      <!-- ========================= -->
+      <div id="statusBox" class="card processing-panel" style="display:none;">
+        <h2>Processing</h2>
+
+        <div class="status-row">
+          <div><b><span id="status"></span></b></div>
+        </div>
+
+        <!-- IMPORTANT: no static text here -->
+        <div id="stage"></div>
+
+        <progress id="progress" value="0" max="100"></progress>
+
+        <div id="downloadBox" class="download" style="display:none;">
+          <a id="downloadLink" href="#" download>⬇ Download Result</a>
+        </div>
+
+        <div id="thoughtBox" class="thought-box">
+          <div id="thoughtText" class="thought-text"></div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- HISTORY (SECONDARY) -->
+      <!-- ========================= -->
       <div class="card">
         <div class="top-bar" style="margin-bottom:12px;">
           <h2>Old converted files history</h2>
@@ -99,30 +125,6 @@
 
     </div>
     <!-- END appContent -->
-
-    <!-- ========================= -->
-    <!-- PROCESSING HERO SECTION -->
-    <!-- ========================= -->
-    <div id="statusBox" class="card processing-panel" style="display:none;">
-      <h2>Processing</h2>
-
-      <div class="status-row">
-        <div><b><span id="status"></span></b></div>
-      </div>
-
-      <!-- IMPORTANT: no static text here -->
-      <div id="stage"></div>
-
-      <progress id="progress" value="0" max="100"></progress>
-
-      <div id="downloadBox" class="download" style="display:none;">
-        <a id="downloadLink" href="#" download>⬇ Download Result</a>
-      </div>
-
-      <div id="thoughtBox" class="thought-box">
-        <div id="thoughtText" class="thought-text"></div>
-      </div>
-    </div>
 
   </div>
 
