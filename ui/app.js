@@ -390,7 +390,7 @@ async function pollStatus() {
     document.body.classList.add("progress-near");
   }
   console.log("Progress:", pct);
-  document.body.classList.add("progress-near");
+  //document.body.classList.add("progress-near");
 
   if (s.output_path) {
     document.body.classList.remove("progress-near", "progress-final");
