@@ -4,268 +4,15 @@
   <meta charset="utf-8" />
   <title>श्रुत एवं जिनवाणी लिप्यंतरण</title>
 
-  <style>
-    :root {
-      --bg: #f9fafb;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --success: #16a34a;
-      --error: #dc2626;
-      --info: #0284c7;
-      --warning-bg: #fffbeb;
-      --warning-border: #fde68a;
-      --warning-text: #92400e;
-    }
+  <link rel="stylesheet" href="./styles.css" />
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 32px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-
-    h1 { font-size: 24px; margin-bottom: 8px; }
-    h2 { font-size: 18px; margin-bottom: 12px; }
-
-    #welcomeBanner {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 2px;
-      display: none;
-    }
-
-    #appIntro {
-      margin-top: 6px;
-      margin-bottom: 14px;
-      font-size: 15px;
-      line-height: 1.6;
-      color: #374151;
-      max-width: 840px;
-    }
-
-    #approvalBanner {
-      display: none;
-      margin-bottom: 16px;
-      padding: 12px 14px;
-      border-radius: 8px;
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-border);
-      color: var(--warning-text);
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    button {
-      border: 1px solid var(--border);
-      background: white;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    button:hover { background: #f3f4f6; }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .btn-primary:hover { background: var(--primary-hover); }
-
-    .btn-danger {
-      color: #b91c1c;
-      border-color: #fecaca;
-      background: #fff5f5;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 18px;
-    }
-
-    .upload-row {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .upload-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    @media (max-width: 720px) {
-      .upload-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-
-    progress {
-      width: 100%;
-      height: 16px;
-      margin-top: 6px;
-    }
-
-    .download a {
-      display: inline-block;
-      margin-top: 12px;
-      color: var(--success);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .job {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .job:last-child { border-bottom: none; }
-
-    .job-title { font-weight: 600; font-size: 14px; }
-    .job-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    .job a {
-      display: inline-block;
-      margin-top: 6px;
-      font-size: 13px;
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    #toasts {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .toast {
-      min-width: 260px;
-      max-width: 360px;
-      padding: 12px 14px;
-      border-radius: 8px;
-      color: white;
-      font-size: 14px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    }
-
-    .toast.success { background: var(--success); }
-    .toast.error { background: var(--error); }
-    .toast.info { background: var(--info); }
-
-    /* ===============================
-       ADDITIVE DRAG & DROP STYLES
-       =============================== */
-
-    .drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      background: #fafafa;
-      transition: all 0.15s ease;
-      min-width: 260px;
-    }
-
-    .drop-zone.dragover {
-      border-color: var(--primary);
-      background: #eef4ff;
-    }
-
-    .drop-zone.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: #f3f4f6;
-    }
-
-    .drop-zone .filename {
-      font-size: 13px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 220px;
-    }
-
-    .drop-zone input[type="file"] {
-      display: none;
-    }
-
-    /* ===============================
-       ADDITIVE THOUGHT SLIDER STYLES
-       =============================== */
-
-    .thought-box {
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      font-size: 15px;
-      color: #374151;
-      display: none;
-      min-height: 54px;
-    }
-
-    .thought-text {
-      animation: thoughtFade 0.6s ease;
-    }
-
-    @keyframes thoughtFade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
+
+<!-- Processing overlay -->
+<div id="processingOverlay" class="processing-overlay"></div>
 
 <div id="toasts"></div>
 
@@ -298,12 +45,12 @@
 
   <div class="upload-grid">
 
-    <div class="card">
+    <div class="card interactive">
       <h2>PDF to Hindi Text</h2>
       <div class="upload-row">
         <div class="drop-zone" id="ocrDrop">
           <input type="file" id="ocrFile"
-            accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
+                 accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
           <span class="label">Drag PDF / Image or click</span>
           <span class="filename" id="ocrFilename"></span>
         </div>
@@ -314,17 +61,17 @@
       <div class="hint">Supported: PDF</div>
     </div>
 
-    <div class="card">
+    <div class="card interactive">
       <h2>Video/Audio to Hindi Text</h2>
       <div class="upload-row">
         <div class="drop-zone" id="transcribeDrop">
           <input type="file" id="transcribeFile"
-            accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
+                 accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
           <span class="label">Drag audio/video or click</span>
           <span class="filename" id="transcribeFilename"></span>
         </div>
         <button class="btn-primary"
-          onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+                onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
           Convert
         </button>
       </div>
@@ -335,25 +82,26 @@
 
   </div>
 
-  <div id="statusBox" class="card" style="display:none;">
+  <div id="statusBox" class="card processing-card" style="display:none;">
     <h2>Processing</h2>
+
     <div class="status-row">
       <div>Status: <b><span id="status"></span></b></div>
       <div><span id="stage"></span></div>
     </div>
+
     <progress id="progress" value="0" max="100"></progress>
 
     <div id="downloadBox" class="download" style="display:none;">
       <a id="downloadLink" download>⬇ Download Result</a>
     </div>
 
-    <!-- ✅ ADDITIVE THOUGHT SLIDER HTML -->
     <div id="thoughtBox" class="thought-box">
       <div id="thoughtText" class="thought-text"></div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card interactive">
     <div class="top-bar" style="margin-bottom:12px;">
       <h2>Old converted files history</h2>
       <button onclick="loadJobs()">🔄 Refresh</button>
@@ -363,294 +111,6 @@
 
 </div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
-<script>
-const API = "https://doc-transcribe-api.onrender.com";
-let ID_TOKEN = null;
-let JOB_ID = null;
-let POLLER = null;
-let USER_EMAIL = null;
-let IS_PENDING = false;
-
-/* 🔐 UI STATE HELPERS */
-function showLoggedInUI() {
-  logoutBtn.style.display = "inline-block";
-  authBox.style.display = "none";
-}
-
-function showLoggedOutUI() {
-  logoutBtn.style.display = "none";
-  authBox.style.display = "block";
-}
-
-/* helpers */
-function toast(message, type="info") {
-  const box = document.getElementById("toasts");
-  const div = document.createElement("div");
-  div.className = `toast ${type}`;
-  div.textContent = message;
-  box.appendChild(div);
-  setTimeout(() => div.remove(), 4000);
-}
-
-function showPending() {
-  IS_PENDING = true;
-  approvalBanner.style.display = "block";
-  document.querySelectorAll(".drop-zone")
-    .forEach(z => z.classList.add("disabled"));
-}
-
-function hidePending() {
-  IS_PENDING = false;
-  approvalBanner.style.display = "none";
-  document.querySelectorAll(".drop-zone")
-    .forEach(z => z.classList.remove("disabled"));
-}
-
-/* auth */
-function renderGoogleButton() {
-  showLoggedOutUI();
-
-  google.accounts.id.initialize({
-    client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
-    callback: onGoogleSignIn,
-    auto_select: false
-  });
-
-  google.accounts.id.renderButton(
-    document.getElementById("google-signin-btn"),
-    { theme: "outline", size: "large" }
-  );
-}
-
-function onGoogleSignIn(resp) {
-  ID_TOKEN = resp.credential;
-  try {
-    const payload = JSON.parse(atob(resp.credential.split(".")[1]));
-    USER_EMAIL = payload.email || "";
-  } catch {}
-
-  welcomeBanner.innerText = `Welcome, ${USER_EMAIL}`;
-  welcomeBanner.style.display = "block";
-
-  showLoggedInUI();
-  hidePending();
-  toast("Signed in successfully", "success");
-  loadJobs();
-}
-
-function logout() {
-  ID_TOKEN = null;
-  USER_EMAIL = null;
-  JOB_ID = null;
-  hidePending();
-  welcomeBanner.style.display = "none";
-
-  showLoggedOutUI();
-  toast("Logged out", "info");
-  renderGoogleButton();
-}
-
-/* upload */
-function uploadFrom(type, inputId) {
-  const input = document.getElementById(inputId);
-  if (!input.files.length) {
-    toast("Please select a file", "error");
-    return;
-  }
-  upload(type, input.files[0]);
-}
-
-async function upload(type, file) {
-  if (!ID_TOKEN) return toast("Please sign in first", "error");
-  if (IS_PENDING) return toast("Account pending approval", "info");
-
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("type", type);
-
-  const res = await fetch(`${API}/upload`, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + ID_TOKEN },
-    body: fd
-  });
-
-  if (res.status === 401) return logout();
-  if (res.status === 403) {
-    showPending();
-    return toast("Your account is pending approval", "info");
-  }
-
-  hidePending();
-  const data = await res.json();
-  JOB_ID = data.job_id;
-
-  statusBox.style.display = "block";
-  downloadBox.style.display = "none";
-
-  pollStatus();
-  POLLER = setInterval(pollStatus, 4000);
-}
-
-/* status */
-async function pollStatus() {
-  if (!JOB_ID) return;
-  const res = await fetch(`${API}/status/${JOB_ID}`, {
-    headers: { Authorization: "Bearer " + ID_TOKEN }
-  });
-  const s = await res.json();
-  status.innerText = s.status || "";
-  stage.innerText = s.stage || "";
-  progress.value = s.progress || 0;
-  if (s.output_path) {
-    downloadLink.href = s.output_path;
-    downloadBox.style.display = "block";
-    clearInterval(POLLER);
-    toast("Completed 🎉", "success");
-    loadJobs();
-  }
-}
-
-/* jobs */
-async function loadJobs() {
-  if (!ID_TOKEN) return;
-  const res = await fetch(`${API}/jobs`, {
-    headers: { Authorization: "Bearer " + ID_TOKEN }
-  });
-  const jobs = await res.json();
-  const box = document.getElementById("jobs");
-  box.innerHTML = "";
-  jobs.forEach(j => {
-    const div = document.createElement("div");
-    div.className = "job";
-    div.innerHTML = `
-      <div class="job-title">${j.job_type} — ${j.status}</div>
-      <div class="job-meta">${j.updated_at || ""}</div>
-      ${j.output_path ? `<a href="${j.output_path}" download>⬇ Download</a>` : ""}
-    `;
-    box.appendChild(div);
-  });
-}
-
-/* ✅ SAFE INITIAL RENDER — ADDED (NO CUTS) */
-function waitForGoogleAndRender() {
-  if (window.google && google.accounts && google.accounts.id) {
-    renderGoogleButton();
-  } else {
-    setTimeout(waitForGoogleAndRender, 50);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", waitForGoogleAndRender);
-</script>
-
-<!-- ===============================
-     DRAG & DROP BINDINGS (ADD ONLY)
-     =============================== -->
-<script>
-function attachDragDrop(zoneId, inputId, nameId) {
-  const zone = document.getElementById(zoneId);
-  const input = document.getElementById(inputId);
-  const name = document.getElementById(nameId);
-  if (!zone || !input) return;
-
-  zone.addEventListener("click", () => {
-    if (!zone.classList.contains("disabled")) input.click();
-  });
-
-  input.addEventListener("change", () => {
-    if (input.files.length) {
-      name.textContent = input.files[0].name;
-    }
-  });
-
-  zone.addEventListener("dragover", e => {
-    if (zone.classList.contains("disabled")) return;
-    e.preventDefault();
-    zone.classList.add("dragover");
-  });
-
-  zone.addEventListener("dragleave", () => {
-    zone.classList.remove("dragover");
-  });
-
-  zone.addEventListener("drop", e => {
-    if (zone.classList.contains("disabled")) return;
-    e.preventDefault();
-    zone.classList.remove("dragover");
-    if (e.dataTransfer.files.length) {
-      input.files = e.dataTransfer.files;
-      input.dispatchEvent(new Event("change"));
-    }
-  });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
-  attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
-});
-</script>
-
-<!-- ===============================
-     THOUGHT SLIDER SCRIPT (ADD ONLY)
-     =============================== -->
-<script>
-const THOUGHTS = [
-  "🪔 शब्दों की शुद्धता ही ज्ञान की रक्षा है।",
-  "📜 हर अक्षर श्रद्धा से संजोया जा रहा है।",
-  "🧘‍♂️ यह प्रक्रिया साधना के समान है।",
-  "🔍 मूल भाव बदले बिना लिप्यंतरण किया जा रहा है।",
-  "⏳ महान ग्रंथ समय लेकर ही प्रकट होते हैं।",
-  "🌸 आपका कार्य सुरक्षित रूप से संसाधित हो रहा है।"
-];
-
-let THOUGHT_TIMER = null;
-let THOUGHT_INDEX = 0;
-
-function startThoughtSlider() {
-  const box = document.getElementById("thoughtBox");
-  const text = document.getElementById("thoughtText");
-  if (!box || THOUGHT_TIMER) return;
-
-  box.style.display = "block";
-  text.textContent = THOUGHTS[0];
-  THOUGHT_INDEX = 1;
-
-  THOUGHT_TIMER = setInterval(() => {
-    text.textContent = THOUGHTS[THOUGHT_INDEX % THOUGHTS.length];
-    text.classList.remove("thought-text");
-    void text.offsetWidth;
-    text.classList.add("thought-text");
-    THOUGHT_INDEX++;
-  }, 4500);
-}
-
-function stopThoughtSlider() {
-  const box = document.getElementById("thoughtBox");
-  if (box) box.style.display = "none";
-  if (THOUGHT_TIMER) clearInterval(THOUGHT_TIMER);
-  THOUGHT_TIMER = null;
-}
-
-/* DOM-BASED WIRING — NO LOGIC TOUCH */
-document.addEventListener("DOMContentLoaded", () => {
-  const statusBox = document.getElementById("statusBox");
-  const downloadBox = document.getElementById("downloadBox");
-
-  const observer = new MutationObserver(() => {
-    if (statusBox.style.display !== "none") {
-      startThoughtSlider();
-    }
-    if (downloadBox.style.display !== "none") {
-      stopThoughtSlider();
-    }
-  });
-
-  observer.observe(statusBox, { attributes: true, attributeFilter: ["style"] });
-  observer.observe(downloadBox, { attributes: true, attributeFilter: ["style"] });
-});
-</script>
-
+<script src="./app.js"></script>
 </body>
 </html>
