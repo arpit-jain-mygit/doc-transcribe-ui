@@ -36,21 +36,31 @@ function setProcessing(on) {
    AUTH
 ======================= */
 function renderGoogleButton() {
+  if (!window.google || !google.accounts || !google.accounts.id) return;
+
   google.accounts.id.initialize({
     client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
     callback: onGoogleSignIn
   });
 
+  const target = document.getElementById("google-signin-btn");
+  if (!target) return;
+
   google.accounts.id.renderButton(
-    document.getElementById("google-signin-btn"),
+    target,
     { theme: "outline", size: "large" }
   );
 }
 
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
-  document.getElementById("welcomeBanner").innerText = "Welcome";
-  document.getElementById("welcomeBanner").style.display = "block";
+
+  const banner = document.getElementById("welcomeBanner");
+  banner.innerText = "Welcome";
+  banner.style.display = "block";
+
+  const authBox = document.getElementById("authBox");
+  if (authBox) authBox.style.display = "none";
 }
 
 /* =======================
@@ -63,6 +73,8 @@ function uploadFrom(type, inputId) {
 }
 
 async function upload(type, file) {
+  if (!ID_TOKEN) return toast("Please sign in first", "error");
+
   setProcessing(true);
 
   const fd = new FormData();
@@ -116,32 +128,28 @@ function attach(zoneId, inputId, nameId) {
   i.onchange = () => n.textContent = i.files[0]?.name || "";
 }
 
+/* =======================
+   BOOTSTRAP (FIXED)
+======================= */
 document.addEventListener("DOMContentLoaded", () => {
-  renderGoogleButton();
+  // Make auth container visible BEFORE rendering Google button
+  const authBox = document.getElementById("authBox");
+  if (authBox) authBox.style.display = "block";
+
   attach("ocrDrop","ocrFile","ocrFilename");
   attach("transcribeDrop","transcribeFile","transcribeFilename");
-});
 
-/* =====================================================
-   GOOGLE GSI SAFE RENDER (ADD ONLY — NO CUTS)
-   ===================================================== */
-(function waitForGoogleAndRenderOnce() {
-  let rendered = false;
-
-  const tryRender = () => {
+  // Wait until Google is actually ready AND container is visible
+  (function waitForGoogle() {
     if (
-      !rendered &&
       window.google &&
       google.accounts &&
       google.accounts.id &&
       document.getElementById("google-signin-btn")
     ) {
-      rendered = true;
       renderGoogleButton();
     } else {
-      setTimeout(tryRender, 50);
+      setTimeout(waitForGoogle, 50);
     }
-  };
-
-  tryRender();
-})();
+  })();
+});
