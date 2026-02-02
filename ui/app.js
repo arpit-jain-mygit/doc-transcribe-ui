@@ -6,22 +6,64 @@ let USER_EMAIL = null;
 let IS_PENDING = false;
 let SESSION_RESTORED = false;
 
+let UI_BUSY = false;
+let UNLOAD_BOUND = false;
+
+function setUIBusy(isBusy) {
+  UI_BUSY = isBusy;
+
+  document
+    .querySelectorAll(
+      "button, input[type='file'], a.history-download"
+    )
+    .forEach(el => {
+      el.disabled = isBusy;
+      el.style.pointerEvents = isBusy ? "none" : "auto";
+      el.style.opacity = isBusy ? "0.6" : "1";
+    });
+
+  document
+    .querySelectorAll(".drop-zone")
+    .forEach(z => {
+      z.classList.toggle("disabled", isBusy);
+    });
+}
+
+
 function stopPolling() {
   if (POLLER) {
     clearInterval(POLLER);
     POLLER = null;
   }
-  window.removeEventListener("beforeunload", beforeUnloadHandler);
 
+  // Remove refresh warning
+  window.removeEventListener("beforeunload", beforeUnloadHandler);
+  UNLOAD_BOUND = false;
+
+  // Unlock UI
+  setUIBusy(false);
+
+  // Exit processing focus mode (UX cleanup)
+  document.body.classList.remove("processing-active");
+  const statusBox = document.getElementById("statusBox");
+  if (statusBox) {
+    statusBox.classList.remove("processing-focus");
+  }
 }
 
-function startPolling() {
-  stopPolling();
 
-  if (!JOB_ID || typeof JOB_ID !== "string") {
-    return;
+function startPolling() {
+  if (POLLER) {
+    clearInterval(POLLER);
+    POLLER = null;
   }
-  window.addEventListener("beforeunload", beforeUnloadHandler);
+
+  if (!JOB_ID || typeof JOB_ID !== "string") return;
+
+  if (!UNLOAD_BOUND) {
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+    UNLOAD_BOUND = true;
+  }
 
   POLLER = setInterval(() => {
     if (JOB_ID && typeof JOB_ID === "string") {
@@ -29,6 +71,8 @@ function startPolling() {
     }
   }, 4000);
 }
+
+
 
 /* ===============================
    AUTH PERSISTENCE (ADD)
@@ -149,6 +193,7 @@ function onGoogleSignIn(resp) {
 }
 
 function logout() {
+  localStorage.removeItem("active_job_id");
 
   // STOP polling exactly once
   stopPolling();
@@ -178,8 +223,6 @@ function logout() {
    AUTH RESTORE (ADD)
    =============================== */
 function restoreSession() {
-  stopPolling();
-
   const saved = localStorage.getItem(AUTH_STORAGE_KEY);
   if (!saved) return false;
 
@@ -193,15 +236,31 @@ function restoreSession() {
     userEmail.innerText = USER_EMAIL;
     userAvatar.src = picture || "https://www.gravatar.com/avatar?d=mp";
 
-    SESSION_RESTORED = true;   // ✅ MOVE HERE
+    SESSION_RESTORED = true;
 
     showLoggedInUI();
     loadJobs();
+
+    const savedJob = localStorage.getItem("active_job_id");
+    if (savedJob) {
+      JOB_ID = savedJob;
+
+      document.body.classList.add("processing-active");
+      const statusBox = document.getElementById("statusBox");
+      if (statusBox) {
+        statusBox.style.display = "block";
+        statusBox.classList.add("processing-focus");
+      }
+
+      startPolling();
+    }
+
     return true;
   } catch {
     return false;
   }
 }
+
 
 
 /* upload */
@@ -215,6 +274,8 @@ function uploadFrom(type, inputId) {
 }
 
 async function upload(type, file) {
+  if (UI_BUSY) return;
+
   if (!file || file.size === 0) {
     toast("Please reselect the file and try again", "error");
     return;
@@ -227,14 +288,22 @@ async function upload(type, file) {
   fd.append("file", file);
   fd.append("type", type);
 
+  setUIBusy(true);
+
   const res = await fetch(`${API}/upload`, {
     method: "POST",
     headers: { Authorization: "Bearer " + ID_TOKEN },
     body: fd
   });
 
-  if (res.status === 401) return logout();
+  // ✅ STATUS HANDLING — AFTER fetch
+  if (res.status === 401) {
+    setUIBusy(false);
+    return logout();
+  }
+
   if (res.status === 403) {
+    setUIBusy(false);
     showPending();
     return toast("Your account is pending approval", "info");
   }
@@ -242,13 +311,20 @@ async function upload(type, file) {
   hidePending();
   const data = await res.json();
   JOB_ID = data.job_id;
+  // 🔐 persist active job for refresh recovery
+  localStorage.setItem("active_job_id", JOB_ID);
+
 
   statusBox.style.display = "block";
+  statusBox.classList.add("processing-focus");
+  document.body.classList.add("processing-active");
+
   downloadBox.style.display = "none";
 
   pollStatus();
   startPolling();
 }
+
 
 /* status */
 async function pollStatus() {
@@ -260,15 +336,30 @@ async function pollStatus() {
   // 🔥 HARD RESET — kills stale UI text
   stage.innerText = "";
 
-  const res = await fetch(`${API}/status/${JOB_ID}`, {
-    headers: { Authorization: "Bearer " + ID_TOKEN }
-  });
+  let res;
+  try {
+    res = await fetch(`${API}/status/${JOB_ID}`, {
+      headers: { Authorization: "Bearer " + ID_TOKEN }
+    });
+  } catch (e) {
+    // network error → unlock UI but keep job
+    stopPolling();
+    toast("Network issue while checking status", "error");
+    return;
+  }
 
   if (res.status === 401) {
-    stopPolling();     // 🔒 stop interval immediately
+    stopPolling();
     logout();
     return;
   }
+
+  if (!res.ok) {
+    stopPolling();
+    toast("Failed to fetch job status", "error");
+    return;
+  }
+
 
 
   const s = await res.json();
@@ -288,13 +379,17 @@ async function pollStatus() {
   progress.value = s.progress || 0;
 
   if (s.output_path) {
-    stopPolling();   // ✅ use the controller
+    // 🧹 clear persisted active job
+    localStorage.removeItem("active_job_id");
 
+    stopPolling();
+    stopThoughtSlider();   // ✅ ADD
     downloadLink.dataset.url = s.output_path;
     downloadBox.style.display = "block";
     toast("Completed 🎉", "success");
     loadJobs();
   }
+
 
 }
 
@@ -500,6 +595,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("click", function (e) {
+  if (UI_BUSY) return;
+
   const link = e.target.closest(".history-download");
   if (!link) return;
 
