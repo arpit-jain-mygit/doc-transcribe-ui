@@ -289,6 +289,8 @@ async function upload(type, file) {
   fd.append("type", type);
 
   setUIBusy(true);
+  document.body.classList.remove("processing-complete");
+
 
   const res = await fetch(`${API}/upload`, {
     method: "POST",
@@ -379,6 +381,8 @@ async function pollStatus() {
   progress.value = s.progress || 0;
 
   if (s.output_path) {
+    document.body.classList.add("processing-complete");
+
     // 🧹 clear persisted active job
     localStorage.removeItem("active_job_id");
 
