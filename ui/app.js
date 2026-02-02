@@ -9,6 +9,10 @@ let SESSION_RESTORED = false;
 let UI_BUSY = false;
 let UNLOAD_BOUND = false;
 
+let LAST_PROGRESS = null;
+let LAST_STATUS = null;
+let LAST_STAGE = null;
+
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
@@ -366,7 +370,7 @@ async function pollStatus() {
 
   const s = await res.json();
 
-  status.innerText = formatStatus(s.status) || "";
+  const nextStatus = formatStatus(s.status) || "";
 
   // STRICT: date only, never labels
   let lastUpdated = "";
@@ -375,12 +379,28 @@ async function pollStatus() {
     lastUpdated = formatDate(s.updated_at);
   }
 
-  stage.innerText = lastUpdated ? `Last updated: ${lastUpdated}` : "";
+  const nextStage = lastUpdated ? `Last updated: ${lastUpdated}` : "";
 
 
   const pct = s.progress || 0;
-  progress.value = pct;
+  const nextProgress = s.progress || 0;
+  /* 🔒 STATUS */
+  if (LAST_STATUS !== nextStatus) {
+    status.innerText = nextStatus;
+    LAST_STATUS = nextStatus;
+  }
 
+  /* 🔒 STAGE */
+  if (LAST_STAGE !== nextStage) {
+    stage.innerText = nextStage;
+    LAST_STAGE = nextStage;
+  }
+
+  /* 🔒 PROGRESS */
+  if (LAST_PROGRESS !== nextProgress) {
+    progress.value = nextProgress;
+    LAST_PROGRESS = nextProgress;
+  }
   // progress color states
   document.body.classList.remove("progress-near", "progress-final");
 
