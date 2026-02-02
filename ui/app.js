@@ -6,18 +6,26 @@ let USER_EMAIL = null;
 let IS_PENDING = false;
 
 /* 🔐 UI STATE HELPERS */
-function formatDate(isoString) {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+function formatDate(value) {
+  if (!value) return "";
+
+  // Only accept ISO-like strings or valid timestamps
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) {
+    return ""; // ❌ invalid date → show nothing
+  }
+
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 }
+
 
 function formatStatus(status) {
   if (!status) return "";
@@ -164,7 +172,10 @@ async function pollStatus() {
   const s = await res.json();
 
   status.innerText = formatStatus(s.status) || "";
-  stage.innerText = formatDate(s.stage) || "";
+  // If stage looks like a timestamp → format it
+  // Else treat it as a label
+  const formattedStage = formatDate(s.stage);
+  stage.innerText = formattedStage || (s.stage && typeof s.stage === "string" ? s.stage : "");
   progress.value = s.progress || 0;
 
   if (s.output_path) {

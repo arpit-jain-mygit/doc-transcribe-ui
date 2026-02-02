@@ -14,32 +14,32 @@
   <div class="container">
 
     <!-- HEADER ROW: title + auth only -->
-<div class="top-bar">
-  <h1>श्रुत एवं जिनवाणी लिप्यंतरण</h1>
+    <div class="top-bar">
+      <h1>श्रुत एवं जिनवाणी लिप्यंतरण</h1>
 
-  <div class="user-column">
-    <!-- SIGNED-IN -->
-    <div id="userProfile" class="user-profile" style="display:none;">
-      <img id="userAvatar" class="user-avatar" />
-      <div class="user-meta">
-        <div class="user-welcome">Welcome</div>
-        <div id="userEmail" class="user-email"></div>
+      <div class="user-column">
+        <!-- SIGNED-IN -->
+        <div id="userProfile" class="user-profile" style="display:none;">
+          <img id="userAvatar" class="user-avatar" />
+          <div class="user-meta">
+            <div class="user-welcome">Welcome</div>
+            <div id="userEmail" class="user-email"></div>
+          </div>
+          <button class="logout-link" onclick="logout()">Sign out</button>
+        </div>
+
+        <!-- SIGNED-OUT -->
+        <div id="authBox" class="signin-box" style="display:none;">
+          <div id="google-signin-btn"></div>
+        </div>
       </div>
-      <button class="logout-link" onclick="logout()">Sign out</button>
     </div>
 
-    <!-- SIGNED-OUT -->
-    <div id="authBox" class="signin-box" style="display:none;">
-      <div id="google-signin-btn"></div>
+    <!-- INTRO: separate visual layer -->
+    <div id="appIntro">
+      🪔📜 इस ऐप के माध्यम से आप जैन प्रवचन, स्तुतियां या प्राचीन ग्रंथों का
+      शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
     </div>
-  </div>
-</div>
-
-<!-- INTRO: separate visual layer -->
-<div id="appIntro">
-  🪔📜 इस ऐप के माध्यम से आप जैन प्रवचन, स्तुतियां या प्राचीन ग्रंथों का
-  शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
-</div>
 
 
     <div id="approvalBanner">
@@ -86,7 +86,8 @@
       <h2>Processing</h2>
       <div class="status-row">
         <div>Status: <b><span id="status"></span></b></div>
-        <div><span id="stage"></span></div>
+        <div>Last updated: <span id="stage"></span></div>
+
       </div>
       <progress id="progress" value="0" max="100"></progress>
 
