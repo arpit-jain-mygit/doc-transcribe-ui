@@ -212,6 +212,11 @@ function uploadFrom(type, inputId) {
 }
 
 async function upload(type, file) {
+  if (!file || file.size === 0) {
+    toast("Please reselect the file and try again", "error");
+    return;
+  }
+
   if (!ID_TOKEN) return toast("Please sign in first", "error");
   if (IS_PENDING) return toast("Account pending approval", "info");
 
@@ -265,8 +270,14 @@ async function pollStatus() {
   status.innerText = formatStatus(s.status) || "";
 
   // STRICT: date only, never labels
-  const lastUpdated = formatDate(s.updated_at || s.stage);
+  let lastUpdated = "";
+
+  if (typeof s.updated_at === "string") {
+    lastUpdated = formatDate(s.updated_at);
+  }
+
   stage.innerText = lastUpdated ? `Last updated: ${lastUpdated}` : "";
+
 
   progress.value = s.progress || 0;
 
