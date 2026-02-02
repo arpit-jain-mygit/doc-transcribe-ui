@@ -200,6 +200,12 @@ progress {
   flex-direction: column;
   gap: 12px;
   align-items: flex-end;
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  min-width: 200px;
 }
 
 #toasts {
