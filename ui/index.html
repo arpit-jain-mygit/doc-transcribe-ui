@@ -549,9 +549,6 @@
         // ✅ Store URL for manual download
         downloadLink.dataset.url = s.output_path;
 
-        // ✅ Auto-download ONCE when job completes
-        forceDownload(s.output_path);
-
         downloadBox.style.display = "block";
         toast("Completed 🎉", "success");
         loadJobs();
@@ -635,6 +632,7 @@
 
         const url = downloadLink.dataset.url;
         if (!url) return;
+        forceDownload(url);
       });
     });
 
