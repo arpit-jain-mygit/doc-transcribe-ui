@@ -557,3 +557,34 @@ body.processing-complete progress::-webkit-progress-value,
 body.processing-complete progress::-moz-progress-bar {
   animation: none;
 }
+
+/* =========================================
+   PROGRESS COLOR SHIFT (80–100%)
+   ========================================= */
+
+/* Default progress color */
+progress {
+  --progress-color: var(--primary);
+}
+
+/* WebKit */
+progress::-webkit-progress-value {
+  background-color: var(--progress-color);
+  transition: background-color 0.4s ease;
+}
+
+/* Firefox */
+progress::-moz-progress-bar {
+  background-color: var(--progress-color);
+  transition: background-color 0.4s ease;
+}
+
+/* Near completion (80–94%) */
+body.progress-near progress {
+  --progress-color: #f59e0b; /* amber */
+}
+
+/* Final stretch (95–100%) */
+body.progress-final progress {
+  --progress-color: var(--success); /* green */
+}

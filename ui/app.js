@@ -378,9 +378,21 @@ async function pollStatus() {
   stage.innerText = lastUpdated ? `Last updated: ${lastUpdated}` : "";
 
 
-  progress.value = s.progress || 0;
+  const pct = s.progress || 0;
+  progress.value = pct;
+
+  // progress color states
+  document.body.classList.remove("progress-near", "progress-final");
+
+  if (pct >= 95) {
+    document.body.classList.add("progress-final");
+  } else if (pct >= 80) {
+    document.body.classList.add("progress-near");
+  }
 
   if (s.output_path) {
+    document.body.classList.remove("progress-near", "progress-final");
+
     document.body.classList.add("processing-complete");
 
     // 🧹 clear persisted active job
