@@ -43,10 +43,21 @@ h2 {
 }
 
 #welcomeBanner {
-  font-size: 14px;
-  color: var(--muted);
+  font-size: 20px;
+  color: var(--primary);
   margin-top: 2px;
   display: none;
+  font-weight: bold;
+  text-align: center;
+  background: var(--card);
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
 }
 
 #appIntro {
