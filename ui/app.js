@@ -6,6 +6,26 @@ let USER_EMAIL = null;
 let IS_PENDING = false;
 let SESSION_RESTORED = false;
 
+function stopPolling() {
+  if (POLLER) {
+    clearInterval(POLLER);
+    POLLER = null;
+  }
+}
+
+function startPolling() {
+  stopPolling();
+
+  if (!JOB_ID || typeof JOB_ID !== "string") {
+    return;
+  }
+
+  POLLER = setInterval(() => {
+    if (JOB_ID && typeof JOB_ID === "string") {
+      pollStatus();
+    }
+  }, 4000);
+}
 
 /* ===============================
    AUTH PERSISTENCE (ADD)
@@ -127,36 +147,36 @@ function onGoogleSignIn(resp) {
 
 function logout() {
 
-  /* 🔴 STOP STATUS POLLING FIRST */
-  if (POLLER) {
-    clearInterval(POLLER);
-    POLLER = null;
-  }
+  // STOP polling exactly once
+  stopPolling();
 
-  /* 🔴 CLEAR AUTH / JOB STATE */
+  // CLEAR AUTH / JOB STATE
   ID_TOKEN = null;
   USER_EMAIL = null;
   JOB_ID = null;
 
-  /* 🔴 CLEAR PERSISTED AUTH */
+  // CLEAR PERSISTED AUTH
   localStorage.removeItem(AUTH_STORAGE_KEY);
 
-  /* 🔴 RESET UI */
+  // RESET UI
   hidePending();
   showLoggedOutUI();
 
   toast("Logged out", "info");
   SESSION_RESTORED = false;
 
-  /* 🔴 RE-RENDER SIGN-IN */
+  // RE-RENDER SIGN-IN
   renderGoogleButton();
 }
+
 
 
 /* ===============================
    AUTH RESTORE (ADD)
    =============================== */
 function restoreSession() {
+  stopPolling();
+
   const saved = localStorage.getItem(AUTH_STORAGE_KEY);
   if (!saved) return false;
 
@@ -170,6 +190,7 @@ function restoreSession() {
     userEmail.innerText = USER_EMAIL;
     userAvatar.src = picture || "https://www.gravatar.com/avatar?d=mp";
 
+    SESSION_RESTORED = true;   // ✅ MOVE HERE
 
     showLoggedInUI();
     loadJobs();
@@ -177,9 +198,8 @@ function restoreSession() {
   } catch {
     return false;
   }
-  SESSION_RESTORED = true;
-
 }
+
 
 /* upload */
 function uploadFrom(type, inputId) {
@@ -219,10 +239,7 @@ async function upload(type, file) {
   downloadBox.style.display = "none";
 
   pollStatus();
-  if (POLLER) clearInterval(POLLER);
-POLLER = setInterval(() => {
-  if (JOB_ID) pollStatus();
-}, 4000);
+  startPolling();
 }
 
 /* status */
@@ -231,11 +248,17 @@ async function pollStatus() {
     return;
   }
 
+
   const res = await fetch(`${API}/status/${JOB_ID}`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
 
-  if (res.status === 401) return logout();
+  if (res.status === 401) {
+    stopPolling();     // 🔒 stop interval immediately
+    logout();
+    return;
+  }
+
 
   const s = await res.json();
 
@@ -248,12 +271,14 @@ async function pollStatus() {
   progress.value = s.progress || 0;
 
   if (s.output_path) {
-    clearInterval(POLLER);
+    stopPolling();   // ✅ use the controller
+
     downloadLink.dataset.url = s.output_path;
     downloadBox.style.display = "block";
     toast("Completed 🎉", "success");
     loadJobs();
   }
+
 }
 
 async function forceDownload(url) {
@@ -407,6 +432,8 @@ function stopThoughtSlider() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  stopPolling();
+
   /* ===============================
      AUTH RESTORE FIRST (ADD)
      =============================== */
