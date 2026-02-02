@@ -382,7 +382,7 @@ progress {
 }
 
 /* ===============================
-   MOBILE AUTH VISIBILITY — HARD FIX
+   MOBILE AUTH VISIBILITY — FINAL (STATE-SAFE)
    =============================== */
 @media screen and (max-width: 768px) {
 
@@ -391,23 +391,23 @@ progress {
   }
 
   .top-bar {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
   }
 
   .user-column {
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 12px !important;
-    align-items: center !important;
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    align-items: center;
   }
 
+  /* Only layout helpers — NOT visibility */
   #authBox,
   #userProfile {
     width: 100%;
-    display: flex !important;
     justify-content: center;
   }
 
