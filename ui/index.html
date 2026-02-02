@@ -112,10 +112,25 @@
 
 </div>
 
+<!-- ✅ GOOGLE SAFETY STUB (MUST BE BEFORE app.js) -->
+<script>
+  if (!window.google) {
+    window.google = {
+      accounts: {
+        id: {
+          initialize: function () {},
+          renderButton: function () {},
+          prompt: function () {}
+        }
+      }
+    };
+  }
+</script>
+
 <!-- App JS -->
 <script src="./app.js" defer></script>
 
-<!-- ✅ HARD SAFETY NET (ADD ONLY) -->
+<!-- Optional safety net (can stay) -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const waitForGoogle = () => {
@@ -130,6 +145,7 @@
     waitForGoogle();
   });
 </script>
+
 
 </body>
 </html>
