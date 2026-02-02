@@ -126,23 +126,32 @@ function onGoogleSignIn(resp) {
 }
 
 function logout() {
+
+  /* 🔴 STOP STATUS POLLING FIRST */
+  if (POLLER) {
+    clearInterval(POLLER);
+    POLLER = null;
+  }
+
+  /* 🔴 CLEAR AUTH / JOB STATE */
   ID_TOKEN = null;
   USER_EMAIL = null;
   JOB_ID = null;
 
-  /* ===============================
-     AUTH CLEAR (ADD)
-     =============================== */
+  /* 🔴 CLEAR PERSISTED AUTH */
   localStorage.removeItem(AUTH_STORAGE_KEY);
 
+  /* 🔴 RESET UI */
   hidePending();
   showLoggedOutUI();
 
   toast("Logged out", "info");
   SESSION_RESTORED = false;
 
+  /* 🔴 RE-RENDER SIGN-IN */
   renderGoogleButton();
 }
+
 
 /* ===============================
    AUTH RESTORE (ADD)
@@ -210,12 +219,17 @@ async function upload(type, file) {
   downloadBox.style.display = "none";
 
   pollStatus();
-  POLLER = setInterval(pollStatus, 4000);
+  if (POLLER) clearInterval(POLLER);
+POLLER = setInterval(() => {
+  if (JOB_ID) pollStatus();
+}, 4000);
 }
 
 /* status */
 async function pollStatus() {
-  if (!JOB_ID) return;
+  if (!JOB_ID || typeof JOB_ID !== "string") {
+    return;
+  }
 
   const res = await fetch(`${API}/status/${JOB_ID}`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }

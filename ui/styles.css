@@ -382,7 +382,7 @@ progress {
 }
 
 /* ===============================
-   MOBILE AUTH VISIBILITY — FINAL (STATE-SAFE)
+   MOBILE AUTH VISIBILITY — FINAL
    =============================== */
 @media screen and (max-width: 768px) {
 
@@ -404,7 +404,7 @@ progress {
     align-items: center;
   }
 
-  /* Only layout helpers — NOT visibility */
+  /* Layout only — JS controls visibility */
   #authBox,
   #userProfile {
     width: 100%;
