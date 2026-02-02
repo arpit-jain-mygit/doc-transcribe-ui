@@ -6,6 +6,24 @@ let USER_EMAIL = null;
 let IS_PENDING = false;
 
 /* 🔐 UI STATE HELPERS */
+function formatDate(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+function formatStatus(status) {
+  if (!status) return "";
+  return status.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()).replace(" — ", " ");
+}
+
 function showLoggedInUI() {
   logoutBtn.style.display = "inline-block";
   authBox.style.display = "none";
@@ -135,8 +153,8 @@ async function pollStatus() {
 
   const s = await res.json();
 
-  status.innerText = s.status || "";
-  stage.innerText = s.stage || "";
+  status.innerText = formatStatus(s.status) || "";
+  stage.innerText = formatDate(s.stage) || "";
   progress.value = s.progress || 0;
 
   if (s.output_path) {
@@ -204,8 +222,8 @@ async function loadJobs() {
     div.className = "job";
 
     div.innerHTML = `
-  <div class="job-title">${j.job_type} — ${j.status}</div>
-  <div class="job-meta">${j.updated_at || ""}</div>
+  <div class="job-title">${j.job_type} — ${formatStatus(j.status)}</div>
+  <div class="job-meta">${formatDate(j.updated_at) || ""}</div>
   ${j.output_path
         ? `<a href="#" class="history-download" data-url="${j.output_path}">
            ⬇ Download
