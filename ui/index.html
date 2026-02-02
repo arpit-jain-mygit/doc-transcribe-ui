@@ -542,8 +542,8 @@
       if (s.output_path) {
         // ✅ USE SIGNED URL DIRECTLY — NO API CALL
         downloadLink.href = s.output_path;
-        downloadLink.setAttribute("target", "_blank");
-        downloadLink.setAttribute("rel", "noopener");
+        // ✅ FORCE DOWNLOAD
+        downloadLink.setAttribute("download", "transcript.txt");
 
         downloadBox.style.display = "block";
         clearInterval(POLLER);
