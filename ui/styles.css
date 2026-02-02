@@ -382,19 +382,33 @@ progress {
 }
 
 /* ===============================
-   MOBILE HEADER FIX
+   MOBILE AUTH VISIBILITY — HARD FIX
    =============================== */
-@media (max-width: 720px) {
+@media screen and (max-width: 768px) {
+
+  body {
+    padding: 16px;
+  }
+
   .top-bar {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     gap: 12px;
   }
 
   .user-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 12px !important;
+    align-items: center !important;
+  }
+
+  #authBox,
+  #userProfile {
     width: 100%;
-    min-width: unset;
-    align-items: center;
+    display: flex !important;
+    justify-content: center;
   }
 
   #google-signin-btn {
