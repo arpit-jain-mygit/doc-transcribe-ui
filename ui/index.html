@@ -6,8 +6,8 @@
 
   <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google Identity Services (FIXED: NO async) -->
+  <script src="https://accounts.google.com/gsi/client" defer></script>
 </head>
 
 <body>
@@ -112,8 +112,24 @@
 
 </div>
 
-<!-- App JS (DEFERRED so google is guaranteed) -->
+<!-- App JS -->
 <script src="./app.js" defer></script>
+
+<!-- ✅ HARD SAFETY NET (ADD ONLY) -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const waitForGoogle = () => {
+      if (window.google && google.accounts && google.accounts.id) {
+        if (typeof renderGoogleButton === "function") {
+          renderGoogleButton();
+        }
+      } else {
+        setTimeout(waitForGoogle, 50);
+      }
+    };
+    waitForGoogle();
+  });
+</script>
 
 </body>
 </html>
