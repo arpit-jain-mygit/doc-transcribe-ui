@@ -9,9 +9,14 @@
   --success: #16a34a;
   --error: #dc2626;
   --info: #0284c7;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -22,10 +27,77 @@ body {
   color: var(--text);
 }
 
-.container { max-width: 980px; margin: 0 auto; }
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+}
 
-h1 { font-size: 24px; margin-bottom: 8px; }
-h2 { font-size: 18px; margin-bottom: 12px; }
+h1 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+#welcomeBanner {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: none;
+}
+
+#appIntro {
+  margin-top: 6px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #374151;
+  max-width: 840px;
+}
+
+#approvalBanner {
+  display: none;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  background: #f3f4f6;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fff5f5;
+}
 
 .card {
   background: var(--card);
@@ -35,73 +107,164 @@ h2 { font-size: 18px; margin-bottom: 12px; }
   margin-bottom: 18px;
 }
 
+.upload-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
 .upload-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+  margin-bottom: 18px;
 }
 
 @media (max-width: 720px) {
-  .upload-grid { grid-template-columns: 1fr; }
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-button {
-  border: 1px solid var(--border);
-  background: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  cursor: pointer;
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
-.btn-primary {
-  background: var(--primary);
+progress {
+  width: 100%;
+  height: 16px;
+  margin-top: 6px;
+}
+
+.download a {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--success);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.job {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.job:last-child {
+  border-bottom: none;
+}
+
+.job-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.job-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.job a {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+#toasts {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  min-width: 260px;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: 8px;
   color: white;
+  font-size: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.btn-primary:hover { background: var(--primary-hover); }
-
-.btn-danger {
-  background: #fff5f5;
-  color: #b91c1c;
+.toast.success {
+  background: var(--success);
 }
+
+.toast.error {
+  background: var(--error);
+}
+
+.toast.info {
+  background: var(--info);
+}
+
+/* ===============================
+   ADDITIVE DRAG & DROP STYLES
+   =============================== */
 
 .drop-zone {
   border: 2px dashed var(--border);
   border-radius: 10px;
   padding: 10px 14px;
   display: inline-flex;
+  align-items: center;
   gap: 10px;
   cursor: pointer;
   background: #fafafa;
+  transition: all 0.15s ease;
+  min-width: 260px;
+}
+
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background: #eef4ff;
 }
 
 .drop-zone.disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #f3f4f6;
 }
 
-.drop-zone input { display: none; }
-
-.processing-card {
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+.drop-zone .filename {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
 }
 
-.processing-overlay {
+.drop-zone input[type="file"] {
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(249,250,251,0.6);
-  z-index: 5;
 }
 
-.processing-active .processing-overlay {
-  display: block;
-}
-
-.processing-active .interactive {
-  pointer-events: none;
-  opacity: 0.45;
-}
+/* ===============================
+   ADDITIVE THOUGHT SLIDER STYLES
+   =============================== */
 
 .thought-box {
   margin-top: 14px;
@@ -109,14 +272,24 @@ button {
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid var(--border);
+  font-size: 15px;
+  color: #374151;
   display: none;
+  min-height: 54px;
 }
 
 .thought-text {
-  animation: fade 0.6s ease;
+  animation: thoughtFade 0.6s ease;
 }
 
-@keyframes fade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes thoughtFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
