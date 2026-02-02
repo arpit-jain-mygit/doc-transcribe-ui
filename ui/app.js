@@ -5,6 +5,11 @@ let POLLER = null;
 let USER_EMAIL = null;
 let IS_PENDING = false;
 
+/* ===============================
+   AUTH PERSISTENCE (ADD)
+   =============================== */
+const AUTH_STORAGE_KEY = "doc_app_auth";
+
 /* 🔐 UI STATE HELPERS */
 function formatDate(value) {
   if (typeof value !== "string") return "";
@@ -25,11 +30,12 @@ function formatDate(value) {
   });
 }
 
-
-
 function formatStatus(status) {
   if (!status) return "";
-  return status.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()).replace(" — ", " ");
+  return status
+    .toLowerCase()
+    .replace(/\b\w/g, l => l.toUpperCase())
+    .replace(" — ", " ");
 }
 
 function showLoggedInUI() {
@@ -85,7 +91,6 @@ function renderGoogleButton() {
       shape: "pill"
     }
   );
-
 }
 
 function onGoogleSignIn(resp) {
@@ -97,6 +102,17 @@ function onGoogleSignIn(resp) {
     USER_EMAIL = payload.email || "";
   } catch { }
 
+  /* ===============================
+     AUTH PERSIST (ADD)
+     =============================== */
+  localStorage.setItem(
+    AUTH_STORAGE_KEY,
+    JSON.stringify({
+      token: ID_TOKEN,
+      email: USER_EMAIL,
+    })
+  );
+
   userEmail.innerText = USER_EMAIL;
   userAvatar.src = payload.picture || "https://www.gravatar.com/avatar?d=mp";
 
@@ -106,11 +122,15 @@ function onGoogleSignIn(resp) {
   loadJobs();
 }
 
-
 function logout() {
   ID_TOKEN = null;
   USER_EMAIL = null;
   JOB_ID = null;
+
+  /* ===============================
+     AUTH CLEAR (ADD)
+     =============================== */
+  localStorage.removeItem(AUTH_STORAGE_KEY);
 
   hidePending();
   showLoggedOutUI();
@@ -119,6 +139,30 @@ function logout() {
   renderGoogleButton();
 }
 
+/* ===============================
+   AUTH RESTORE (ADD)
+   =============================== */
+function restoreSession() {
+  const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!saved) return false;
+
+  try {
+    const { token, email } = JSON.parse(saved);
+    if (!token || !email) return false;
+
+    ID_TOKEN = token;
+    USER_EMAIL = email;
+
+    userEmail.innerText = USER_EMAIL;
+    userAvatar.src = "https://www.gravatar.com/avatar?d=mp";
+
+    showLoggedInUI();
+    loadJobs();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /* upload */
 function uploadFrom(type, inputId) {
@@ -169,32 +213,30 @@ async function pollStatus() {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
 
+  if (res.status === 401) return logout();
+
   const s = await res.json();
 
   status.innerText = formatStatus(s.status) || "";
-  // If stage looks like a timestamp → format it
-  // Else treat it as a label
-  const formattedStage = formatDate(s.stage);
-  stage.innerText = formattedStage || (s.stage && typeof s.stage === "string" ? s.stage : "");
+
+  // STRICT: date only, never labels
+  const lastUpdated = formatDate(s.updated_at || s.stage);
+  stage.innerText = lastUpdated ? `Last updated: ${lastUpdated}` : "";
+
   progress.value = s.progress || 0;
 
   if (s.output_path) {
     clearInterval(POLLER);
-
-    // ✅ Store URL for manual download
     downloadLink.dataset.url = s.output_path;
-
     downloadBox.style.display = "block";
     toast("Completed 🎉", "success");
     loadJobs();
   }
 }
 
-
 async function forceDownload(url) {
   const res = await fetch(url);
 
-  // 1️⃣ Try Content-Disposition (if present)
   let filename = "transcript.txt";
   const cd = res.headers.get("Content-Disposition");
 
@@ -204,7 +246,6 @@ async function forceDownload(url) {
       filename = match[1];
     }
   } else {
-    // 2️⃣ Fallback: extract from GCS URL path
     try {
       const pathname = new URL(url).pathname;
       filename = pathname.split("/").pop() || filename;
@@ -225,7 +266,6 @@ async function forceDownload(url) {
   a.remove();
 }
 
-
 /* jobs */
 async function loadJobs() {
   if (!ID_TOKEN) return;
@@ -233,6 +273,8 @@ async function loadJobs() {
   const res = await fetch(`${API}/jobs`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
+
+  if (res.status === 401) return logout();
 
   const jobs = await res.json();
   const box = document.getElementById("jobs");
@@ -243,20 +285,19 @@ async function loadJobs() {
     div.className = "job";
 
     div.innerHTML = `
-  <div class="job-title">${j.job_type} — ${formatStatus(j.status)}</div>
-  <div class="job-meta">${formatDate(j.updated_at) || ""}</div>
-  ${j.output_path
+      <div class="job-title">${j.job_type} — ${formatStatus(j.status)}</div>
+      <div class="job-meta">${formatDate(j.updated_at) || ""}</div>
+      ${j.output_path
         ? `<a href="#" class="history-download" data-url="${j.output_path}">
-           ⬇ Download
-         </a>`
+             ⬇ Download
+           </a>`
         : ""
       }
-`;
+    `;
 
     box.appendChild(div);
   });
 }
-
 
 /* ✅ SAFE INITIAL RENDER — ADDED (NO CUTS) */
 function waitForGoogleAndRender() {
@@ -342,13 +383,18 @@ function stopThoughtSlider() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  waitForGoogleAndRender();
+  /* ===============================
+     AUTH RESTORE FIRST (ADD)
+     =============================== */
+  const restored = restoreSession();
+  if (!restored) {
+    waitForGoogleAndRender();
+  }
 
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
     downloadLink.addEventListener("click", (e) => {
-      e.preventDefault(); // ⛔ stop anchor navigation
-
+      e.preventDefault();
       const url = downloadLink.dataset.url;
       if (!url) return;
       forceDownload(url);
@@ -374,13 +420,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (downloadBox) observer.observe(downloadBox, { attributes: true, attributeFilter: ["style"] });
 });
 
-
 document.addEventListener("click", function (e) {
   const link = e.target.closest(".history-download");
   if (!link) return;
 
-  e.preventDefault(); // stop new tab navigation
-
+  e.preventDefault();
   const url = link.dataset.url;
   if (!url) {
     console.warn("History download clicked but no data-url found");
