@@ -379,9 +379,9 @@
       </div>
       <progress id="progress" value="0" max="100"></progress>
 
-    <div id="downloadBox" class="download" style="display:none;">
-      <a id="downloadLink" href="#" download>⬇ Download Result</a>
-    </div>
+      <div id="downloadBox" class="download" style="display:none;">
+        <a id="downloadLink" href="#" download>⬇ Download Result</a>
+      </div>
 
       <!-- ✅ ADDITIVE THOUGHT SLIDER HTML -->
       <div id="thoughtBox" class="thought-box">
@@ -530,27 +530,65 @@
     }
 
     /* status */
+    /* status */
     async function pollStatus() {
       if (!JOB_ID) return;
+
       const res = await fetch(`${API}/status/${JOB_ID}`, {
         headers: { Authorization: "Bearer " + ID_TOKEN }
       });
+
       const s = await res.json();
+
       status.innerText = s.status || "";
       stage.innerText = s.stage || "";
       progress.value = s.progress || 0;
+
       if (s.output_path) {
-        // ✅ USE SIGNED URL DIRECTLY — NO API CALL
-        downloadLink.href = s.output_path;
-        // ✅ FORCE DOWNLOAD
-        downloadLink.setAttribute("download", "transcript.txt");
+        clearInterval(POLLER);
+
+        // 🔒 FORCE LOCAL DOWNLOAD (FINAL FIX)
+        forceDownload(s.output_path);
 
         downloadBox.style.display = "block";
-        clearInterval(POLLER);
         toast("Completed 🎉", "success");
         loadJobs();
       }
     }
+
+    async function forceDownload(url) {
+      const res = await fetch(url);
+      const blob = await res.blob();
+
+      const a = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+
+      a.href = objectUrl;
+      a.download = "transcript.txt";
+      document.body.appendChild(a);
+      a.click();
+
+      URL.revokeObjectURL(objectUrl);
+      a.remove();
+    }
+
+
+    async function forceDownload(url) {
+      const res = await fetch(url);
+      const blob = await res.blob();
+
+      const a = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+
+      a.href = objectUrl;
+      a.download = "transcript.txt";
+      document.body.appendChild(a);
+      a.click();
+
+      URL.revokeObjectURL(objectUrl);
+      a.remove();
+    }
+
 
     /* jobs */
     async function loadJobs() {
