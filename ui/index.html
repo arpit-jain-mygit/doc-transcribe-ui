@@ -530,7 +530,6 @@
     }
 
     /* status */
-    /* status */
     async function pollStatus() {
       if (!JOB_ID) return;
 
@@ -547,7 +546,10 @@
       if (s.output_path) {
         clearInterval(POLLER);
 
-        // 🔒 FORCE LOCAL DOWNLOAD (FINAL FIX)
+        // ✅ Store URL for manual download
+        downloadLink.dataset.url = s.output_path;
+
+        // ✅ Auto-download ONCE when job completes
         forceDownload(s.output_path);
 
         downloadBox.style.display = "block";
@@ -555,6 +557,7 @@
         loadJobs();
       }
     }
+
 
     async function forceDownload(url) {
       const res = await fetch(url);
@@ -583,24 +586,6 @@
 
       a.href = objectUrl;
       a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      URL.revokeObjectURL(objectUrl);
-      a.remove();
-    }
-
-
-
-    async function forceDownload(url) {
-      const res = await fetch(url);
-      const blob = await res.blob();
-
-      const a = document.createElement("a");
-      const objectUrl = URL.createObjectURL(blob);
-
-      a.href = objectUrl;
-      a.download = "transcript.txt";
       document.body.appendChild(a);
       a.click();
 
@@ -639,7 +624,23 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", waitForGoogleAndRender);
+    document.addEventListener("DOMContentLoaded", () => {
+      waitForGoogleAndRender();
+
+      const downloadLink = document.getElementById("downloadLink");
+      if (!downloadLink) return;
+
+      downloadLink.addEventListener("click", (e) => {
+        e.preventDefault(); // ⛔ stop anchor navigation
+
+        const url = downloadLink.dataset.url;
+        if (!url) return;
+
+        forceDownload(url);
+      });
+    });
+
+
   </script>
 
   <!-- ===============================
