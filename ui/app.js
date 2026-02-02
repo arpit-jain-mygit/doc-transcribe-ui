@@ -7,14 +7,13 @@ let IS_PENDING = false;
 
 /* 🔐 UI STATE HELPERS */
 function formatDate(value) {
-  if (!value) return "";
+  if (typeof value !== "string") return "";
 
-  // Only accept ISO-like strings or valid timestamps
+  // accept only ISO-like timestamps
+  if (!value.includes("T")) return "";
+
   const date = new Date(value);
-
-  if (isNaN(date.getTime())) {
-    return ""; // ❌ invalid date → show nothing
-  }
+  if (isNaN(date.getTime())) return "";
 
   return date.toLocaleString("en-US", {
     year: "numeric",
@@ -25,6 +24,7 @@ function formatDate(value) {
     second: "2-digit",
   });
 }
+
 
 
 function formatStatus(status) {
