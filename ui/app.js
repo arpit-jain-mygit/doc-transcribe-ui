@@ -4,6 +4,8 @@ let JOB_ID = null;
 let POLLER = null;
 let USER_EMAIL = null;
 let IS_PENDING = false;
+let SESSION_RESTORED = false;
+
 
 /* ===============================
    AUTH PERSISTENCE (ADD)
@@ -137,6 +139,8 @@ function logout() {
   showLoggedOutUI();
 
   toast("Logged out", "info");
+  SESSION_RESTORED = false;
+
   renderGoogleButton();
 }
 
@@ -148,7 +152,7 @@ function restoreSession() {
   if (!saved) return false;
 
   try {
-    const { token, email } = JSON.parse(saved);
+    const { token, email, picture } = JSON.parse(saved);
     if (!token || !email) return false;
 
     ID_TOKEN = token;
@@ -164,6 +168,8 @@ function restoreSession() {
   } catch {
     return false;
   }
+  SESSION_RESTORED = true;
+
 }
 
 /* upload */
@@ -303,12 +309,14 @@ async function loadJobs() {
 
 /* ✅ SAFE INITIAL RENDER — ADDED (NO CUTS) */
 function waitForGoogleAndRender() {
+  if (SESSION_RESTORED) return; // 🔧 ADD
   if (window.google && google.accounts && google.accounts.id) {
     renderGoogleButton();
   } else {
     setTimeout(waitForGoogleAndRender, 50);
   }
 }
+
 
 function attachDragDrop(zoneId, inputId, nameId) {
   const zone = document.getElementById(zoneId);
@@ -389,9 +397,10 @@ document.addEventListener("DOMContentLoaded", () => {
      AUTH RESTORE FIRST (ADD)
      =============================== */
   const restored = restoreSession();
-  if (!restored) {
-    waitForGoogleAndRender();
+  if (restored && window.google?.accounts?.id) {
+    google.accounts.id.cancel();
   }
+
 
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
