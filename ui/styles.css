@@ -312,3 +312,67 @@ progress {
     transform: translateY(0);
   }
 }
+
+/* ===============================
+   USER AUTH UX
+   =============================== */
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-welcome {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.user-email {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-link {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.logout-link:hover {
+  color: var(--error);
+  text-decoration: underline;
+}
+
+.signin-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.signin-text {
+  font-size: 13px;
+  color: var(--muted);
+}

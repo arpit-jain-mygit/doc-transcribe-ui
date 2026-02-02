@@ -23,14 +23,25 @@
         </div>
       </div>
 
+      <!-- ✅ AUTH UX -->
       <div class="user-column">
-        <button id="logoutBtn" class="btn-danger" onclick="logout()" style="display:none;">
-          Sign Out
-        </button>
-        <div id="welcomeBanner"></div>
-        <div id="authBox" style="display:none;">
+
+        <!-- SIGNED-IN -->
+        <div id="userProfile" class="user-profile" style="display:none;">
+          <img id="userAvatar" class="user-avatar" />
+          <div class="user-meta">
+            <div class="user-welcome">Welcome</div>
+            <div id="userEmail" class="user-email"></div>
+          </div>
+          <button class="logout-link" onclick="logout()">Sign out</button>
+        </div>
+
+        <!-- SIGNED-OUT -->
+        <div id="authBox" class="signin-box" style="display:none;">
+          <div class="signin-text">Sign in to start transcription</div>
           <div id="google-signin-btn"></div>
         </div>
+
       </div>
     </div>
 
@@ -86,7 +97,6 @@
         <a id="downloadLink" href="#" download>⬇ Download Result</a>
       </div>
 
-      <!-- ✅ ADDITIVE THOUGHT SLIDER HTML -->
       <div id="thoughtBox" class="thought-box">
         <div id="thoughtText" class="thought-text"></div>
       </div>
@@ -103,10 +113,7 @@
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <script src="app.js"></script>
 
 </body>
-
-
 </html>

@@ -25,13 +25,13 @@ function formatStatus(status) {
 }
 
 function showLoggedInUI() {
-  logoutBtn.style.display = "inline-block";
+  userProfile.style.display = "flex";
   authBox.style.display = "none";
 }
 
 function showLoggedOutUI() {
-  logoutBtn.style.display = "none";
-  authBox.style.display = "block";
+  userProfile.style.display = "none";
+  authBox.style.display = "flex";
 }
 
 /* helpers */
@@ -76,13 +76,15 @@ function renderGoogleButton() {
 
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
-  try {
-    const payload = JSON.parse(atob(resp.credential.split(".")[1]));
-    USER_EMAIL = payload.email || "";
-  } catch { }
 
-  welcomeBanner.innerText = `Welcome, ${USER_EMAIL}`;
-  welcomeBanner.style.display = "block";
+  let payload = {};
+  try {
+    payload = JSON.parse(atob(resp.credential.split(".")[1]));
+    USER_EMAIL = payload.email || "";
+  } catch {}
+
+  userEmail.innerText = USER_EMAIL;
+  userAvatar.src = payload.picture || "https://www.gravatar.com/avatar?d=mp";
 
   showLoggedInUI();
   hidePending();
@@ -90,17 +92,19 @@ function onGoogleSignIn(resp) {
   loadJobs();
 }
 
+
 function logout() {
   ID_TOKEN = null;
   USER_EMAIL = null;
   JOB_ID = null;
-  hidePending();
-  welcomeBanner.style.display = "none";
 
+  hidePending();
   showLoggedOutUI();
+
   toast("Logged out", "info");
   renderGoogleButton();
 }
+
 
 /* upload */
 function uploadFrom(type, inputId) {
