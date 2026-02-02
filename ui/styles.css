@@ -203,10 +203,7 @@ button:disabled {
 
 /* Processing title */
 .processing-panel h2 {
-  font-size: 28px;
-  text-align: center;
-  margin-bottom: 16px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 /* Status text (e.g. RUNNING, COMPLETED) */
@@ -453,15 +450,22 @@ progress {
    =============================== */
 
 body.processing-active #appContent {
-  opacity: 0.25;
+  opacity: 0.6;
+  /* was 0.25 ❌ */
   pointer-events: none;
-  filter: grayscale(0.6);
+  filter: grayscale(0.2);
+  /* was 0.6 ❌ */
+  transition: opacity 0.25s ease, filter 0.25s ease;
 }
+
 
 .processing-focus {
   transform: scale(1.02);
-  transition: transform 0.25s ease;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.18),
+    0 6px 18px rgba(0, 0, 0, 0.12);
 }
+
 
 .processing-focus h2 {
   color: var(--primary);
@@ -480,9 +484,6 @@ body.processing-active .card:has(#jobs) {
    DE-EMPHASIZE HISTORY DURING PROCESSING 👈 ADD HERE
    ========================================= */
 
-body.processing-active #jobs {
-  opacity: 0.6;
-}
 
 body.processing-active .job {
   filter: grayscale(0.4);
