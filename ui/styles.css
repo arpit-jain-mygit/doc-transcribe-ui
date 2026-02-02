@@ -367,10 +367,10 @@ progress {
 
 .signin-box {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: flex-end;
 }
+
 
 .signin-text {
   font-size: 13px;

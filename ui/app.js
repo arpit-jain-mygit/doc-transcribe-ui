@@ -70,8 +70,14 @@ function renderGoogleButton() {
 
   google.accounts.id.renderButton(
     document.getElementById("google-signin-btn"),
-    { theme: "outline", size: "large" }
+    {
+      theme: "outline",
+      size: "medium",
+      text: "signin_with",
+      shape: "pill"
+    }
   );
+
 }
 
 function onGoogleSignIn(resp) {
@@ -81,7 +87,7 @@ function onGoogleSignIn(resp) {
   try {
     payload = JSON.parse(atob(resp.credential.split(".")[1]));
     USER_EMAIL = payload.email || "";
-  } catch {}
+  } catch { }
 
   userEmail.innerText = USER_EMAIL;
   userAvatar.src = payload.picture || "https://www.gravatar.com/avatar?d=mp";
