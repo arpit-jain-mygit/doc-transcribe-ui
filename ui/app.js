@@ -430,74 +430,85 @@ async function pollStatus() {
   }
 
   const s = await res.json();
-  console.log("STATUS PAYLOAD", s);
 
-  /* =====================================================
-     🚨 HARD STOP: COMPLETION ALWAYS WINS
-     ===================================================== */
+  /* ===============================
+     🔒 HARD COMPLETION GATE
+     =============================== */
+  const isCompleted =
+    s.status === "COMPLETED" ||
+    s.stage === "Completed" ||
+    Boolean(s.output_path);
 
-  if (s.output_path) {
-    // Prevent double execution
-    if (document.body.classList.contains("processing-complete")) return;
-
-    document.body.classList.add("processing-complete");
-    document.body.classList.remove("processing-active", "progress-near", "progress-final");
-
+  if (isCompleted) {
+    // ⛔ STOP EVERYTHING FIRST
     stopPolling();
     stopThoughtSlider();
     localStorage.removeItem("active_job_id");
 
-    // UI state
+    // 🔐 LOCK UI INTO FINAL STATE
+    LAST_STATUS = "COMPLETED";
+    LAST_PROGRESS = 100;
+    LAST_STAGE = "COMPLETED";
+
+    // Status text
     status.textContent = "Ready";
     status.className = "status-ready";
-    stage.textContent = "(Just now)";
 
-    // Progress bar cleanup
+    // Time (static, no relative ticking)
+    if (s.updated_at) {
+      stage.textContent = "Just now";
+    }
+
+    // Progress bar → fade out
     progress.value = 100;
     progress.style.opacity = "0";
+    progress.style.height = "0";
+    progress.style.margin = "0";
 
-    // Show filenames ONLY NOW
-    const inputEl = document.getElementById("inputFilename");
-    const outputEl = document.getElementById("outputFilename");
-    const summary = document.getElementById("fileSummary");
+    // ✅ SHOW FILE INFO ONLY NOW
+    const uploadedEl = document.getElementById("uploadedFile");
+    const generatedEl = document.getElementById("generatedFile");
 
-    if (inputEl) inputEl.textContent = "Uploaded file";
-    if (outputEl) outputEl.textContent = "transcript.txt";
+    if (uploadedEl) uploadedEl.textContent = "Uploaded file";
+    if (generatedEl) generatedEl.textContent = "transcript.txt";
 
-    downloadLink.dataset.url = s.output_path;
-    summary.style.display = "block";
+    // Download
+    if (s.output_path) {
+      downloadLink.dataset.url = s.output_path;
+      downloadBox.style.display = "block";
+    }
+
+    document.body.classList.add("processing-complete");
 
     toast("Ready ✨", "success");
     loadJobs();
-    return; // ⛔ NOTHING AFTER THIS
+
+    return; // ⛔ ABSOLUTE STOP
   }
 
-  /* =====================================================
-     NORMAL PROCESSING STATE (ONLY IF NOT COMPLETED)
-     ===================================================== */
-
-  document.body.classList.add("processing-active");
-
+  /* ===============================
+     ⏳ STILL PROCESSING
+     =============================== */
   const pct = Number(s.progress) || 0;
+
+  if (LAST_STATUS !== s.status) {
+    status.textContent = formatStatus(s.status);
+    LAST_STATUS = s.status;
+  }
+
+  if (LAST_STAGE !== s.updated_at) {
+    stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+    LAST_STAGE = s.updated_at;
+  }
 
   if (LAST_PROGRESS !== pct) {
     progress.value = pct;
-    progress.style.opacity = "1";
     LAST_PROGRESS = pct;
   }
 
   document.body.classList.remove("progress-near", "progress-final");
   if (pct >= 95) document.body.classList.add("progress-final");
   else if (pct >= 80) document.body.classList.add("progress-near");
-
-  if (LAST_STATUS !== s.status) {
-    status.textContent = "Processing";
-    LAST_STATUS = s.status;
-  }
-
-  if (s.updated_at) {
-    stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
-  }
 }
 
 
