@@ -70,6 +70,12 @@ async function upload(type, file) {
   // ===============================
   // ✅ ENTER PROCESSING MODE (FORCED)
   // ===============================
+  
+  // Defensive: ensure no leftover thoughts
+if (typeof stopThoughts === "function") {
+  stopThoughts();
+}
+
   setUIBusy(true);
   
 
@@ -88,6 +94,7 @@ async function upload(type, file) {
   }
 
   document.body.classList.add("processing-active");
+  
   // Start thoughts slider
 if (typeof startThoughts === "function") {
   startThoughts();

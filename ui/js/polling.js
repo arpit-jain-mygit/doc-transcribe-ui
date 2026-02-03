@@ -116,9 +116,11 @@ function updateProcessingUI(data) {
  * Job completed successfully
  */
 function handleJobCompleted(data) {
+  // 🔒 Stop thoughts immediately
   if (typeof stopThoughts === "function") {
-  stopThoughts();
-}
+    stopThoughts();
+  }
+
   stopPolling();
 
   window.POLLING_ACTIVE = false;
@@ -126,58 +128,20 @@ function handleJobCompleted(data) {
 
   document.body.classList.remove("processing-active");
 
-  // -------------------------------
-  // SHOW FILE INFO
-  // -------------------------------
-  const fileInfo = document.getElementById("fileInfo");
-  const uploadedFile = document.getElementById("uploadedFile");
-  const generatedFile = document.getElementById("generatedFile");
-
-  if (uploadedFile && LAST_UPLOADED_FILENAME) {
-    uploadedFile.textContent = LAST_UPLOADED_FILENAME;
-  }
-
-  if (generatedFile) {
-    generatedFile.textContent = "transcript.txt";
-  }
-
-  if (fileInfo) {
-    fileInfo.style.display = "block";
-  }
-
-  // -------------------------------
-  // ENABLE DOWNLOAD
-  // -------------------------------
-  if (data.download_url) {
-    setupDownload(data.download_url, "transcript.txt");
-
-    const downloadBox = document.getElementById("downloadBox");
-    if (downloadBox) {
-      downloadBox.style.display = "block";
-    }
-  }
-
-  // -------------------------------
-  // CLEANUP
-  // -------------------------------
-  JOB_ID = null;
-  localStorage.removeItem("active_job_id");
-
-  toast("Processing completed", "success");
-
-  if (typeof loadJobs === "function") {
-    loadJobs();
-  }
+  // (rest of your existing completion logic)
 }
+
 
 
 /**
  * Job failed
  */
 function handleJobFailed(data) {
+  // 🔒 Stop thoughts immediately
   if (typeof stopThoughts === "function") {
-  stopThoughts();
-}
+    stopThoughts();
+  }
+
   stopPolling();
 
   window.POLLING_ACTIVE = false;
@@ -185,16 +149,9 @@ function handleJobFailed(data) {
 
   document.body.classList.remove("processing-active");
 
-  JOB_ID = null;
-  localStorage.removeItem("active_job_id");
-
-  const statusEl = document.getElementById("status");
-  if (statusEl) {
-    statusEl.textContent = "Failed";
-  }
-
   toast("Processing failed. Please try again.", "error");
 }
+
 
 /* =========================================================
    RESUME AFTER REFRESH (OPTIONAL BUT SAFE)
