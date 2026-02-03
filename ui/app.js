@@ -491,21 +491,36 @@ if (LAST_STATUS !== nextStatus) {
   console.log("Progress:", pct);
   //document.body.classList.add("progress-near");
 
+const isCompleted =
+  s.status?.toUpperCase() === "COMPLETED" || Boolean(s.output_path);
+
+if (isCompleted) {
+  document.body.classList.add("processing-complete");
+  document.body.classList.remove("progress-near", "progress-final");
+
+  // stop polling ONCE
+  stopPolling();
+  stopThoughtSlider();
+
+  // clear persisted active job
+  localStorage.removeItem("active_job_id");
+
+  // update status immediately
+  status.textContent = "Ready";
+  status.className = "status-ready";
+
+  // attach download if available
   if (s.output_path) {
-    document.body.classList.add("processing-complete");
-
-    document.body.classList.remove("progress-near", "progress-final");
-
-    // 🧹 clear persisted active job
-    localStorage.removeItem("active_job_id");
-
-    stopPolling();
-    stopThoughtSlider();   // ✅ ADD
     downloadLink.dataset.url = s.output_path;
     downloadBox.style.display = "block";
-    toast("Completed 🎉", "success");
-    loadJobs();
   }
+
+  toast("Ready ✨", "success");
+  loadJobs();
+
+  return; // ⛔ prevent further UI updates
+}
+
 
 
 }
