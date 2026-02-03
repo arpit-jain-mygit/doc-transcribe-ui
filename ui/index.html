@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,24 +9,26 @@
 
 <body>
 
+  <!-- Toasts -->
   <div id="toasts"></div>
 
   <div class="container">
-    <!-- PROCESSING ANCHOR -->
-<div id="processingAnchor"></div>
 
+    <!-- Processing anchor (used by JS) -->
+    <div id="processingAnchor"></div>
 
     <!-- ========================= -->
-    <!-- NON-PROCESSING CONTENT -->
+    <!-- APP CONTENT -->
     <!-- ========================= -->
     <div id="appContent">
 
-      <!-- HEADER ROW: title + auth only -->
+      <!-- HEADER -->
       <div class="top-bar">
         <h1>श्रुत एवं जिनवाणी संरक्षण</h1>
 
         <div class="user-column">
-          <!-- SIGNED-IN -->
+
+          <!-- SIGNED IN -->
           <div id="userProfile" class="user-profile" style="display:none;">
             <img id="userAvatar" class="user-avatar" />
             <div class="user-meta">
@@ -37,7 +38,7 @@
             <button class="logout-link" onclick="logout()">Sign out</button>
           </div>
 
-          <!-- SIGNED-OUT -->
+          <!-- SIGNED OUT -->
           <div id="authBox" class="signin-box">
             <div id="google-signin-btn"></div>
           </div>
@@ -50,37 +51,46 @@
         शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
       </div>
 
-      <div id="approvalBanner">
+      <!-- PENDING APPROVAL -->
+      <div id="approvalBanner" style="display:none;">
         ⏳ Your account is pending approval. Uploads are disabled until approval.
       </div>
 
+      <!-- ========================= -->
       <!-- UPLOAD GRID -->
+      <!-- ========================= -->
       <div class="upload-grid">
 
+        <!-- OCR -->
         <div class="card">
           <h2>PDF to Hindi Text</h2>
           <div class="upload-row">
             <div class="drop-zone" id="ocrDrop">
-              <input type="file" id="ocrFile" accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" />
+              <input type="file" id="ocrFile"
+                     accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" hidden />
               <span class="label">Drag PDF / Image or click</span>
               <span class="filename" id="ocrFilename"></span>
             </div>
-            <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">
+            <button class="btn-primary"
+                    onclick="uploadFrom('OCR','ocrFile')">
               Convert
             </button>
           </div>
-          <div class="hint">Supported: PDF</div>
+          <div class="hint">Supported: PDF, Images</div>
         </div>
 
+        <!-- TRANSCRIPTION -->
         <div class="card">
-          <h2>Video/Audio to Hindi Text</h2>
+          <h2>Video / Audio to Hindi Text</h2>
           <div class="upload-row">
             <div class="drop-zone" id="transcribeDrop">
-              <input type="file" id="transcribeFile" accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" />
+              <input type="file" id="transcribeFile"
+                     accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" hidden />
               <span class="label">Drag audio/video or click</span>
               <span class="filename" id="transcribeFilename"></span>
             </div>
-            <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+            <button class="btn-primary"
+                    onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
               Convert
             </button>
           </div>
@@ -92,64 +102,54 @@
       </div>
 
       <!-- ========================= -->
-      <!-- PROCESSING HERO SECTION -->
+      <!-- PROCESSING PANEL -->
       <!-- ========================= -->
-       
-      <div id="statusBox" class="card processing-panel" style="display:none;">
+      <div id="statusBox"
+           class="card processing-panel"
+           style="display:none;">
 
-        <!-- FILE INFO — SHOW ONLY AFTER COMPLETION -->
-<div id="fileInfo" style="display:none; margin-top:16px;">
-  <div>
-    <strong>Uploaded:</strong>
-    <span id="uploadedFile"></span>
-  </div>
+        <button class="processing-close"
+                onclick="hideProcessing()">✕</button>
 
-  <div style="margin-top:6px;">
-    <strong>Generated:</strong>
-    <a href="#" id="generatedFile" class="history-download"></a>
-  </div>
-</div>
+        <h2>Processing</h2>
 
-      </div>
-  <button class="processing-close" onclick="hideProcessing()">✕</button>
-  <h2>Processing</h2>
-
-
-<div id="fileSummary" style="display:none;">
-  <div class="file-line">
-    <strong>Uploaded:</strong>
-    <span id="inputFilename">Uploaded file</span>
-  </div>
-
-  <div class="file-line">
-    <strong>Generated:</strong>
-    <a id="downloadLink" href="#" class="file-download">
-      <span id="outputFilename">transcript.txt</span>
-      <span class="download-icon">⬇</span>
-    </a>
-  </div>
-</div>
-
-
-
+        <!-- STATUS -->
+        <div id="status"></div>
+        <div id="stage"></div>
 
         <progress id="progress" value="0" max="100"></progress>
 
-        <!-- FILE SUMMARY (ON COMPLETION) -->
-<div id="fileSummary" style="display:none;">
-  <div><strong>Uploaded:</strong> <span id="inputFilename"></span></div>
-  <div><strong>Generated:</strong> <span id="outputFilename"></span></div>
-</div>
-
-
-
+        <!-- THOUGHT SLIDER -->
         <div id="thoughtBox" class="thought-box">
           <div id="thoughtText" class="thought-text"></div>
         </div>
+
+        <!-- FILE INFO (ONLY AFTER COMPLETION) -->
+        <div id="fileInfo" style="display:none; margin-top:16px;">
+          <div>
+            <strong>Uploaded:</strong>
+            <span id="uploadedFile"></span>
+          </div>
+
+          <div style="margin-top:6px;">
+            <strong>Generated:</strong>
+            <a href="#"
+               id="generatedFile"
+               class="history-download"></a>
+          </div>
+        </div>
+
+        <!-- DOWNLOAD BOX -->
+        <div id="downloadBox" style="display:none; margin-top:12px;">
+          <a id="downloadLink" href="#" class="file-download">
+            ⬇ Download
+          </a>
+        </div>
+
       </div>
 
       <!-- ========================= -->
-      <!-- HISTORY (SECONDARY) -->
+      <!-- HISTORY -->
       <!-- ========================= -->
       <div class="card">
         <div class="top-bar" style="margin-bottom:12px;">
@@ -164,8 +164,23 @@
 
   </div>
 
+  <!-- ========================= -->
+  <!-- SCRIPTS (ORDER MATTERS) -->
+  <!-- ========================= -->
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="app.js"></script>
+
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/polling.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/jobs.js"></script>
+  <script src="js/dragdrop.js"></script>
+  <script src="js/thoughts.js"></script>
+  <script src="js/main.js"></script>
 
 </body>
 </html>
