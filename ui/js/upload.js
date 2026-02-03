@@ -22,12 +22,37 @@ async function upload(type, file) {
   if (res.status === 401) return logout();
   if (res.status === 403) return showPending();
 
-  const data = await res.json();
   JOB_ID = data.job_id;
   window.JOB_COMPLETED = false;
+
+  // persist for refresh recovery
   localStorage.setItem("active_job_id", JOB_ID);
-  startPolling();
+
+  // ===============================
+  // ✅ ENTER PROCESSING UI MODE
+  // ===============================
+  const statusBox = document.getElementById("statusBox");
+  const downloadBox = document.getElementById("downloadBox");
+
+  if (statusBox) {
+    const anchor = document.getElementById("processingAnchor");
+    if (anchor) anchor.appendChild(statusBox);
+
+    statusBox.style.display = "block";
+    statusBox.classList.add("processing-focus");
+  }
+
+  document.body.classList.add("processing-active");
+
+  // hide any previous download UI
+  if (downloadBox) {
+    downloadBox.style.display = "none";
+  }
+
+  // kick polling
   pollStatus();
+  startPolling();
+
 }
 
 async function forceDownload(url) {
