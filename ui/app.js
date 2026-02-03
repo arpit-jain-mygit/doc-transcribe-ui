@@ -122,6 +122,32 @@ function formatDate(value) {
 }
 
 
+function formatRelativeTime(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (isNaN(date)) return "";
+
+  // Convert "now" to IST
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+
+  if (diffSec < 30) return "Just now";
+  if (diffSec < 60) return `${diffSec}s ago`;
+
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} min ago`;
+
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} hr ago`;
+
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+}
 
 
 function formatStatus(status) {
@@ -414,7 +440,9 @@ async function pollStatus() {
     lastUpdated = formatDate(s.updated_at);
   }
 
-  const nextStage = lastUpdated ? `(${lastUpdated})` : "";
+const nextStage = s.updated_at
+  ? `(${formatRelativeTime(s.updated_at)})`
+  : "";
 
 
 
@@ -520,7 +548,7 @@ async function loadJobs() {
 
     div.innerHTML = `
       <div class="job-title">${j.job_type} — ${formatStatus(j.status)}</div>
-      <div class="job-meta">${formatDate(j.updated_at) || ""}</div>
+      <div class="job-meta">${formatRelativeTime(j.updated_at) || ""}</div>
       ${j.output_path
         ? `<a href="#" class="history-download" data-url="${j.output_path}">
              ⬇ Download
