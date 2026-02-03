@@ -254,6 +254,27 @@ button:disabled {
   font-size: 15px;
 }
 
+/* ===============================
+   STATUS BADGE
+   =============================== */
+
+.status-completed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.status-completed::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+
 /* Timestamp / stage */
 #stage {
   text-align: center;
@@ -295,6 +316,21 @@ progress::-moz-progress-bar {
   border-radius: 999px;
   transition: background-color 0.4s ease;
 }
+
+/* ===============================
+   PROGRESS COMPLETE FADE
+   =============================== */
+
+body.processing-complete progress {
+  opacity: 0;
+  height: 0;
+  margin-top: 0;
+  transition:
+    opacity 0.35s ease,
+    height 0.35s ease,
+    margin 0.35s ease;
+}
+
 
 /* Default */
 progress {
@@ -595,6 +631,24 @@ body.processing-enter #appContent .card:not(.processing-panel) {
   color: var(--muted);
   white-space: nowrap;
 }
+
+.status-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.status-ready::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+
 
 .download.inline a {
   font-size: 15px;

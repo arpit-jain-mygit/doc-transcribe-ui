@@ -454,10 +454,20 @@ const pct = Number(s.progress) || 0;
 const nextProgress = pct;
 
   /* 🔒 STATUS */
-  if (LAST_STATUS !== nextStatus) {
-    status.innerText = nextStatus;
-    LAST_STATUS = nextStatus;
+if (LAST_STATUS !== nextStatus) {
+  status.className = ""; // reset
+
+  if (nextStatus.toLowerCase() === "completed") {
+    status.textContent = "Ready";
+    status.classList.add("status-ready");
+  } else {
+    status.textContent = nextStatus;
   }
+
+  LAST_STATUS = nextStatus;
+}
+
+
 
   /* 🔒 STAGE */
   if (LAST_STAGE !== nextStage) {
