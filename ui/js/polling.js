@@ -92,15 +92,25 @@ function updateProcessingUI(data) {
   const statusEl = document.getElementById("status");
   const progressEl = document.getElementById("progress");
 
-  // Secondary line ONLY (stage text)
+  // Secondary line: stage text only
   if (statusEl && data.stage) {
     statusEl.textContent = data.stage;
   }
 
-  if (progressEl && typeof data.progress === "number") {
-    progressEl.value = Math.max(0, Math.min(100, data.progress));
+  // Progress update (CRITICAL FIX)
+  if (
+    progressEl &&
+    typeof data.progress === "number" &&
+    !Number.isNaN(data.progress)
+  ) {
+    const value = Math.max(0, Math.min(100, data.progress));
+    progressEl.value = value;
+
+    // Store for CSS-based color change
+    progressEl.setAttribute("data-progress", value);
   }
 }
+
 
 
 /* =========================================================

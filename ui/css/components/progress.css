@@ -1,3 +1,7 @@
+/* =========================================
+   PROGRESS BAR — ACTIVE, CLEAR, RESPONSIVE
+   ========================================= */
+
 progress {
   width: 100%;
   height: 10px;
@@ -5,26 +9,39 @@ progress {
   appearance: none;
   -webkit-appearance: none;
   background: #e5e7eb;
+  overflow: hidden;
 }
 
+/* Track */
 progress::-webkit-progress-bar {
   background: #e5e7eb;
 }
 
+/* Default (running) */
 progress::-webkit-progress-value {
-  background: var(--primary);
+  background: #2563eb; /* blue */
   border-radius: 999px;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 progress::-moz-progress-bar {
-  background: var(--primary);
+  background: #2563eb;
   border-radius: 999px;
+  transition: background-color 0.3s ease;
 }
 
-/* =========================================
-   HIDE PROGRESS BAR AFTER COMPLETION
-   ========================================= */
+/* Near completion (>= 90%) */
+progress[data-progress^="9"]::-webkit-progress-value,
+progress[data-progress="100"]::-webkit-progress-value {
+  background: #16a34a; /* green */
+}
 
+progress[data-progress^="9"]::-moz-progress-bar,
+progress[data-progress="100"]::-moz-progress-bar {
+  background: #16a34a;
+}
+
+/* Hide progress when not processing */
 body:not(.processing-active) progress {
   display: none;
 }
