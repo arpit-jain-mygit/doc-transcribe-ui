@@ -401,52 +401,29 @@ requestAnimationFrame(() => {
 
 
 /* status */
-let JOB_TERMINAL = false; // 🔒 ADD ONCE (top-level)
+let JOB_TERMINAL = false; // ✅ add once at top-level
 
 async function pollStatus() {
   if (!JOB_ID || typeof JOB_ID !== "string") return;
-  if (JOB_TERMINAL) return; // ⛔ HARD STOP
+  if (JOB_TERMINAL) return; // 🔒 HARD STOP forever
 
-  let res;
-  try {
-    res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: { Authorization: "Bearer " + ID_TOKEN }
-    });
-  } catch {
-    stopPolling();
-    toast("Network issue while checking status", "error");
-    return;
-  }
+  const res = await fetch(`${API}/status/${JOB_ID}`, {
+    headers: { Authorization: "Bearer " + ID_TOKEN }
+  });
 
-  if (res.status === 401) {
-    stopPolling();
-    logout();
-    return;
-  }
-
-  if (!res.ok) {
-    stopPolling();
-    toast("Failed to fetch job status", "error");
-    return;
-  }
+  if (!res.ok) return;
 
   const s = await res.json();
 
-  const rawStatus = (s.status || "").toUpperCase();
-  const isCompleted =
-    rawStatus === "COMPLETED" ||
-    rawStatus === "DONE" ||
-    Boolean(s.output_path);
+  const hasOutput = Boolean(s.output_path);
 
-  /* ===============================
-     TERMINAL COMPLETION (ONCE)
-     =============================== */
-  if (isCompleted) {
-    JOB_TERMINAL = true; // 🔒 LATCH
-
+  /* =========================================
+     ✅ TERMINAL COMPLETION (SINGLE SOURCE)
+     ========================================= */
+  if (hasOutput) {
+    JOB_TERMINAL = true;           // 🔒 latch forever
     stopPolling();
     stopThoughtSlider();
-    localStorage.removeItem("active_job_id");
 
     document.body.classList.add("processing-complete");
     document.body.classList.remove("progress-near", "progress-final");
@@ -455,76 +432,55 @@ async function pollStatus() {
     status.textContent = "Ready";
     status.className = "status-ready";
 
-    // TIME → freeze relative time ONCE
+    // FREEZE relative time ONCE
     if (s.updated_at) {
-      stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+      stage.textContent = `(Just now)`;
     }
 
     // PROGRESS → fade out
     progress.value = 100;
     progress.style.opacity = "0";
     progress.style.height = "0";
-    progress.style.marginTop = "0";
+    progress.style.margin = "0";
 
     // DOWNLOAD
-    if (s.output_path) {
-      downloadLink.dataset.url = s.output_path;
-      downloadBox.style.display = "block";
-    }
+    downloadLink.dataset.url = s.output_path;
+    downloadBox.style.display = "block";
 
-    // FILE SUMMARY
+    // FILE SUMMARY — ONLY NOW
     const fileSummary = document.getElementById("fileSummary");
-    const inputNameEl = document.getElementById("inputFilename");
-    const outputNameEl = document.getElementById("outputFilename");
+    const inputEl = document.getElementById("inputFilename");
+    const outputEl = document.getElementById("outputFilename");
 
-    inputNameEl.textContent =
-      s.filename || s.input_filename || "Uploaded file";
+    inputEl.textContent =
+      s.filename || "Uploaded file";
 
-    try {
-      outputNameEl.textContent = decodeURIComponent(
-        s.output_path.split("/").pop()
-      );
-    } catch {
-      outputNameEl.textContent = "Generated file";
-    }
+    outputEl.textContent =
+      decodeURIComponent(s.output_path.split("/").pop());
 
     fileSummary.style.display = "block";
 
+    localStorage.removeItem("active_job_id");
     toast("Ready ✨", "success");
     loadJobs();
-    return; // ⛔ NEVER UPDATE UI AGAIN
+    return; // ⛔ NOTHING AFTER THIS EVER RUNS
   }
 
-  /* ===============================
-     ACTIVE PROCESSING STATE
-     =============================== */
+  /* =========================================
+     🔄 ACTIVE PROCESSING ONLY
+     ========================================= */
 
-  // STATUS
-  const nextStatus = formatStatus(s.status);
-  if (LAST_STATUS !== nextStatus) {
-    status.textContent = nextStatus;
-    LAST_STATUS = nextStatus;
-  }
+  status.textContent = "Processing";
 
-  // RELATIVE TIME (live only while processing)
   if (s.updated_at) {
-    const rel = formatRelativeTime(s.updated_at);
-    if (LAST_STAGE !== rel) {
-      stage.textContent = `(${rel})`;
-      LAST_STAGE = rel;
-    }
+    stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
   }
 
-  // PROGRESS
   const pct = Number(s.progress) || 0;
-  if (LAST_PROGRESS !== pct) {
-    progress.value = pct;
-    LAST_PROGRESS = pct;
-  }
+  progress.value = pct;
 
   document.body.classList.remove("progress-near", "progress-final");
-  if (pct >= 95) document.body.classList.add("progress-final");
-  else if (pct >= 80) document.body.classList.add("progress-near");
+  if (pct >= 80) document.body.classList.add("progress-near");
 }
 
 
