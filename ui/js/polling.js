@@ -89,7 +89,10 @@ async function pollStatus() {
  * Update status text, stage, progress bar
  */
 function updateProcessingUI(data) {
+    console.log("Progress from backend:", data.progress);
+
   const statusEl = document.getElementById("status");
+  
   const progressEl = document.getElementById("progress");
 
   // Secondary line: stage text only
