@@ -8,3 +8,9 @@
   cursor: default;
   user-select: text;
 }
+
+#fileInfo {
+  display: none;
+  margin-top: 16px;
+  font-size: 14px;
+}

@@ -20,3 +20,11 @@ progress::-moz-progress-bar {
   background: var(--primary);
   border-radius: 999px;
 }
+
+/* =========================================
+   HIDE PROGRESS BAR AFTER COMPLETION
+   ========================================= */
+
+body:not(.processing-active) progress {
+  display: none;
+}
