@@ -1,27 +1,19 @@
 button {
-  border: 1px solid var(--border);
-  background: white;
-  padding: 10px 20px;
-  border-radius: 10px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   cursor: pointer;
-  font-size: 15px;
-}
-
-button:hover {
-  background: #f3f4f6;
-}
-
-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: #2563eb;
+  border-color: #2563eb;
   color: white;
-  border-color: var(--primary);
 }
 
-.btn-primary:hover {
-  background: var(--primary-hover);
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

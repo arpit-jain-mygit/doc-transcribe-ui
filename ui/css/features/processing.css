@@ -1,69 +1,28 @@
-/* =========================================
-   PROCESSING HERO — SAFE DE-EMPHASIS FIX
-   ========================================= */
-
-/* Disable global pointer lock */
-body.processing-active #appContent {
-  pointer-events: auto;
+.processing-panel {
+  border-left: 4px solid #2563eb;
+  background: #ffffff;
 }
 
-/* Allow only hero interactions */
-body.processing-active .processing-panel,
-body.processing-active .processing-panel * {
-  pointer-events: auto;
+.processing-panel h2 {
+  font-size: 16px;
+  margin-bottom: 6px;
 }
 
-/* -----------------------------------------
-   Upload cards: softly de-emphasize
------------------------------------------- */
-body.processing-active .upload-grid .card {
-  opacity: 0.55;
-  filter: grayscale(0.2);
-  transform: scale(0.99);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+#status {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
-/* -----------------------------------------
-   History card: compress instead of blur
------------------------------------------- */
-body.processing-active .card:has(#jobs) {
-  opacity: 0.85;
-  filter: none;
-  transform: none;
+#stage {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 10px;
 }
 
-/* Reduce visual weight of individual jobs */
-body.processing-active .job {
-  opacity: 0.6;
-}
-
-/* -----------------------------------------
-   Never blur text-heavy sections
------------------------------------------- */
-body.processing-active .job,
-body.processing-active #jobs {
-  filter: none !important;
-}
-
-/* Collapse history slightly during processing */
-body.processing-active .card:has(#jobs) {
-  max-height: 260px;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Subtle fade at bottom */
-body.processing-active .card:has(#jobs)::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 60px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0),
-    rgba(255,255,255,0.95)
-  );
-  pointer-events: none;
+progress {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: #e5e7eb;
 }

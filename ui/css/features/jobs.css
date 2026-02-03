@@ -1,0 +1,14 @@
+.job {
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.job-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.job-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
