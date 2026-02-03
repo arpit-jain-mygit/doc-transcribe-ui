@@ -88,31 +88,34 @@ async function pollStatus() {
 /**
  * Update status text, stage, progress bar
  */
-function updateProcessingUI(data) {
-    console.log("Progress from backend:", data.progress);
+let lastProgress = 0;
 
+function updateProcessingUI(data) {
   const statusEl = document.getElementById("status");
-  
   const progressEl = document.getElementById("progress");
 
-  // Secondary line: stage text only
   if (statusEl && data.stage) {
     statusEl.textContent = data.stage;
   }
 
-  // Progress update (CRITICAL FIX)
   if (
     progressEl &&
     typeof data.progress === "number" &&
     !Number.isNaN(data.progress)
   ) {
-    const value = Math.max(0, Math.min(100, data.progress));
-    progressEl.value = value;
+    const target = Math.max(0, Math.min(100, data.progress));
 
-    // Store for CSS-based color change
-    progressEl.setAttribute("data-progress", value);
+    // 🔧 Smooth jump (visual only)
+    const smoothValue = Math.max(lastProgress, target);
+    lastProgress = smoothValue;
+
+    progressEl.value = smoothValue;
+
+    // Set state attribute for CSS
+    progressEl.setAttribute("data-progress", smoothValue);
   }
 }
+
 
 
 
