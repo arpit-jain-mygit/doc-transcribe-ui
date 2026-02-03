@@ -15,6 +15,7 @@ let LAST_STAGE = null;
 
 window.JOB_COMPLETED = false;
 
+let LAST_UPLOADED_FILENAME = null;
 
 
 function setUIBusy(isBusy) {
@@ -357,6 +358,9 @@ async function upload(type, file) {
   fd.append("file", file);
   fd.append("type", type);
 
+  LAST_UPLOADED_FILENAME = file.name;
+
+
   setUIBusy(true);
   document.body.classList.remove("processing-complete");
 
@@ -490,6 +494,33 @@ async function pollStatus() {
     // Status
     if (statusEl) {
       statusEl.textContent = "Ready";
+
+      // ===============================
+      // 📁 FILE INFO — SHOW NOW ONLY
+      // ===============================
+      const fileInfo = document.getElementById("fileInfo");
+      const uploadedEl = document.getElementById("uploadedFile");
+      const generatedEl = document.getElementById("generatedFile");
+
+      if (fileInfo && uploadedEl && generatedEl && s.output_path) {
+        // Uploaded filename
+        uploadedEl.textContent =
+          LAST_UPLOADED_FILENAME || "Uploaded file";
+
+        // Extract filename from signed URL
+        let generatedName = "transcript.txt";
+        try {
+          const url = new URL(s.output_path);
+          generatedName = url.pathname.split("/").pop() || generatedName;
+        } catch { }
+
+        generatedEl.textContent = generatedName;
+        generatedEl.dataset.url = s.output_path;
+
+        fileInfo.style.display = "block";
+      }
+
+
       statusEl.className = "status-ready";
     }
 
@@ -748,35 +779,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
+    const statusBox = getStatusBox();
+    const downloadBox = getDownloadBox();
+
+    if (statusBox && statusBox.style.display !== "none") {
+      startThoughtSlider();
+    }
+
+    if (downloadBox && downloadBox.style.display !== "none") {
+      stopThoughtSlider();
+    }
+  });
+
   const statusBox = getStatusBox();
   const downloadBox = getDownloadBox();
 
-  if (statusBox && statusBox.style.display !== "none") {
-    startThoughtSlider();
+  if (statusBox) {
+    observer.observe(statusBox, {
+      attributes: true,
+      attributeFilter: ["style"]
+    });
   }
 
-  if (downloadBox && downloadBox.style.display !== "none") {
-    stopThoughtSlider();
+  if (downloadBox) {
+    observer.observe(downloadBox, {
+      attributes: true,
+      attributeFilter: ["style"]
+    });
   }
-});
-
-const statusBox = getStatusBox();
-const downloadBox = getDownloadBox();
-
-if (statusBox) {
-  observer.observe(statusBox, {
-    attributes: true,
-    attributeFilter: ["style"]
-  });
-}
-
-if (downloadBox) {
-  observer.observe(downloadBox, {
-    attributes: true,
-    attributeFilter: ["style"]
-  });
-}
 
 
   if (statusBox) observer.observe(statusBox, { attributes: true, attributeFilter: ["style"] });

@@ -91,7 +91,23 @@
       <!-- ========================= -->
       <!-- PROCESSING HERO SECTION -->
       <!-- ========================= -->
+       
       <div id="statusBox" class="card processing-panel" style="display:none;">
+
+        <!-- FILE INFO — SHOW ONLY AFTER COMPLETION -->
+<div id="fileInfo" style="display:none; margin-top:16px;">
+  <div>
+    <strong>Uploaded:</strong>
+    <span id="uploadedFile"></span>
+  </div>
+
+  <div style="margin-top:6px;">
+    <strong>Generated:</strong>
+    <a href="#" id="generatedFile" class="history-download"></a>
+  </div>
+</div>
+
+      </div>
   <button class="processing-close" onclick="hideProcessing()">✕</button>
   <h2>Processing</h2>
 
