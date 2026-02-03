@@ -116,6 +116,9 @@ function updateProcessingUI(data) {
  * Job completed successfully
  */
 function handleJobCompleted(data) {
+  if (typeof stopThoughts === "function") {
+  stopThoughts();
+}
   stopPolling();
 
   window.POLLING_ACTIVE = false;
@@ -123,7 +126,28 @@ function handleJobCompleted(data) {
 
   document.body.classList.remove("processing-active");
 
-  // Enable download
+  // -------------------------------
+  // SHOW FILE INFO
+  // -------------------------------
+  const fileInfo = document.getElementById("fileInfo");
+  const uploadedFile = document.getElementById("uploadedFile");
+  const generatedFile = document.getElementById("generatedFile");
+
+  if (uploadedFile && LAST_UPLOADED_FILENAME) {
+    uploadedFile.textContent = LAST_UPLOADED_FILENAME;
+  }
+
+  if (generatedFile) {
+    generatedFile.textContent = "transcript.txt";
+  }
+
+  if (fileInfo) {
+    fileInfo.style.display = "block";
+  }
+
+  // -------------------------------
+  // ENABLE DOWNLOAD
+  // -------------------------------
   if (data.download_url) {
     setupDownload(data.download_url, "transcript.txt");
 
@@ -133,22 +157,27 @@ function handleJobCompleted(data) {
     }
   }
 
-  // Clear active job
+  // -------------------------------
+  // CLEANUP
+  // -------------------------------
   JOB_ID = null;
   localStorage.removeItem("active_job_id");
 
   toast("Processing completed", "success");
 
-  // Optional: refresh history
   if (typeof loadJobs === "function") {
     loadJobs();
   }
 }
 
+
 /**
  * Job failed
  */
 function handleJobFailed(data) {
+  if (typeof stopThoughts === "function") {
+  stopThoughts();
+}
   stopPolling();
 
   window.POLLING_ACTIVE = false;

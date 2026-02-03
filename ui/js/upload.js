@@ -71,6 +71,7 @@ async function upload(type, file) {
   // ✅ ENTER PROCESSING MODE (FORCED)
   // ===============================
   setUIBusy(true);
+  
 
   const statusBox = document.getElementById("statusBox");
   const anchor = document.getElementById("processingAnchor");
@@ -87,6 +88,11 @@ async function upload(type, file) {
   }
 
   document.body.classList.add("processing-active");
+  // Start thoughts slider
+if (typeof startThoughts === "function") {
+  startThoughts();
+}
+
 
   // ===============================
   // START POLLING
