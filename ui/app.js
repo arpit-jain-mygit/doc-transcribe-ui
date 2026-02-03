@@ -401,8 +401,11 @@ requestAnimationFrame(() => {
 
 
 /* status */
+let JOB_TERMINAL = false; // 🔒 ADD ONCE (top-level)
+
 async function pollStatus() {
   if (!JOB_ID || typeof JOB_ID !== "string") return;
+  if (JOB_TERMINAL) return; // ⛔ HARD STOP
 
   let res;
   try {
@@ -429,69 +432,47 @@ async function pollStatus() {
 
   const s = await res.json();
 
-  /* ---------- STATUS ---------- */
   const rawStatus = (s.status || "").toUpperCase();
-  const isCompleted = rawStatus === "COMPLETED" || Boolean(s.output_path);
+  const isCompleted =
+    rawStatus === "COMPLETED" ||
+    rawStatus === "DONE" ||
+    Boolean(s.output_path);
 
-  if (LAST_STATUS !== rawStatus) {
-    status.className = "";
-
-    if (isCompleted) {
-      status.textContent = "Ready";
-      status.classList.add("status-ready");
-    } else {
-      status.textContent = formatStatus(s.status);
-    }
-
-    LAST_STATUS = rawStatus;
-  }
-
-  /* ---------- RELATIVE TIME ---------- */
-  if (s.updated_at) {
-    const rel = formatRelativeTime(s.updated_at);
-    if (LAST_STAGE !== rel) {
-      stage.textContent = `(${rel})`;
-      LAST_STAGE = rel;
-    }
-  }
-
-  /* ---------- PROGRESS ---------- */
-  const pct = Number(s.progress) || 0;
-
-  if (LAST_PROGRESS !== pct) {
-    progress.value = pct;
-    LAST_PROGRESS = pct;
-  }
-
-  document.body.classList.remove("progress-near", "progress-final");
-
-  if (pct >= 95) {
-    document.body.classList.add("progress-final");
-  } else if (pct >= 80) {
-    document.body.classList.add("progress-near");
-  }
-
-  /* ---------- COMPLETION ---------- */
+  /* ===============================
+     TERMINAL COMPLETION (ONCE)
+     =============================== */
   if (isCompleted) {
-    document.body.classList.add("processing-complete");
-    document.body.classList.remove("progress-near", "progress-final");
+    JOB_TERMINAL = true; // 🔒 LATCH
 
     stopPolling();
     stopThoughtSlider();
     localStorage.removeItem("active_job_id");
 
-    /* Fade progress bar */
+    document.body.classList.add("processing-complete");
+    document.body.classList.remove("progress-near", "progress-final");
+
+    // STATUS
+    status.textContent = "Ready";
+    status.className = "status-ready";
+
+    // TIME → freeze relative time ONCE
+    if (s.updated_at) {
+      stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+    }
+
+    // PROGRESS → fade out
+    progress.value = 100;
     progress.style.opacity = "0";
     progress.style.height = "0";
     progress.style.marginTop = "0";
 
-    /* Download */
+    // DOWNLOAD
     if (s.output_path) {
       downloadLink.dataset.url = s.output_path;
       downloadBox.style.display = "block";
     }
 
-    /* ---------- FILE SUMMARY ---------- */
+    // FILE SUMMARY
     const fileSummary = document.getElementById("fileSummary");
     const inputNameEl = document.getElementById("inputFilename");
     const outputNameEl = document.getElementById("outputFilename");
@@ -504,15 +485,48 @@ async function pollStatus() {
         s.output_path.split("/").pop()
       );
     } catch {
-      outputNameEl.textContent = "Result file";
+      outputNameEl.textContent = "Generated file";
     }
 
     fileSummary.style.display = "block";
 
     toast("Ready ✨", "success");
     loadJobs();
+    return; // ⛔ NEVER UPDATE UI AGAIN
   }
+
+  /* ===============================
+     ACTIVE PROCESSING STATE
+     =============================== */
+
+  // STATUS
+  const nextStatus = formatStatus(s.status);
+  if (LAST_STATUS !== nextStatus) {
+    status.textContent = nextStatus;
+    LAST_STATUS = nextStatus;
+  }
+
+  // RELATIVE TIME (live only while processing)
+  if (s.updated_at) {
+    const rel = formatRelativeTime(s.updated_at);
+    if (LAST_STAGE !== rel) {
+      stage.textContent = `(${rel})`;
+      LAST_STAGE = rel;
+    }
+  }
+
+  // PROGRESS
+  const pct = Number(s.progress) || 0;
+  if (LAST_PROGRESS !== pct) {
+    progress.value = pct;
+    LAST_PROGRESS = pct;
+  }
+
+  document.body.classList.remove("progress-near", "progress-final");
+  if (pct >= 95) document.body.classList.add("progress-final");
+  else if (pct >= 80) document.body.classList.add("progress-near");
 }
+
 
 
 
