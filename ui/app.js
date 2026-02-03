@@ -402,18 +402,14 @@ requestAnimationFrame(() => {
 
 /* status */
 async function pollStatus() {
-
-  if (!JOB_ID || typeof JOB_ID !== "string") {
-    return;
-  }
+  if (!JOB_ID || typeof JOB_ID !== "string") return;
 
   let res;
   try {
     res = await fetch(`${API}/status/${JOB_ID}`, {
       headers: { Authorization: "Bearer " + ID_TOKEN }
     });
-  } catch (e) {
-    // network error → unlock UI but keep job
+  } catch {
     stopPolling();
     toast("Network issue while checking status", "error");
     return;
@@ -431,56 +427,90 @@ async function pollStatus() {
     return;
   }
 
-
-
   const s = await res.json();
+
+  console.log("STATUS PAYLOAD", {
+    status: s.status,
+    progress: s.progress,
+    output_path: s.output_path,
+    updated_at: s.updated_at
+  });
+
+  const rawStatus = String(s.status || "").toUpperCase();
+  const pct = Number(s.progress) || 0;
+
+  /* ===============================
+     🟢 COMPLETION — HANDLE FIRST
+     =============================== */
+  const isCompleted =
+    rawStatus.includes("COMPLETE") ||
+    rawStatus.includes("DONE") ||
+    Boolean(s.output_path);
+
+  if (isCompleted) {
+    console.log("UI → COMPLETED (early exit)");
+
+    stopPolling();
+    stopThoughtSlider();
+
+    document.body.classList.add("processing-complete");
+    document.body.classList.remove("progress-near", "progress-final");
+
+    localStorage.removeItem("active_job_id");
+
+    // Status (soft tone)
+    status.textContent = "Ready";
+    status.className = "status-ready";
+
+    // Stable relative time at completion
+    if (s.updated_at) {
+      stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+    }
+
+    // Lock progress
+    progress.value = 100;
+
+    // Download
+    if (s.output_path) {
+      downloadLink.dataset.url = s.output_path;
+      downloadBox.style.display = "block";
+    }
+
+    toast("Ready ✨", "success");
+    loadJobs();
+    return; // ⛔ stop ALL further UI updates
+  }
+
+  /* ===============================
+     🔵 PROCESSING (ACTIVE)
+     =============================== */
 
   const nextStatus = formatStatus(s.status) || "";
 
-  // STRICT: date only, never labels
-  let lastUpdated = "";
-
-  if (typeof s.updated_at === "string") {
-    lastUpdated = formatDate(s.updated_at);
-  }
-
-const nextStage = s.updated_at
-  ? `(${formatRelativeTime(s.updated_at)})`
-  : "";
-
-
-
-const pct = Number(s.progress) || 0;
-const nextProgress = pct;
-
-  /* 🔒 STATUS */
-if (LAST_STATUS !== nextStatus) {
-  status.className = ""; // reset
-
-  if (nextStatus.toLowerCase() === "completed") {
-    status.textContent = "Ready";
-    status.classList.add("status-ready");
-  } else {
+  // STATUS
+  if (LAST_STATUS !== nextStatus) {
+    status.className = "";
     status.textContent = nextStatus;
+    LAST_STATUS = nextStatus;
   }
 
-  LAST_STATUS = nextStatus;
-}
+  // RELATIVE TIME
+  const nextStage = s.updated_at
+    ? `(${formatRelativeTime(s.updated_at)})`
+    : "";
 
-
-
-  /* 🔒 STAGE */
   if (LAST_STAGE !== nextStage) {
-    stage.innerText = nextStage;
+    stage.textContent = nextStage;
     LAST_STAGE = nextStage;
   }
 
-  /* 🔒 PROGRESS */
-  if (LAST_PROGRESS !== nextProgress) {
-    progress.value = nextProgress;
-    LAST_PROGRESS = nextProgress;
+  // PROGRESS
+  if (LAST_PROGRESS !== pct) {
+    progress.value = pct;
+    LAST_PROGRESS = pct;
   }
-  // progress color states
+
+  // Progress color states
   document.body.classList.remove("progress-near", "progress-final");
 
   if (pct >= 95) {
@@ -488,42 +518,8 @@ if (LAST_STATUS !== nextStatus) {
   } else if (pct >= 80) {
     document.body.classList.add("progress-near");
   }
-  console.log("Progress:", pct);
-  //document.body.classList.add("progress-near");
-
-const isCompleted =
-  s.status?.toUpperCase() === "COMPLETED" || Boolean(s.output_path);
-
-if (isCompleted) {
-  document.body.classList.add("processing-complete");
-  document.body.classList.remove("progress-near", "progress-final");
-
-  // stop polling ONCE
-  stopPolling();
-  stopThoughtSlider();
-
-  // clear persisted active job
-  localStorage.removeItem("active_job_id");
-
-  // update status immediately
-  status.textContent = "Ready";
-  status.className = "status-ready";
-
-  // attach download if available
-  if (s.output_path) {
-    downloadLink.dataset.url = s.output_path;
-    downloadBox.style.display = "block";
-  }
-
-  toast("Ready ✨", "success");
-  loadJobs();
-
-  return; // ⛔ prevent further UI updates
 }
 
-
-
-}
 
 async function forceDownload(url) {
   const res = await fetch(url);
