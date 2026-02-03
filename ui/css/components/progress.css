@@ -1,47 +1,105 @@
 /* =========================================
-   PROGRESS BAR — ACTIVE, CLEAR, RESPONSIVE
+   PROGRESS BAR — CLEAN, RELIABLE, POLISHED
    ========================================= */
 
 progress {
   width: 100%;
   height: 10px;
+  margin-top: 10px;
   border-radius: 999px;
+
   appearance: none;
   -webkit-appearance: none;
-  background: #e5e7eb;
+
+  background-color: #e5e7eb; /* track */
   overflow: hidden;
 }
 
-/* Track */
+/* Track (WebKit) */
 progress::-webkit-progress-bar {
-  background: #e5e7eb;
+  background-color: #e5e7eb;
+  border-radius: 999px;
 }
 
-/* Default (running) */
+/* ===============================
+   ACTIVE (DEFAULT — BLUE)
+   =============================== */
+
+/* WebKit */
 progress::-webkit-progress-value {
-  background: #2563eb; /* blue */
+  background-color: #2563eb; /* blue */
   border-radius: 999px;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition:
+    width 0.35s ease,
+    background-color 0.35s ease;
 }
 
+/* Firefox */
 progress::-moz-progress-bar {
-  background: #2563eb;
+  background-color: #2563eb;
   border-radius: 999px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.35s ease;
 }
 
-/* Near completion (>= 90%) */
-progress[data-progress^="9"]::-webkit-progress-value,
-progress[data-progress="100"]::-webkit-progress-value {
-  background: #16a34a; /* green */
+/* ===============================
+   NEAR COMPLETION (GREEN)
+   =============================== */
+
+progress[value="90"]::-webkit-progress-value,
+progress[value="95"]::-webkit-progress-value,
+progress[value="100"]::-webkit-progress-value {
+  background-color: #16a34a; /* green */
 }
 
-progress[data-progress^="9"]::-moz-progress-bar,
-progress[data-progress="100"]::-moz-progress-bar {
-  background: #16a34a;
+progress[value="90"]::-moz-progress-bar,
+progress[value="95"]::-moz-progress-bar,
+progress[value="100"]::-moz-progress-bar {
+  background-color: #16a34a;
 }
 
-/* Hide progress when not processing */
+/* ===============================
+   EARLY / INDETERMINATE FEEL
+   =============================== */
+
+body.processing-active progress[value="0"]::-webkit-progress-value {
+  background-image: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.35) 37%,
+    rgba(255, 255, 255, 0.15) 63%
+  );
+  background-size: 200% 100%;
+  animation: progress-sheen 2.2s linear infinite;
+}
+
+body.processing-active progress[value="0"]::-moz-progress-bar {
+  background-image: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.35) 37%,
+    rgba(255, 255, 255, 0.15) 63%
+  );
+  background-size: 200% 100%;
+  animation: progress-sheen 2.2s linear infinite;
+}
+
+/* ===============================
+   HIDE AFTER COMPLETION
+   =============================== */
+
 body:not(.processing-active) progress {
   display: none;
+}
+
+/* ===============================
+   ANIMATION
+   =============================== */
+
+@keyframes progress-sheen {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
