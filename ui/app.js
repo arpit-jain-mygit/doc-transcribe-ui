@@ -13,7 +13,8 @@ let LAST_PROGRESS = null;
 let LAST_STATUS = null;
 let LAST_STAGE = null;
 
-let JOB_COMPLETED = false;
+window.JOB_COMPLETED = false;
+
 
 
 function setUIBusy(isBusy) {
@@ -372,8 +373,12 @@ const downloadBox = getDownloadBox();
   }
 
   hidePending();
-  const data = await res.json();
-  JOB_ID = data.job_id;
+const data = await res.json();
+JOB_ID = data.job_id;
+
+/* 🔒 RESET TERMINAL STATE FOR NEW JOB */
+window.JOB_COMPLETED = false;
+
 
   // ⏳ One-time processing duration hint (Hindi)
 toast(
@@ -405,12 +410,9 @@ requestAnimationFrame(() => {
 }
 
 
-/* status */
-let JOB_TERMINAL = false;
-
 async function pollStatus() {
-  // ⛔ HARD STOP — NOTHING runs after completion
-  if (JOB_COMPLETED) return;
+  // ⛔ HARD STOP — once completed, nothing ever runs again
+  if (window.JOB_COMPLETED) return;
 
   if (!JOB_ID || typeof JOB_ID !== "string") return;
 
@@ -438,38 +440,53 @@ async function pollStatus() {
   }
 
   const s = await res.json();
-
   console.log("POLL STATUS", s);
 
-  const isCompleted =
-    s.status === "COMPLETED" ||
-    s.stage === "Completed" ||
-    Boolean(s.output_path);
+  const statusEl = document.getElementById("status");
+  const stageEl = document.getElementById("stage");
+  const progressEl = document.getElementById("progress");
+  const downloadBoxEl = document.getElementById("downloadBox");
+  const downloadLinkEl = document.getElementById("downloadLink");
 
-  /* ===============================
-     ✅ COMPLETED — ONE WAY DOOR
-     =============================== */
+  const pct = Number(s.progress) || 0;
+
+  const isCompleted =
+    s.status?.toUpperCase() === "COMPLETED" ||
+    s.stage === "Completed" ||
+    Boolean(s.output_path) ||
+    pct >= 100;
+
+  /* =================================================
+     ✅ COMPLETED — ONE-WAY TERMINAL STATE
+     ================================================= */
   if (isCompleted) {
-    JOB_COMPLETED = true;          // 🔒 LOCK
-    stopPolling();                // ⛔ stop interval
+    window.JOB_COMPLETED = true; // 🔒 HARD LOCK
+
+    stopPolling();
     stopThoughtSlider();
     localStorage.removeItem("active_job_id");
 
     // Status
-    status.textContent = "Ready";
-    status.className = "status-ready";
+    if (statusEl) {
+      statusEl.textContent = "Ready";
+      statusEl.className = "status-ready";
+    }
 
-    // Time — static
-    stage.textContent = "Just now";
+    // Time — static, never updates again
+    if (stageEl) {
+      stageEl.textContent = "Just now";
+    }
 
-    // Progress — disappear forever
-    progress.value = 100;
-    progress.style.display = "none";
+    // Progress — permanently gone
+    if (progressEl) {
+      progressEl.value = 100;
+      progressEl.style.display = "none";
+    }
 
     document.body.classList.remove("progress-near", "progress-final");
     document.body.classList.add("processing-complete");
 
-    // File info — ONLY NOW
+    // File names — ONLY after completion
     const uploadedEl = document.getElementById("uploadedFile");
     const generatedEl = document.getElementById("generatedFile");
 
@@ -477,9 +494,9 @@ async function pollStatus() {
     if (generatedEl) generatedEl.textContent = "transcript.txt";
 
     // Download
-    if (s.output_path) {
-      downloadLink.dataset.url = s.output_path;
-      downloadBox.style.display = "block";
+    if (s.output_path && downloadLinkEl && downloadBoxEl) {
+      downloadLinkEl.dataset.url = s.output_path;
+      downloadBoxEl.style.display = "block";
     }
 
     toast("Ready ✨", "success");
@@ -488,21 +505,28 @@ async function pollStatus() {
     return; // ⛔ ABSOLUTE STOP
   }
 
-  /* ===============================
+  /* =================================================
      ⏳ STILL PROCESSING
-     =============================== */
-  const pct = Number(s.progress) || 0;
+     ================================================= */
+  if (statusEl) {
+    statusEl.textContent = formatStatus(s.status);
+    statusEl.className = "";
+  }
 
-  status.textContent = formatStatus(s.status);
-  stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+  if (stageEl && s.updated_at) {
+    stageEl.textContent = `(${formatRelativeTime(s.updated_at)})`;
+  }
 
-  progress.style.display = "block";
-  progress.value = pct;
+  if (progressEl) {
+    progressEl.style.display = "block";
+    progressEl.value = pct;
+  }
 
   document.body.classList.remove("progress-near", "progress-final");
   if (pct >= 95) document.body.classList.add("progress-final");
   else if (pct >= 80) document.body.classList.add("progress-near");
 }
+
 
 
 
