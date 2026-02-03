@@ -401,30 +401,30 @@ requestAnimationFrame(() => {
 
 
 /* status */
-let JOB_TERMINAL = false; // ✅ add once at top-level
+let JOB_TERMINAL = false;
 
 async function pollStatus() {
-  if (!JOB_ID || typeof JOB_ID !== "string") return;
-  if (JOB_TERMINAL) return; // 🔒 HARD STOP forever
+  if (!JOB_ID || JOB_TERMINAL) return;
 
   const res = await fetch(`${API}/status/${JOB_ID}`, {
     headers: { Authorization: "Bearer " + ID_TOKEN }
   });
-
   if (!res.ok) return;
 
   const s = await res.json();
 
-  const hasOutput = Boolean(s.output_path);
+  const isDone = Boolean(s.output_path);
 
-  /* =========================================
-     ✅ TERMINAL COMPLETION (SINGLE SOURCE)
-     ========================================= */
-  if (hasOutput) {
-    JOB_TERMINAL = true;           // 🔒 latch forever
+  /* ===============================
+     🟢 TERMINAL STATE (ONCE)
+     =============================== */
+  if (isDone) {
+    JOB_TERMINAL = true;
+
     stopPolling();
     stopThoughtSlider();
 
+    // 🔒 Freeze UI forever
     document.body.classList.add("processing-complete");
     document.body.classList.remove("progress-near", "progress-final");
 
@@ -432,12 +432,10 @@ async function pollStatus() {
     status.textContent = "Ready";
     status.className = "status-ready";
 
-    // FREEZE relative time ONCE
-    if (s.updated_at) {
-      stage.textContent = `(Just now)`;
-    }
+    // TIME — freeze
+    stage.textContent = "(Just now)";
 
-    // PROGRESS → fade out
+    // PROGRESS — hide
     progress.value = 100;
     progress.style.opacity = "0";
     progress.style.height = "0";
@@ -447,28 +445,28 @@ async function pollStatus() {
     downloadLink.dataset.url = s.output_path;
     downloadBox.style.display = "block";
 
-    // FILE SUMMARY — ONLY NOW
+    // ✅ CLEAN FILENAMES (CRITICAL FIX)
     const fileSummary = document.getElementById("fileSummary");
     const inputEl = document.getElementById("inputFilename");
     const outputEl = document.getElementById("outputFilename");
 
-    inputEl.textContent =
-      s.filename || "Uploaded file";
+    inputEl.textContent = s.filename || "Uploaded file";
 
-    outputEl.textContent =
-      decodeURIComponent(s.output_path.split("/").pop());
+    // ⛔ NEVER show signed URL
+    outputEl.textContent = "transcript.txt";
 
     fileSummary.style.display = "block";
 
     localStorage.removeItem("active_job_id");
     toast("Ready ✨", "success");
     loadJobs();
-    return; // ⛔ NOTHING AFTER THIS EVER RUNS
+
+    return; // ⛔ NOTHING AFTER THIS
   }
 
-  /* =========================================
+  /* ===============================
      🔄 ACTIVE PROCESSING ONLY
-     ========================================= */
+     =============================== */
 
   status.textContent = "Processing";
 
