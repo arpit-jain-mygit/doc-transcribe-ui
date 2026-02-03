@@ -1,28 +1,108 @@
+/* ===============================
+   PROCESSING PANEL — FINAL CLEAN
+   =============================== */
+
 .processing-panel {
-  border-left: 4px solid #2563eb;
+  position: relative;
+  padding: 16px 18px 18px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
   background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-.processing-panel h2 {
+/* -------------------------------
+   CLOSE BUTTON
+-------------------------------- */
+
+.processing-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+
   font-size: 16px;
-  margin-bottom: 6px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
 }
+
+.processing-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* -------------------------------
+   TITLE
+-------------------------------- */
+
+.processing-panel h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* -------------------------------
+   STATUS TEXT
+-------------------------------- */
 
 #status {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  color: #374151;
   margin-bottom: 2px;
 }
 
+/* Timestamp / stage */
 #stage {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
   margin-bottom: 10px;
 }
 
+/* -------------------------------
+   PROGRESS BAR
+-------------------------------- */
+
 progress {
   width: 100%;
-  height: 12px;
+  height: 10px;                 /* ⬅️ critical fix */
   border-radius: 999px;
+  appearance: none;
+  -webkit-appearance: none;
   background: #e5e7eb;
+  overflow: hidden;
+}
+
+/* WebKit */
+progress::-webkit-progress-bar {
+  background: #e5e7eb;
+}
+
+progress::-webkit-progress-value {
+  background: #2563eb;
+  border-radius: 999px;
+}
+
+/* Firefox */
+progress::-moz-progress-bar {
+  background: #2563eb;
+  border-radius: 999px;
+}
+
+/* -------------------------------
+   REMOVE ALL "HERO" EFFECTS
+-------------------------------- */
+
+.processing-panel::before,
+.processing-panel::after {
+  display: none !important;
 }
