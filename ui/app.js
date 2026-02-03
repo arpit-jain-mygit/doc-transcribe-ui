@@ -100,7 +100,6 @@ const AUTH_STORAGE_KEY = "doc_app_auth";
 /* 🔐 UI STATE HELPERS */
 function formatDate(value) {
   if (typeof value !== "string") return "";
-  if (!value.includes("T")) return "";
 
   const date = new Date(value);
   if (isNaN(date.getTime())) return "";
@@ -113,10 +112,10 @@ function formatDate(value) {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: true,
-    timeZoneName: "short"
-  });
+    hour12: true
+  }) + " IST";
 }
+
 
 
 function formatStatus(status) {
