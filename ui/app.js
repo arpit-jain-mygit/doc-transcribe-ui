@@ -288,6 +288,9 @@ async function upload(type, file) {
   if (!ID_TOKEN) return toast("Please sign in first", "error");
   if (IS_PENDING) return toast("Account pending approval", "info");
 
+  const statusBox = getStatusBox();
+const downloadBox = getDownloadBox();
+
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
@@ -317,13 +320,27 @@ async function upload(type, file) {
   hidePending();
   const data = await res.json();
   JOB_ID = data.job_id;
+
+  // ⏳ One-time processing duration hint (Hindi)
+toast(
+  "⏳ 20 मिनट के ऑडियो के लिए लगभग 2–3 मिनट लग सकते हैं। कृपया प्रतीक्षा करें।",
+  "info"
+);
+
+
   // 🔐 persist active job for refresh recovery
   localStorage.setItem("active_job_id", JOB_ID);
 
 
   statusBox.style.display = "block";
   statusBox.classList.add("processing-focus");
-  document.body.classList.add("processing-active");
+document.body.classList.add("processing-active");
+document.body.classList.add("processing-enter");
+
+// remove transition helper after first paint
+requestAnimationFrame(() => {
+  document.body.classList.remove("processing-enter");
+});
 
   downloadBox.style.display = "none";
 
@@ -379,8 +396,9 @@ async function pollStatus() {
   const nextStage = lastUpdated ? `Last updated: ${lastUpdated}` : "";
 
 
-  const pct = s.progress || 0;
-  const nextProgress = s.progress || 0;
+const pct = Number(s.progress) || 0;
+const nextProgress = pct;
+
   /* 🔒 STATUS */
   if (LAST_STATUS !== nextStatus) {
     status.innerText = nextStatus;
@@ -410,9 +428,9 @@ async function pollStatus() {
   //document.body.classList.add("progress-near");
 
   if (s.output_path) {
-    document.body.classList.remove("progress-near", "progress-final");
-
     document.body.classList.add("processing-complete");
+
+    document.body.classList.remove("progress-near", "progress-final");
 
     // 🧹 clear persisted active job
     localStorage.removeItem("active_job_id");
@@ -587,6 +605,12 @@ function beforeUnloadHandler(e) {
   }
 }
 
+function getStatusBox() {
+  return document.getElementById("statusBox");
+}
+function getDownloadBox() {
+  return document.getElementById("downloadBox");
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   stopPolling();
@@ -613,17 +637,38 @@ document.addEventListener("DOMContentLoaded", () => {
   attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
   attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
 
-  const statusBox = document.getElementById("statusBox");
-  const downloadBox = document.getElementById("downloadBox");
 
-  const observer = new MutationObserver(() => {
-    if (statusBox && statusBox.style.display !== "none") {
-      startThoughtSlider();
-    }
-    if (downloadBox && downloadBox.style.display !== "none") {
-      stopThoughtSlider();
-    }
+
+const observer = new MutationObserver(() => {
+  const statusBox = getStatusBox();
+  const downloadBox = getDownloadBox();
+
+  if (statusBox && statusBox.style.display !== "none") {
+    startThoughtSlider();
+  }
+
+  if (downloadBox && downloadBox.style.display !== "none") {
+    stopThoughtSlider();
+  }
+});
+
+const statusBox = getStatusBox();
+const downloadBox = getDownloadBox();
+
+if (statusBox) {
+  observer.observe(statusBox, {
+    attributes: true,
+    attributeFilter: ["style"]
   });
+}
+
+if (downloadBox) {
+  observer.observe(downloadBox, {
+    attributes: true,
+    attributeFilter: ["style"]
+  });
+}
+
 
   if (statusBox) observer.observe(statusBox, { attributes: true, attributeFilter: ["style"] });
   if (downloadBox) observer.observe(downloadBox, { attributes: true, attributeFilter: ["style"] });

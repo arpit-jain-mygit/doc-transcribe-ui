@@ -253,7 +253,8 @@ progress {
   border: none;
   border-radius: 999px;
   overflow: hidden;
-  background-color: #e5e7eb; /* track */
+  background-color: #e5e7eb;
+  /* track */
 }
 
 /* Track (WebKit) */
@@ -283,14 +284,27 @@ progress {
 
 /* 80–94% */
 body.progress-near progress {
-  --progress-color: #f59e0b; /* amber */
+  --progress-color: #f59e0b;
+  /* amber */
 }
 
 /* 95–100% */
 body.progress-final progress {
-  --progress-color: var(--success); /* green */
+  --progress-color: var(--success);
+  /* green */
 }
 
+/* Slow sheen near completion */
+body.progress-final progress::-webkit-progress-value,
+body.progress-final progress::-moz-progress-bar {
+  animation-duration: 3.5s;
+}
+
+/* Stop sheen completely at 100% */
+body.processing-complete progress::-webkit-progress-value,
+body.processing-complete progress::-moz-progress-bar {
+  background-image: none;
+}
 
 /* ===============================
    THOUGHT SLIDER
@@ -516,8 +530,13 @@ body.processing-active #appContent {
 body.processing-active #appContent .card:not(.processing-panel) {
   opacity: 0.7;
   filter: grayscale(0.15);
+}
+
+/* Only animate ONCE when entering processing */
+body.processing-enter #appContent .card:not(.processing-panel) {
   transition: opacity 0.25s ease, filter 0.25s ease;
 }
+
 
 .processing-focus {
   transform: scale(1.03);
@@ -599,6 +618,7 @@ body.processing-active .job {
   from {
     background-position: 200% 0;
   }
+
   to {
     background-position: -200% 0;
   }
@@ -624,18 +644,20 @@ progress::-webkit-progress-value {
   transition: background-color 0.4s ease;
 }
 
-/* Firefox */
-progress::-moz-progress-bar {
-  background-color: var(--progress-color);
-  transition: background-color 0.4s ease;
+body.processing-active progress::-webkit-progress-value {
+  background-image: linear-gradient(110deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      rgba(255, 255, 255, 0.35) 37%,
+      rgba(255, 255, 255, 0.15) 63%);
+  background-size: 200% 100%;
+  animation: progress-sheen 2.2s linear infinite;
 }
 
-/* Near completion (80–94%) */
-body.progress-near progress {
-  --progress-color: #f59e0b; /* amber */
-}
-
-/* Final stretch (95–100%) */
-body.progress-final progress {
-  --progress-color: var(--success); /* green */
+body.processing-active progress::-moz-progress-bar {
+  background-image: linear-gradient(110deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      rgba(255, 255, 255, 0.35) 37%,
+      rgba(255, 255, 255, 0.15) 63%);
+  background-size: 200% 100%;
+  animation: progress-sheen 2.2s linear infinite;
 }
