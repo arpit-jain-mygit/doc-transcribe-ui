@@ -1,11 +1,13 @@
 /* =====================================
-   GENERATED FILE — DISPLAY AS TEXT
+   GENERATED FILE — NON-INTERACTIVE TEXT
    ===================================== */
 
 #generatedFile {
-  color: #111827;          /* normal text color */
-  text-decoration: none;   /* remove underline */
-  cursor: default;         /* no pointer cursor */
-  pointer-events: none;    /* disable click */
+  color: #111827;
+  text-decoration: none;
   font-weight: 500;
+
+  cursor: default;          /* no hand cursor */
+  pointer-events: none;     /* 🔒 blocks ALL clicks */
+  user-select: text;        /* allow copying filename */
 }

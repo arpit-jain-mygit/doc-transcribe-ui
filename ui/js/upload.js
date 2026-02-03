@@ -96,12 +96,23 @@ async function upload(type, file) {
 }
 
 
-async function forceDownload(url) {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = url.split("/").pop();
-  a.click();
-  URL.revokeObjectURL(a.href);
+async function forceDownload(url, filename = "transcript.txt") {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Download failed");
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch (err) {
+    toast("Download failed", "error");
+  }
 }
