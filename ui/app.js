@@ -125,17 +125,15 @@ function formatDate(value) {
 function formatRelativeTime(value) {
   if (!value) return "";
 
-  const date = new Date(value);
-  if (isNaN(date)) return "";
+  const past = new Date(value);
+  if (isNaN(past)) return "";
 
-  // Convert "now" to IST
-  const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-  );
+  const now = new Date(); // ✅ local now (already IST on your system)
+  const diffMs = now - past;
 
-  const diffMs = now - date;
+  if (diffMs < 0) return "Just now"; // clock skew safety
+
   const diffSec = Math.floor(diffMs / 1000);
-
   if (diffSec < 30) return "Just now";
   if (diffSec < 60) return `${diffSec}s ago`;
 
@@ -148,6 +146,7 @@ function formatRelativeTime(value) {
   const diffDay = Math.floor(diffHr / 24);
   return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
 }
+
 
 
 function formatStatus(status) {
