@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>श्रुत एवं जिनवाणी संरक्षण</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <!-- Modular CSS entry point -->
+  <link rel="stylesheet" href="css/main.css" />
 </head>
 
 <body>
@@ -63,13 +65,18 @@
           <h2>PDF to Hindi Text</h2>
           <div class="upload-row">
             <div class="drop-zone" id="ocrDrop">
-              <input type="file" id="ocrFile"
-                     accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" hidden />
+              <input
+                type="file"
+                id="ocrFile"
+                accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp"
+                hidden
+              />
               <span class="label">Drag PDF / Image or click</span>
               <span class="filename" id="ocrFilename"></span>
             </div>
-            <button class="btn-primary"
-                    onclick="uploadFrom('OCR','ocrFile')">
+            <button
+              class="btn-primary"
+              onclick="uploadFrom('OCR','ocrFile')">
               Convert
             </button>
           </div>
@@ -81,13 +88,18 @@
           <h2>Video / Audio to Hindi Text</h2>
           <div class="upload-row">
             <div class="drop-zone" id="transcribeDrop">
-              <input type="file" id="transcribeFile"
-                     accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" hidden />
+              <input
+                type="file"
+                id="transcribeFile"
+                accept=".mp3,.wav,.m4a,.mp4,.mov,.webm"
+                hidden
+              />
               <span class="label">Drag audio/video or click</span>
               <span class="filename" id="transcribeFilename"></span>
             </div>
-            <button class="btn-primary"
-                    onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+            <button
+              class="btn-primary"
+              onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
               Convert
             </button>
           </div>
@@ -99,19 +111,21 @@
       </div>
 
       <!-- ========================= -->
-      <!-- PROCESSING ANCHOR (KEY FIX) -->
+      <!-- PROCESSING ANCHOR -->
       <!-- ========================= -->
       <div id="processingAnchor"></div>
 
       <!-- ========================= -->
       <!-- PROCESSING PANEL -->
       <!-- ========================= -->
-      <div id="statusBox"
-           class="card processing-panel"
-           style="display:none;">
+      <div
+        id="statusBox"
+        class="card processing-panel"
+        style="display:none;">
 
-        <button class="processing-close"
-                onclick="hideProcessing()">✕</button>
+        <button
+          class="processing-close"
+          onclick="hideProcessing()">✕</button>
 
         <h2>Processing</h2>
 
@@ -131,14 +145,18 @@
           </div>
           <div style="margin-top:6px;">
             <strong>Generated:</strong>
-            <a href="#"
-               id="generatedFile"
-               class="history-download"></a>
+            <a
+              href="#"
+              id="generatedFile"
+              class="history-download"></a>
           </div>
         </div>
 
         <div id="downloadBox" style="display:none; margin-top:12px;">
-          <a id="downloadLink" href="#" class="file-download">
+          <a
+            id="downloadLink"
+            href="#"
+            class="file-download">
             ⬇ Download
           </a>
         </div>

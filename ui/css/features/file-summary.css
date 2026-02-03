@@ -1,0 +1,13 @@
+.file-summary {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  font-size: 14px;
+}
+
+.file-download {
+  display: inline-flex;
+  gap: 6px;
+  color: var(--success);
+  font-weight: 700;
+}

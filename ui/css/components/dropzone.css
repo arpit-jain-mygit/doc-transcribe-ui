@@ -1,0 +1,23 @@
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: all 0.15s ease;
+  min-width: 260px;
+}
+
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background: #eef4ff;
+}
+
+.drop-zone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
