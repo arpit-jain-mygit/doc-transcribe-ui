@@ -1,59 +1,100 @@
 function uploadFrom(type, inputId) {
   const input = document.getElementById(inputId);
-  if (!input.files.length) return toast("Please select a file", "error");
+  if (!input || !input.files.length) {
+    toast("Please select a file", "error");
+    return;
+  }
   upload(type, input.files[0]);
 }
 
 async function upload(type, file) {
-  if (UI_BUSY || !file || !ID_TOKEN) return;
+  // 🚫 Block only if a job is ACTUALLY running
+  if (JOB_ID && !window.JOB_COMPLETED) {
+    toast("A job is already running", "info");
+    return;
+  }
+
+  if (!file || file.size === 0) {
+    toast("Please select a valid file", "error");
+    return;
+  }
+
+  if (!ID_TOKEN) {
+    toast("Please sign in first", "error");
+    return;
+  }
+
+  if (IS_PENDING) {
+    toast("Account pending approval", "info");
+    return;
+  }
+
+  // ===============================
+  // RESET STATE FOR NEW JOB
+  // ===============================
+  window.JOB_COMPLETED = false;
+  JOB_ID = null;
+  LAST_UPLOADED_FILENAME = file.name;
+
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
-  LAST_UPLOADED_FILENAME = file.name;
 
-  setUIBusy(true);
+  let res;
+  try {
+    res = await fetch(`${API}/upload`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + ID_TOKEN },
+      body: fd
+    });
+  } catch {
+    toast("Network error during upload", "error");
+    return;
+  }
 
-  const res = await fetch(`${API}/upload`, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + ID_TOKEN },
-    body: fd
-  });
+  if (res.status === 401) {
+    logout();
+    return;
+  }
 
-  if (res.status === 401) return logout();
-  if (res.status === 403) return showPending();
+  if (res.status === 403) {
+    showPending();
+    toast("Your account is pending approval", "info");
+    return;
+  }
 
+  const data = await res.json();
   JOB_ID = data.job_id;
-  window.JOB_COMPLETED = false;
-
-  // persist for refresh recovery
   localStorage.setItem("active_job_id", JOB_ID);
 
   // ===============================
-  // ✅ ENTER PROCESSING UI MODE
+  // ✅ ENTER PROCESSING MODE (FORCED)
   // ===============================
+  setUIBusy(true);
+
   const statusBox = document.getElementById("statusBox");
+  const anchor = document.getElementById("processingAnchor");
   const downloadBox = document.getElementById("downloadBox");
 
   if (statusBox) {
-    const anchor = document.getElementById("processingAnchor");
     if (anchor) anchor.appendChild(statusBox);
-
     statusBox.style.display = "block";
     statusBox.classList.add("processing-focus");
   }
 
-  document.body.classList.add("processing-active");
-
-  // hide any previous download UI
   if (downloadBox) {
     downloadBox.style.display = "none";
   }
 
-  // kick polling
+  document.body.classList.add("processing-active");
+
+  // ===============================
+  // START POLLING
+  // ===============================
   pollStatus();
   startPolling();
-
 }
+
 
 async function forceDownload(url) {
   const res = await fetch(url);

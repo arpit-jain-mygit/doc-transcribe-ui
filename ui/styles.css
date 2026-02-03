@@ -198,19 +198,10 @@ button:disabled {
    =============================== */
 
 .processing-panel {
-  margin: 16px auto 24px; /* 👈 tighter, predictable */
-  padding: 32px;
-  max-width: 720px;
-  border-radius: 16px;
-  color: #111827;
-  /* force strong foreground */
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  z-index: 10;
+}
+body.processing-active .processing-panel {
+  /* visual emphasis only */
 }
 
 /* Close button on processing panel */

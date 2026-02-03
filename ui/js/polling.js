@@ -7,9 +7,7 @@ function startPolling() {
     UNLOAD_BOUND = true;
   }
 
-  POLLER = setInterval(() => {
-    if (JOB_ID) pollStatus();
-  }, 4000);
+  POLLER = setInterval(pollStatus, 4000);
 }
 
 function stopPolling() {
@@ -19,23 +17,29 @@ function stopPolling() {
   window.removeEventListener("beforeunload", beforeUnloadHandler);
   UNLOAD_BOUND = false;
 
-  // ✅ Only unlock, never lock here
   setUIBusy(false);
-
   document.body.classList.remove("processing-active");
 
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.classList.remove("processing-focus");
 }
 
-
-/* ===============================
-   JOB STATUS POLLER (MOVED HERE)
-   =============================== */
 async function pollStatus() {
-  // ⛔ hard stop
   if (window.JOB_COMPLETED) return;
   if (!JOB_ID || !ID_TOKEN) return;
+
+  // ===============================
+  // ✅ FORCE UI VISIBILITY
+  // ===============================
+  const statusBox = document.getElementById("statusBox");
+  const anchor = document.getElementById("processingAnchor");
+
+  if (statusBox && statusBox.style.display === "none") {
+    if (anchor) anchor.appendChild(statusBox);
+    statusBox.style.display = "block";
+    statusBox.classList.add("processing-focus");
+    document.body.classList.add("processing-active");
+  }
 
   let res;
   try {
@@ -44,7 +48,7 @@ async function pollStatus() {
     });
   } catch {
     stopPolling();
-    toast("Network issue while checking status", "error");
+    toast("Network error while checking status", "error");
     return;
   }
 
@@ -76,12 +80,11 @@ async function pollStatus() {
     Boolean(s.output_path) ||
     pct >= 100;
 
-  /* ===============================
-     ✅ COMPLETED (TERMINAL STATE)
-     =============================== */
+  // ===============================
+  // ✅ COMPLETED (TERMINAL)
+  // ===============================
   if (isCompleted) {
     window.JOB_COMPLETED = true;
-
     stopPolling();
     stopThoughtSlider();
     localStorage.removeItem("active_job_id");
@@ -92,12 +95,10 @@ async function pollStatus() {
     }
 
     if (stageEl) stageEl.textContent = "Just now";
-
     if (progressEl) progressEl.style.display = "none";
 
     document.body.classList.add("processing-complete");
 
-    // File info
     const fileInfo = document.getElementById("fileInfo");
     const uploadedEl = document.getElementById("uploadedFile");
     const generatedEl = document.getElementById("generatedFile");
@@ -125,9 +126,9 @@ async function pollStatus() {
     return;
   }
 
-  /* ===============================
-     ⏳ STILL PROCESSING
-     =============================== */
+  // ===============================
+  // ⏳ STILL PROCESSING
+  // ===============================
   if (statusEl) {
     statusEl.textContent = formatStatus(s.status);
     statusEl.className = "";
