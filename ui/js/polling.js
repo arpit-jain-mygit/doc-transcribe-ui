@@ -117,7 +117,7 @@ function updateProcessingUI(data) {
  */
 function handleJobCompleted(data) {
   // --------------------------------
-  // STOP ALL PROCESSING UI
+  // STOP PROCESSING STATE FIRST
   // --------------------------------
   if (typeof stopThoughts === "function") {
     stopThoughts();
@@ -128,18 +128,18 @@ function handleJobCompleted(data) {
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
-  // 🔑 EXIT processing mode FIRST
+  // Exit processing mode BEFORE UI changes
   document.body.classList.remove("processing-active");
 
   // --------------------------------
-  // SHOW FILE INFORMATION
+  // POPULATE FILE INFO (POST-COMPLETION ONLY)
   // --------------------------------
   const fileInfo = document.getElementById("fileInfo");
   const uploadedFile = document.getElementById("uploadedFile");
   const generatedFile = document.getElementById("generatedFile");
 
-  if (uploadedFile && LAST_UPLOADED_FILENAME) {
-    uploadedFile.textContent = LAST_UPLOADED_FILENAME;
+  if (uploadedFile) {
+    uploadedFile.textContent = LAST_UPLOADED_FILENAME || "";
   }
 
   if (generatedFile) {
@@ -151,7 +151,7 @@ function handleJobCompleted(data) {
   }
 
   // --------------------------------
-  // ENABLE DOWNLOAD
+  // ENABLE DOWNLOAD (POST-COMPLETION ONLY)
   // --------------------------------
   if (data.download_url) {
     setupDownload(data.download_url, "transcript.txt");
@@ -173,11 +173,11 @@ function handleJobCompleted(data) {
   // --------------------------------
   toast("Processing completed", "success");
 
-  // Refresh history (safe)
   if (typeof loadJobs === "function") {
     loadJobs();
   }
 }
+
 
 
 

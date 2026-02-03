@@ -70,14 +70,14 @@ async function upload(type, file) {
   // ===============================
   // ✅ ENTER PROCESSING MODE (FORCED)
   // ===============================
-  
+
   // Defensive: ensure no leftover thoughts
-if (typeof stopThoughts === "function") {
-  stopThoughts();
-}
+  if (typeof stopThoughts === "function") {
+    stopThoughts();
+  }
 
   setUIBusy(true);
-  
+
 
   const statusBox = document.getElementById("statusBox");
   const anchor = document.getElementById("processingAnchor");
@@ -92,13 +92,18 @@ if (typeof stopThoughts === "function") {
   if (downloadBox) {
     downloadBox.style.display = "none";
   }
+  // Ensure file info is hidden at job start
+  const fileInfo = document.getElementById("fileInfo");
+  if (fileInfo) {
+    fileInfo.style.display = "none";
+  }
 
   document.body.classList.add("processing-active");
-  
+
   // Start thoughts slider
-if (typeof startThoughts === "function") {
-  startThoughts();
-}
+  if (typeof startThoughts === "function") {
+    startThoughts();
+  }
 
 
   // ===============================
