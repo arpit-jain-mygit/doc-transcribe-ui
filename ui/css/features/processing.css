@@ -1,6 +1,6 @@
-/* ===============================
-   PROCESSING PANEL — FINAL CLEAN
-   =============================== */
+/* =================================================
+   PROCESSING PANEL — FINAL, CLEAN, PROFESSIONAL
+   ================================================= */
 
 .processing-panel {
   position: relative;
@@ -11,10 +11,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* -------------------------------
+/* ---------------------------------
    CLOSE BUTTON
--------------------------------- */
-
+---------------------------------- */
 .processing-close {
   position: absolute;
   top: 10px;
@@ -22,7 +21,6 @@
 
   width: 28px;
   height: 28px;
-  padding: 0;
 
   border-radius: 50%;
   border: 1px solid #e5e7eb;
@@ -39,42 +37,61 @@
   color: #111827;
 }
 
-/* -------------------------------
-   TITLE
--------------------------------- */
-
+/* ---------------------------------
+   TITLE (PRIMARY STATE)
+---------------------------------- */
 .processing-panel h2 {
   margin: 0 0 6px;
   font-size: 16px;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #1f2937;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* -------------------------------
-   STATUS TEXT
--------------------------------- */
+/* Activity dot (attention, not noise) */
+.processing-panel h2::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  animation: pulse 1.8s ease-out infinite;
+}
 
+/* ---------------------------------
+   STATUS LINE (DETAIL ONLY)
+---------------------------------- */
 #status {
   font-size: 14px;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: #2563eb;
   margin-bottom: 2px;
 }
 
-/* Timestamp / stage */
+/* 🚫 Prevent duplicate "Processing" */
+.processing-panel h2 + #status {
+  display: none;
+}
+
+/* ---------------------------------
+   STAGE / TIMESTAMP
+---------------------------------- */
 #stage {
   font-size: 12px;
   color: #6b7280;
   margin-bottom: 10px;
 }
 
-/* -------------------------------
-   PROGRESS BAR
--------------------------------- */
-
+/* ---------------------------------
+   PROGRESS BAR (COMPACT & CLEAN)
+---------------------------------- */
 progress {
   width: 100%;
-  height: 10px;                 /* ⬅️ critical fix */
+  height: 10px;               /* critical */
   border-radius: 999px;
   appearance: none;
   -webkit-appearance: none;
@@ -98,11 +115,19 @@ progress::-moz-progress-bar {
   border-radius: 999px;
 }
 
-/* -------------------------------
-   REMOVE ALL "HERO" EFFECTS
--------------------------------- */
-
+/* ---------------------------------
+   REMOVE ALL HERO / GIMMICKS
+---------------------------------- */
 .processing-panel::before,
 .processing-panel::after {
   display: none !important;
+}
+
+/* ---------------------------------
+   SUBTLE ACTIVITY PULSE
+---------------------------------- */
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  70%  { box-shadow: 0 0 0 6px rgba(37,99,235,0); }
+  100% { box-shadow: 0 0 0 3px rgba(37,99,235,0); }
 }
