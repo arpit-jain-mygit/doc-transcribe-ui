@@ -1,5 +1,5 @@
 /* =================================================
-   PROCESSING PANEL — FINAL, CLEAN, PROFESSIONAL
+   PROCESSING PANEL — CLEAN & PROFESSIONAL
    ================================================= */
 
 .processing-panel {
@@ -11,9 +11,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* ---------------------------------
-   CLOSE BUTTON
----------------------------------- */
+/* Close button */
 .processing-close {
   position: absolute;
   top: 10px;
@@ -37,9 +35,7 @@
   color: #111827;
 }
 
-/* ---------------------------------
-   TITLE (PRIMARY STATE)
----------------------------------- */
+/* Title */
 .processing-panel h2 {
   margin: 0 0 6px;
   font-size: 16px;
@@ -51,7 +47,7 @@
   gap: 8px;
 }
 
-/* Activity dot (attention, not noise) */
+/* Activity dot */
 .processing-panel h2::before {
   content: "";
   width: 8px;
@@ -62,9 +58,7 @@
   animation: pulse 1.8s ease-out infinite;
 }
 
-/* ---------------------------------
-   STATUS LINE (DETAIL ONLY)
----------------------------------- */
+/* Status text (only when meaningful) */
 #status {
   font-size: 14px;
   font-weight: 600;
@@ -72,26 +66,22 @@
   margin-bottom: 2px;
 }
 
-/* 🚫 Prevent duplicate "Processing" */
+/* Prevent duplicate “Processing” */
 .processing-panel h2 + #status {
   display: none;
 }
 
-/* ---------------------------------
-   STAGE / TIMESTAMP
----------------------------------- */
+/* Stage / timestamp */
 #stage {
   font-size: 12px;
   color: #6b7280;
   margin-bottom: 10px;
 }
 
-/* ---------------------------------
-   PROGRESS BAR (COMPACT & CLEAN)
----------------------------------- */
+/* Progress bar */
 progress {
   width: 100%;
-  height: 10px;               /* critical */
+  height: 10px;
   border-radius: 999px;
   appearance: none;
   -webkit-appearance: none;
@@ -99,7 +89,6 @@ progress {
   overflow: hidden;
 }
 
-/* WebKit */
 progress::-webkit-progress-bar {
   background: #e5e7eb;
 }
@@ -109,23 +98,17 @@ progress::-webkit-progress-value {
   border-radius: 999px;
 }
 
-/* Firefox */
 progress::-moz-progress-bar {
   background: #2563eb;
   border-radius: 999px;
 }
 
-/* ---------------------------------
-   REMOVE ALL HERO / GIMMICKS
----------------------------------- */
+/* Remove any hero artifacts */
 .processing-panel::before,
 .processing-panel::after {
   display: none !important;
 }
 
-/* ---------------------------------
-   SUBTLE ACTIVITY PULSE
----------------------------------- */
 @keyframes pulse {
   0%   { box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
   70%  { box-shadow: 0 0 0 6px rgba(37,99,235,0); }

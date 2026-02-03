@@ -53,3 +53,17 @@ function getStatusBox() {
 function getDownloadBox() {
   return document.getElementById("downloadBox");
 }
+
+function setupDownload(downloadUrl, filename = "transcript.txt") {
+  const downloadLink = document.getElementById("downloadLink");
+
+  if (!downloadUrl) {
+    downloadLink.onclick = null;
+    return;
+  }
+
+  downloadLink.onclick = (e) => {
+    e.preventDefault();
+    forceDownload(downloadUrl, filename);
+  };
+}

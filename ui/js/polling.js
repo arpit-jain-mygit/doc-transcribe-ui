@@ -1,156 +1,182 @@
+/* =========================================================
+   POLLING — SINGLE SOURCE OF TRUTH
+   ========================================================= */
+
+let POLL_INTERVAL = null;
+
+/**
+ * Start polling job status
+ */
 function startPolling() {
-  if (POLLER) clearInterval(POLLER);
-  if (!JOB_ID || typeof JOB_ID !== "string") return;
+  if (!JOB_ID) return;
 
-  if (!UNLOAD_BOUND) {
-    window.addEventListener("beforeunload", beforeUnloadHandler);
-    UNLOAD_BOUND = true;
-  }
+  // Prevent duplicate intervals
+  stopPolling();
 
-  POLLER = setInterval(pollStatus, 4000);
+  window.POLLING_ACTIVE = true;
+
+  // Poll immediately, then on interval
+  pollStatus();
+  POLL_INTERVAL = setInterval(pollStatus, 3000);
 }
 
+/**
+ * Stop polling safely
+ */
 function stopPolling() {
-  if (POLLER) clearInterval(POLLER);
-  POLLER = null;
-
-  window.removeEventListener("beforeunload", beforeUnloadHandler);
-  UNLOAD_BOUND = false;
-
-  setUIBusy(false);
-  document.body.classList.remove("processing-active");
-
-  const statusBox = document.getElementById("statusBox");
-  if (statusBox) statusBox.classList.remove("processing-focus");
+  if (POLL_INTERVAL) {
+    clearInterval(POLL_INTERVAL);
+    POLL_INTERVAL = null;
+  }
 }
 
+/**
+ * Poll backend for job status
+ */
 async function pollStatus() {
-  if (window.JOB_COMPLETED) return;
   if (!JOB_ID || !ID_TOKEN) return;
-
-  // ===============================
-  // ✅ FORCE UI VISIBILITY
-  // ===============================
-  const statusBox = document.getElementById("statusBox");
-  const anchor = document.getElementById("processingAnchor");
-
-  if (statusBox && statusBox.style.display === "none") {
-    if (anchor) anchor.appendChild(statusBox);
-    statusBox.style.display = "block";
-    statusBox.classList.add("processing-focus");
-    document.body.classList.add("processing-active");
-  }
 
   let res;
   try {
     res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: { Authorization: "Bearer " + ID_TOKEN }
+      headers: {
+        Authorization: "Bearer " + ID_TOKEN
+      }
     });
-  } catch {
-    stopPolling();
-    toast("Network error while checking status", "error");
+  } catch (err) {
+    console.error("Polling network error", err);
     return;
   }
 
   if (res.status === 401) {
-    stopPolling();
     logout();
     return;
   }
 
   if (!res.ok) {
-    stopPolling();
-    toast("Failed to fetch job status", "error");
+    console.error("Polling failed", res.status);
     return;
   }
 
-  const s = await res.json();
+  const data = await res.json();
 
+  /*
+    Expected backend payload (example):
+    {
+      status: "RUNNING" | "COMPLETED" | "FAILED",
+      stage: "Transcribing audio",
+      progress: 42,
+      download_url: "https://..."
+    }
+  */
+
+  updateProcessingUI(data);
+
+  if (data.status === "COMPLETED") {
+    handleJobCompleted(data);
+  }
+
+  if (data.status === "FAILED") {
+    handleJobFailed(data);
+  }
+}
+
+/* =========================================================
+   UI UPDATE HELPERS
+   ========================================================= */
+
+/**
+ * Update status text, stage, progress bar
+ */
+function updateProcessingUI(data) {
   const statusEl = document.getElementById("status");
   const stageEl = document.getElementById("stage");
   const progressEl = document.getElementById("progress");
-  const downloadBox = document.getElementById("downloadBox");
-  const downloadLink = document.getElementById("downloadLink");
 
-  const pct = Number(s.progress) || 0;
+  if (statusEl && data.status) {
+    // Show meaningful status only
+    statusEl.textContent =
+      data.status === "RUNNING" ? "" : data.status;
+  }
 
-  const isCompleted =
-    s.status?.toUpperCase() === "COMPLETED" ||
-    s.stage === "Completed" ||
-    Boolean(s.output_path) ||
-    pct >= 100;
+  if (stageEl && data.stage) {
+    stageEl.textContent = data.stage;
+  }
 
-  // ===============================
-  // ✅ COMPLETED (TERMINAL)
-  // ===============================
-  if (isCompleted) {
-    window.JOB_COMPLETED = true;
-    stopPolling();
-    stopThoughtSlider();
-    localStorage.removeItem("active_job_id");
+  if (progressEl && typeof data.progress === "number") {
+    progressEl.value = Math.max(0, Math.min(100, data.progress));
+  }
+}
 
-    if (statusEl) {
-      statusEl.textContent = "Ready";
-      statusEl.className = "status-ready";
-    }
+/* =========================================================
+   COMPLETION / FAILURE HANDLERS
+   ========================================================= */
 
-    if (stageEl) stageEl.textContent = "Just now";
-    if (progressEl) progressEl.style.display = "none";
+/**
+ * Job completed successfully
+ */
+function handleJobCompleted(data) {
+  stopPolling();
 
-    document.body.classList.add("processing-complete");
+  window.POLLING_ACTIVE = false;
+  window.JOB_COMPLETED = true;
 
-    const fileInfo = document.getElementById("fileInfo");
-    const uploadedEl = document.getElementById("uploadedFile");
-    const generatedEl = document.getElementById("generatedFile");
+  document.body.classList.remove("processing-active");
 
-    if (fileInfo && uploadedEl && generatedEl && s.output_path) {
-      uploadedEl.textContent = LAST_UPLOADED_FILENAME || "Uploaded file";
+  // Enable download
+  if (data.download_url) {
+    setupDownload(data.download_url, "transcript.txt");
 
-      let name = "transcript.txt";
-      try {
-        name = new URL(s.output_path).pathname.split("/").pop() || name;
-      } catch {}
-
-      generatedEl.textContent = name;
-      generatedEl.dataset.url = s.output_path;
-      fileInfo.style.display = "block";
-    }
-
-    if (downloadBox && downloadLink && s.output_path) {
-      downloadLink.dataset.url = s.output_path;
+    const downloadBox = document.getElementById("downloadBox");
+    if (downloadBox) {
       downloadBox.style.display = "block";
     }
+  }
 
-    toast("Ready ✨", "success");
+  // Clear active job
+  JOB_ID = null;
+  localStorage.removeItem("active_job_id");
+
+  toast("Processing completed", "success");
+
+  // Optional: refresh history
+  if (typeof loadJobs === "function") {
     loadJobs();
-    return;
   }
+}
 
-  // ===============================
-  // ⏳ STILL PROCESSING
-  // ===============================
+/**
+ * Job failed
+ */
+function handleJobFailed(data) {
+  stopPolling();
+
+  window.POLLING_ACTIVE = false;
+  window.JOB_COMPLETED = true;
+
+  document.body.classList.remove("processing-active");
+
+  JOB_ID = null;
+  localStorage.removeItem("active_job_id");
+
+  const statusEl = document.getElementById("status");
   if (statusEl) {
-    statusEl.textContent = formatStatus(s.status);
-    statusEl.className = "";
+    statusEl.textContent = "Failed";
   }
 
-  if (stageEl && s.updated_at) {
-    stageEl.textContent = `(${formatRelativeTime(s.updated_at)})`;
-  }
-
-  if (progressEl) {
-    progressEl.style.display = "block";
-    progressEl.value = pct;
-  }
-
-  document.body.classList.remove("progress-near", "progress-final");
-  if (pct >= 95) document.body.classList.add("progress-final");
-  else if (pct >= 80) document.body.classList.add("progress-near");
+  toast("Processing failed. Please try again.", "error");
 }
 
-function beforeUnloadHandler(e) {
-  if (JOB_ID && POLLER) {
-    e.preventDefault();
-    e.returnValue = "";
+/* =========================================================
+   RESUME AFTER REFRESH (OPTIONAL BUT SAFE)
+   ========================================================= */
+
+(function resumePollingIfNeeded() {
+  const savedJobId = localStorage.getItem("active_job_id");
+  if (savedJobId && ID_TOKEN) {
+    JOB_ID = savedJobId;
+    window.POLLING_ACTIVE = true;
+    document.body.classList.add("processing-active");
+    startPolling();
   }
-}
+})();

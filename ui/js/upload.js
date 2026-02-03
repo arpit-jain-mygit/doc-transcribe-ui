@@ -96,7 +96,7 @@ async function upload(type, file) {
 }
 
 
-async function forceDownload(url, filename = "transcript.txt") {
+async function forceDownload(url, filename) {
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("Download failed");
@@ -116,3 +116,4 @@ async function forceDownload(url, filename = "transcript.txt") {
     toast("Download failed", "error");
   }
 }
+
