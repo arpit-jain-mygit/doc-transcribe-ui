@@ -101,20 +101,26 @@ const AUTH_STORAGE_KEY = "doc_app_auth";
 function formatDate(value) {
   if (typeof value !== "string") return "";
 
-  const date = new Date(value);
+  // 🔒 Force UTC interpretation
+  const utcValue = value.endsWith("Z") ? value : value + "Z";
+  const date = new Date(utcValue);
+
   if (isNaN(date.getTime())) return "";
 
-  return date.toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  }) + " IST";
+  return (
+    date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    }) + " IST"
+  );
 }
+
 
 
 
