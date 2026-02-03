@@ -734,3 +734,30 @@ body.processing-active progress::-moz-progress-bar {
   background-size: 200% 100%;
   animation: progress-sheen 2.2s linear infinite;
 }
+/* ===============================
+   FILE SUMMARY (POST-COMPLETION)
+   =============================== */
+
+.file-summary {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  font-size: 14px;
+}
+
+.file-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.file-label {
+  color: var(--muted);
+  min-width: 80px;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-all;
+}

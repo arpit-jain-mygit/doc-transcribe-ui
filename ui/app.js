@@ -429,88 +429,40 @@ async function pollStatus() {
 
   const s = await res.json();
 
-  console.log("STATUS PAYLOAD", {
-    status: s.status,
-    progress: s.progress,
-    output_path: s.output_path,
-    updated_at: s.updated_at
-  });
+  /* ---------- STATUS ---------- */
+  const rawStatus = (s.status || "").toUpperCase();
+  const isCompleted = rawStatus === "COMPLETED" || Boolean(s.output_path);
 
-  const rawStatus = String(s.status || "").toUpperCase();
+  if (LAST_STATUS !== rawStatus) {
+    status.className = "";
+
+    if (isCompleted) {
+      status.textContent = "Ready";
+      status.classList.add("status-ready");
+    } else {
+      status.textContent = formatStatus(s.status);
+    }
+
+    LAST_STATUS = rawStatus;
+  }
+
+  /* ---------- RELATIVE TIME ---------- */
+  if (s.updated_at) {
+    const rel = formatRelativeTime(s.updated_at);
+    if (LAST_STAGE !== rel) {
+      stage.textContent = `(${rel})`;
+      LAST_STAGE = rel;
+    }
+  }
+
+  /* ---------- PROGRESS ---------- */
   const pct = Number(s.progress) || 0;
 
-  /* ===============================
-     🟢 COMPLETION — HANDLE FIRST
-     =============================== */
-  const isCompleted =
-    rawStatus.includes("COMPLETE") ||
-    rawStatus.includes("DONE") ||
-    Boolean(s.output_path);
-
-  if (isCompleted) {
-    console.log("UI → COMPLETED (early exit)");
-
-    stopPolling();
-    stopThoughtSlider();
-
-    document.body.classList.add("processing-complete");
-    document.body.classList.remove("progress-near", "progress-final");
-
-    localStorage.removeItem("active_job_id");
-
-    // Status (soft tone)
-    status.textContent = "Ready";
-    status.className = "status-ready";
-
-    // Stable relative time at completion
-    if (s.updated_at) {
-      stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
-    }
-
-    // Lock progress
-    progress.value = 100;
-
-    // Download
-    if (s.output_path) {
-      downloadLink.dataset.url = s.output_path;
-      downloadBox.style.display = "block";
-    }
-
-    toast("Ready ✨", "success");
-    loadJobs();
-    return; // ⛔ stop ALL further UI updates
-  }
-
-  /* ===============================
-     🔵 PROCESSING (ACTIVE)
-     =============================== */
-
-  const nextStatus = formatStatus(s.status) || "";
-
-  // STATUS
-  if (LAST_STATUS !== nextStatus) {
-    status.className = "";
-    status.textContent = nextStatus;
-    LAST_STATUS = nextStatus;
-  }
-
-  // RELATIVE TIME
-  const nextStage = s.updated_at
-    ? `(${formatRelativeTime(s.updated_at)})`
-    : "";
-
-  if (LAST_STAGE !== nextStage) {
-    stage.textContent = nextStage;
-    LAST_STAGE = nextStage;
-  }
-
-  // PROGRESS
   if (LAST_PROGRESS !== pct) {
     progress.value = pct;
     LAST_PROGRESS = pct;
   }
 
-  // Progress color states
   document.body.classList.remove("progress-near", "progress-final");
 
   if (pct >= 95) {
@@ -518,7 +470,50 @@ async function pollStatus() {
   } else if (pct >= 80) {
     document.body.classList.add("progress-near");
   }
+
+  /* ---------- COMPLETION ---------- */
+  if (isCompleted) {
+    document.body.classList.add("processing-complete");
+    document.body.classList.remove("progress-near", "progress-final");
+
+    stopPolling();
+    stopThoughtSlider();
+    localStorage.removeItem("active_job_id");
+
+    /* Fade progress bar */
+    progress.style.opacity = "0";
+    progress.style.height = "0";
+    progress.style.marginTop = "0";
+
+    /* Download */
+    if (s.output_path) {
+      downloadLink.dataset.url = s.output_path;
+      downloadBox.style.display = "block";
+    }
+
+    /* ---------- FILE SUMMARY ---------- */
+    const fileSummary = document.getElementById("fileSummary");
+    const inputNameEl = document.getElementById("inputFilename");
+    const outputNameEl = document.getElementById("outputFilename");
+
+    inputNameEl.textContent =
+      s.filename || s.input_filename || "Uploaded file";
+
+    try {
+      outputNameEl.textContent = decodeURIComponent(
+        s.output_path.split("/").pop()
+      );
+    } catch {
+      outputNameEl.textContent = "Result file";
+    }
+
+    fileSummary.style.display = "block";
+
+    toast("Ready ✨", "success");
+    loadJobs();
+  }
 }
+
 
 
 async function forceDownload(url) {
