@@ -18,3 +18,5 @@
 @import "./features/file-summary.css";
 
 @import "./responsive/mobile.css";
+
+@import "./components/downloads.css";
