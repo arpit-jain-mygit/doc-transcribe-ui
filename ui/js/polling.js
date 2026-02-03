@@ -19,12 +19,15 @@ function stopPolling() {
   window.removeEventListener("beforeunload", beforeUnloadHandler);
   UNLOAD_BOUND = false;
 
+  // ✅ Only unlock, never lock here
   setUIBusy(false);
+
   document.body.classList.remove("processing-active");
 
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.classList.remove("processing-focus");
 }
+
 
 /* ===============================
    JOB STATUS POLLER (MOVED HERE)

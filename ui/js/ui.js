@@ -1,14 +1,20 @@
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
-  document.querySelectorAll("button, input[type='file'], a.history-download")
-    .forEach(el => {
-      el.disabled = isBusy;
-      el.style.pointerEvents = isBusy ? "none" : "auto";
-      el.style.opacity = isBusy ? "0.6" : "1";
-    });
-  document.querySelectorAll(".drop-zone")
-    .forEach(z => z.classList.toggle("disabled", isBusy));
+
+  // ⚠️ DO NOT disable auth UI
+  document.querySelectorAll(
+    "button:not(.logout-link):not(#google-signin-btn button), input[type='file'], a.history-download"
+  ).forEach(el => {
+    el.disabled = isBusy;
+    el.style.pointerEvents = isBusy ? "none" : "auto";
+    el.style.opacity = isBusy ? "0.6" : "1";
+  });
+
+  document.querySelectorAll(".drop-zone").forEach(z => {
+    z.classList.toggle("disabled", isBusy);
+  });
 }
+
 
 function showLoggedInUI() {
   userProfile.style.display = "flex";
