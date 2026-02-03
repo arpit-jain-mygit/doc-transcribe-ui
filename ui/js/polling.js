@@ -90,23 +90,18 @@ async function pollStatus() {
  */
 function updateProcessingUI(data) {
   const statusEl = document.getElementById("status");
-  const stageEl = document.getElementById("stage");
   const progressEl = document.getElementById("progress");
 
-  if (statusEl && data.status) {
-    // Show meaningful status only
-    statusEl.textContent =
-      data.status === "RUNNING" ? "" : data.status;
-  }
-
-  if (stageEl && data.stage) {
-    stageEl.textContent = data.stage;
+  // Secondary line ONLY (stage text)
+  if (statusEl && data.stage) {
+    statusEl.textContent = data.stage;
   }
 
   if (progressEl && typeof data.progress === "number") {
     progressEl.value = Math.max(0, Math.min(100, data.progress));
   }
 }
+
 
 /* =========================================================
    COMPLETION / FAILURE HANDLERS
@@ -116,13 +111,8 @@ function updateProcessingUI(data) {
  * Job completed successfully
  */
 function handleJobCompleted(data) {
-  const processingFilename = document.getElementById("processingFilename");
-  if (processingFilename) {
-    processingFilename.textContent = "";
-  }
-
   // --------------------------------
-  // STOP PROCESSING STATE FIRST
+  // STOP PROCESSING UI IMMEDIATELY
   // --------------------------------
   if (typeof stopThoughts === "function") {
     stopThoughts();
@@ -133,11 +123,24 @@ function handleJobCompleted(data) {
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
-  // Exit processing mode BEFORE UI changes
+  // Exit processing mode FIRST (hides progress bar)
   document.body.classList.remove("processing-active");
 
   // --------------------------------
-  // POPULATE FILE INFO (POST-COMPLETION ONLY)
+  // CLEAR PROCESSING HEADER
+  // --------------------------------
+  const header = document.getElementById("processingHeader");
+  if (header) {
+    header.textContent = "";
+  }
+
+  const statusEl = document.getElementById("status");
+  if (statusEl) {
+    statusEl.textContent = "";
+  }
+
+  // --------------------------------
+  // SHOW FILE INFO (POST-COMPLETION ONLY)
   // --------------------------------
   const fileInfo = document.getElementById("fileInfo");
   const uploadedFile = document.getElementById("uploadedFile");
@@ -156,7 +159,7 @@ function handleJobCompleted(data) {
   }
 
   // --------------------------------
-  // ENABLE DOWNLOAD (POST-COMPLETION ONLY)
+  // ENABLE DOWNLOAD
   // --------------------------------
   if (data.download_url) {
     setupDownload(data.download_url, "transcript.txt");
@@ -178,6 +181,7 @@ function handleJobCompleted(data) {
   // --------------------------------
   toast("Processing completed", "success");
 
+  // Refresh history safely
   if (typeof loadJobs === "function") {
     loadJobs();
   }
@@ -186,16 +190,14 @@ function handleJobCompleted(data) {
 
 
 
+
 /**
  * Job failed
  */
 function handleJobFailed(data) {
-  const processingFilename = document.getElementById("processingFilename");
-  if (processingFilename) {
-    processingFilename.textContent = "";
-  }
-
-  // 🔒 Stop thoughts immediately
+  // --------------------------------
+  // STOP PROCESSING UI IMMEDIATELY
+  // --------------------------------
   if (typeof stopThoughts === "function") {
     stopThoughts();
   }
@@ -205,10 +207,34 @@ function handleJobFailed(data) {
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
+  // Exit processing mode
   document.body.classList.remove("processing-active");
 
+  // --------------------------------
+  // CLEAR PROCESSING HEADER
+  // --------------------------------
+  const header = document.getElementById("processingHeader");
+  if (header) {
+    header.textContent = "";
+  }
+
+  const statusEl = document.getElementById("status");
+  if (statusEl) {
+    statusEl.textContent = "";
+  }
+
+  // --------------------------------
+  // CLEANUP JOB STATE
+  // --------------------------------
+  JOB_ID = null;
+  localStorage.removeItem("active_job_id");
+
+  // --------------------------------
+  // USER FEEDBACK
+  // --------------------------------
   toast("Processing failed. Please try again.", "error");
 }
+
 
 
 /* =========================================================

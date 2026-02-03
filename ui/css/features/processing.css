@@ -58,12 +58,12 @@
   animation: pulse 1.8s ease-out infinite;
 }
 
-/* Status text (only when meaningful) */
+/* Secondary status line */
 #status {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 10px;
 }
 
 /* Prevent duplicate “Processing” */
@@ -129,5 +129,13 @@ progress::-moz-progress-bar {
   font-size: 13px;
   font-weight: 500;
   color: #6b7280;
+  word-break: break-all;
+}
+/* Primary processing header */
+#processingHeader {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
   word-break: break-all;
 }

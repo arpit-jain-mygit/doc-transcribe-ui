@@ -100,6 +100,11 @@ async function upload(type, file) {
   }
 
   document.body.classList.add("processing-active");
+  const header = document.getElementById("processingHeader");
+  if (header) {
+    header.textContent = `PROCESSING ${LAST_UPLOADED_FILENAME}`;
+  }
+
   const processingFilename = document.getElementById("processingFilename");
   if (processingFilename) {
     processingFilename.textContent = LAST_UPLOADED_FILENAME || "";
