@@ -13,16 +13,22 @@ let THOUGHT_INDEX = 0;
 function startThoughtSlider() {
   const box = document.getElementById("thoughtBox");
   const text = document.getElementById("thoughtText");
-  if (!box || THOUGHT_TIMER) return;
+  if (!box || !text || THOUGHT_TIMER) return;
+
   box.style.display = "block";
   text.textContent = THOUGHTS[0];
+  THOUGHT_INDEX = 1;
+
   THOUGHT_TIMER = setInterval(() => {
-    text.textContent = THOUGHTS[++THOUGHT_INDEX % THOUGHTS.length];
+    const idx = THOUGHT_INDEX % THOUGHTS.length;
+    text.textContent = THOUGHTS[idx];
+    THOUGHT_INDEX++;
   }, 4500);
 }
 
 function stopThoughtSlider() {
   if (THOUGHT_TIMER) clearInterval(THOUGHT_TIMER);
   THOUGHT_TIMER = null;
-  document.getElementById("thoughtBox")?.style.display = "none";
+  const box = document.getElementById("thoughtBox");
+  if (box) box.style.display = "none";
 }
