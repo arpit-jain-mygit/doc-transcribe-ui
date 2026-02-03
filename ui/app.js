@@ -55,6 +55,20 @@ function stopPolling() {
   }
 }
 
+function hideProcessing() {
+  const statusBox = document.getElementById("statusBox");
+  if (!statusBox) return;
+
+  // Just hide UI — DO NOT stop polling
+  statusBox.style.display = "none";
+  statusBox.classList.remove("processing-focus");
+
+  // Re-enable rest of UI visuals (but keep job running)
+  document.body.classList.remove("processing-active");
+
+  toast("Processing is running in background", "info");
+}
+
 
 function startPolling() {
   if (POLLER) {
@@ -86,22 +100,24 @@ const AUTH_STORAGE_KEY = "doc_app_auth";
 /* 🔐 UI STATE HELPERS */
 function formatDate(value) {
   if (typeof value !== "string") return "";
-
-  // accept only ISO-like timestamps
   if (!value.includes("T")) return "";
 
   const date = new Date(value);
   if (isNaN(date.getTime())) return "";
 
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
+    hour12: true,
+    timeZoneName: "short"
   });
 }
+
 
 function formatStatus(status) {
   if (!status) return "";

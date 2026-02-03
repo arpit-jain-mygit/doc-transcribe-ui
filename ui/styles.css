@@ -213,6 +213,25 @@ button:disabled {
   z-index: 10;
 }
 
+/* Close button on processing panel */
+.processing-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.processing-close:hover {
+  background: #f3f4f6;
+  color: var(--text);
+}
 
 
 /* Processing title */
