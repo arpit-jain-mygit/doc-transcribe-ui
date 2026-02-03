@@ -14,9 +14,6 @@
 
   <div class="container">
 
-    <!-- Processing anchor (used by JS) -->
-    <div id="processingAnchor"></div>
-
     <!-- ========================= -->
     <!-- APP CONTENT -->
     <!-- ========================= -->
@@ -102,6 +99,11 @@
       </div>
 
       <!-- ========================= -->
+      <!-- PROCESSING ANCHOR (KEY FIX) -->
+      <!-- ========================= -->
+      <div id="processingAnchor"></div>
+
+      <!-- ========================= -->
       <!-- PROCESSING PANEL -->
       <!-- ========================= -->
       <div id="statusBox"
@@ -113,24 +115,20 @@
 
         <h2>Processing</h2>
 
-        <!-- STATUS -->
         <div id="status"></div>
         <div id="stage"></div>
 
         <progress id="progress" value="0" max="100"></progress>
 
-        <!-- THOUGHT SLIDER -->
         <div id="thoughtBox" class="thought-box">
           <div id="thoughtText" class="thought-text"></div>
         </div>
 
-        <!-- FILE INFO (ONLY AFTER COMPLETION) -->
         <div id="fileInfo" style="display:none; margin-top:16px;">
           <div>
             <strong>Uploaded:</strong>
             <span id="uploadedFile"></span>
           </div>
-
           <div style="margin-top:6px;">
             <strong>Generated:</strong>
             <a href="#"
@@ -139,7 +137,6 @@
           </div>
         </div>
 
-        <!-- DOWNLOAD BOX -->
         <div id="downloadBox" style="display:none; margin-top:12px;">
           <a id="downloadLink" href="#" class="file-download">
             ⬇ Download
@@ -165,7 +162,7 @@
   </div>
 
   <!-- ========================= -->
-  <!-- SCRIPTS (ORDER MATTERS) -->
+  <!-- SCRIPTS -->
   <!-- ========================= -->
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
