@@ -340,11 +340,18 @@ async function upload(type, file) {
     return;
   }
 
-  if (!ID_TOKEN) return toast("Please sign in first", "error");
-  if (IS_PENDING) return toast("Account pending approval", "info");
+  if (!ID_TOKEN) {
+    toast("Please sign in first", "error");
+    return;
+  }
+
+  if (IS_PENDING) {
+    toast("Account pending approval", "info");
+    return;
+  }
 
   const statusBox = getStatusBox();
-const downloadBox = getDownloadBox();
+  const downloadBox = getDownloadBox();
 
   const fd = new FormData();
   fd.append("file", file);
@@ -353,61 +360,75 @@ const downloadBox = getDownloadBox();
   setUIBusy(true);
   document.body.classList.remove("processing-complete");
 
+  let res;
+  try {
+    res = await fetch(`${API}/upload`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + ID_TOKEN },
+      body: fd
+    });
+  } catch {
+    setUIBusy(false);
+    toast("Network error during upload", "error");
+    return;
+  }
 
-  const res = await fetch(`${API}/upload`, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + ID_TOKEN },
-    body: fd
-  });
-
-  // ✅ STATUS HANDLING — AFTER fetch
+  // 🔐 AUTH / PERMISSION HANDLING
   if (res.status === 401) {
     setUIBusy(false);
-    return logout();
+    logout();
+    return;
   }
 
   if (res.status === 403) {
     setUIBusy(false);
     showPending();
-    return toast("Your account is pending approval", "info");
+    toast("Your account is pending approval", "info");
+    return;
   }
 
   hidePending();
-const data = await res.json();
-JOB_ID = data.job_id;
 
-/* 🔒 RESET TERMINAL STATE FOR NEW JOB */
-window.JOB_COMPLETED = false;
+  const data = await res.json();
+  JOB_ID = data.job_id;
 
+  /* 🔒 RESET TERMINAL STATE FOR NEW JOB */
+  window.JOB_COMPLETED = false;
 
-  // ⏳ One-time processing duration hint (Hindi)
-toast(
-  "⏳ 20 मिनट के ऑडियो के लिए लगभग 2–3 मिनट लग सकते हैं। कृपया प्रतीक्षा करें।",
-  "info"
-);
-
+  // ⏳ One-time processing hint (Hindi)
+  toast(
+    "⏳ 20 मिनट के ऑडियो के लिए लगभग 2–3 मिनट लग सकते हैं। कृपया प्रतीक्षा करें।",
+    "info"
+  );
 
   // 🔐 persist active job for refresh recovery
   localStorage.setItem("active_job_id", JOB_ID);
 
+  /* ===============================
+     ✅ SAFE UI MUTATIONS (NO CRASH)
+     =============================== */
 
-  statusBox.style.display = "block";
-  statusBox.classList.add("processing-focus");
-document.body.classList.add("processing-active");
-document.body.classList.add("processing-enter");
+  if (statusBox) {
+    statusBox.style.display = "block";
+    statusBox.classList.add("processing-focus");
+  }
 
-// remove transition helper after first paint
-requestAnimationFrame(() => {
-  document.body.classList.remove("processing-enter");
-});
+  document.body.classList.add("processing-active");
+  document.body.classList.add("processing-enter");
 
-  downloadBox.style.display = "none";
+  requestAnimationFrame(() => {
+    document.body.classList.remove("processing-enter");
+  });
 
+  if (downloadBox) {
+    downloadBox.style.display = "none";
+  }
+
+  // Kick polling
   pollStatus();
-  JOB_COMPLETED = false;
-
   startPolling();
 }
+
 
 
 async function pollStatus() {
