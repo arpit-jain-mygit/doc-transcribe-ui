@@ -96,17 +96,21 @@
   <h2>Processing</h2>
 
 
-<div class="status-line processing-row">
-
-  <div class="status-left">
-    <strong id="status"></strong>
-    <span id="stage" class="status-time"></span>
+<div id="fileSummary" style="display:none;">
+  <div class="file-line">
+    <strong>Uploaded:</strong>
+    <span id="inputFilename">Uploaded file</span>
   </div>
 
-  <div id="downloadBox" class="download inline" style="display:none;">
-    <a id="downloadLink" href="#" download>⬇ Download</a>
+  <div class="file-line">
+    <strong>Generated:</strong>
+    <a id="downloadLink" href="#" class="file-download">
+      <span id="outputFilename">transcript.txt</span>
+      <span class="download-icon">⬇</span>
+    </a>
   </div>
 </div>
+
 
 
         <progress id="progress" value="0" max="100"></progress>

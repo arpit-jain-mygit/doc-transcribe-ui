@@ -761,3 +761,29 @@ body.processing-active progress::-moz-progress-bar {
   color: var(--text);
   word-break: break-all;
 }
+
+.file-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 16px;
+}
+
+.file-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.file-download:hover {
+  text-decoration: underline;
+}
+
+.download-icon {
+  font-size: 18px;
+  line-height: 1;
+}
