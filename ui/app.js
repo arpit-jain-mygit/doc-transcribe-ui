@@ -414,7 +414,8 @@ async function pollStatus() {
     lastUpdated = formatDate(s.updated_at);
   }
 
-  const nextStage = lastUpdated ? `Last updated: ${lastUpdated}` : "";
+  const nextStage = lastUpdated ? `(${lastUpdated})` : "";
+
 
 
 const pct = Number(s.progress) || 0;
