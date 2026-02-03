@@ -404,86 +404,102 @@ requestAnimationFrame(() => {
 let JOB_TERMINAL = false;
 
 async function pollStatus() {
-  if (!JOB_ID || JOB_TERMINAL) return;
+  if (!JOB_ID || typeof JOB_ID !== "string") return;
 
-  const res = await fetch(`${API}/status/${JOB_ID}`, {
-    headers: { Authorization: "Bearer " + ID_TOKEN }
-  });
-  if (!res.ok) return;
-
-  const s = await res.json();
-  const isCompleted =
-    s.status?.toUpperCase() === "COMPLETED" || Boolean(s.output_path);
-
-  const fileSummary = document.getElementById("fileSummary");
-
-  /* ===============================
-     🟡 ACTIVE PROCESSING
-     =============================== */
-  if (!isCompleted) {
-    // ✅ ensure completion UI is hidden
-    if (fileSummary) fileSummary.style.display = "none";
-
-    // ✅ ensure progress bar is visible
-    progress.style.opacity = "1";
-    progress.style.height = "18px";
-    progress.style.marginTop = "8px";
-
-    status.textContent = "Processing";
-
-    if (s.updated_at) {
-      stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
-    }
-
-    const pct = Number(s.progress) || 0;
-    progress.value = pct;
-
-    document.body.classList.remove("progress-near", "progress-final");
-    if (pct >= 80) document.body.classList.add("progress-near");
-
+  let res;
+  try {
+    res = await fetch(`${API}/status/${JOB_ID}`, {
+      headers: { Authorization: "Bearer " + ID_TOKEN }
+    });
+  } catch {
+    stopPolling();
+    toast("Network issue while checking status", "error");
     return;
   }
 
-  /* ===============================
-     🟢 TERMINAL COMPLETED (ONCE)
-     =============================== */
-  JOB_TERMINAL = true;
+  if (res.status === 401) {
+    stopPolling();
+    logout();
+    return;
+  }
 
-  stopPolling();
-  stopThoughtSlider();
+  if (!res.ok) {
+    stopPolling();
+    toast("Failed to fetch job status", "error");
+    return;
+  }
 
-  document.body.classList.add("processing-complete");
+  const s = await res.json();
+  console.log("STATUS PAYLOAD", s);
+
+  /* =====================================================
+     🚨 HARD STOP: COMPLETION ALWAYS WINS
+     ===================================================== */
+
+  if (s.output_path) {
+    // Prevent double execution
+    if (document.body.classList.contains("processing-complete")) return;
+
+    document.body.classList.add("processing-complete");
+    document.body.classList.remove("processing-active", "progress-near", "progress-final");
+
+    stopPolling();
+    stopThoughtSlider();
+    localStorage.removeItem("active_job_id");
+
+    // UI state
+    status.textContent = "Ready";
+    status.className = "status-ready";
+    stage.textContent = "(Just now)";
+
+    // Progress bar cleanup
+    progress.value = 100;
+    progress.style.opacity = "0";
+
+    // Show filenames ONLY NOW
+    const inputEl = document.getElementById("inputFilename");
+    const outputEl = document.getElementById("outputFilename");
+    const summary = document.getElementById("fileSummary");
+
+    if (inputEl) inputEl.textContent = "Uploaded file";
+    if (outputEl) outputEl.textContent = "transcript.txt";
+
+    downloadLink.dataset.url = s.output_path;
+    summary.style.display = "block";
+
+    toast("Ready ✨", "success");
+    loadJobs();
+    return; // ⛔ NOTHING AFTER THIS
+  }
+
+  /* =====================================================
+     NORMAL PROCESSING STATE (ONLY IF NOT COMPLETED)
+     ===================================================== */
+
+  document.body.classList.add("processing-active");
+
+  const pct = Number(s.progress) || 0;
+
+  if (LAST_PROGRESS !== pct) {
+    progress.value = pct;
+    progress.style.opacity = "1";
+    LAST_PROGRESS = pct;
+  }
+
   document.body.classList.remove("progress-near", "progress-final");
+  if (pct >= 95) document.body.classList.add("progress-final");
+  else if (pct >= 80) document.body.classList.add("progress-near");
 
-  // STATUS
-  status.textContent = "Ready";
-  status.className = "status-ready";
+  if (LAST_STATUS !== s.status) {
+    status.textContent = "Processing";
+    LAST_STATUS = s.status;
+  }
 
-  // TIME (freeze forever)
-  stage.textContent = "(Just now)";
-
-  // HIDE progress bar cleanly
-  progress.value = 100;
-  progress.style.opacity = "0";
-  progress.style.height = "0";
-  progress.style.margin = "0";
-
-  // SHOW file summary ONLY NOW
-  const inputEl = document.getElementById("inputFilename");
-  const outputEl = document.getElementById("outputFilename");
-
-  inputEl.textContent = s.filename || "Uploaded file";
-  outputEl.textContent = "transcript.txt"; // ⛔ never show signed URL
-  fileSummary.style.display = "block";
-
-  // DOWNLOAD
-  downloadLink.dataset.url = s.output_path;
-  downloadBox.style.display = "block";
-
-  localStorage.removeItem("active_job_id");
-  toast("Ready ✨", "success");
-  loadJobs();
+  if (s.updated_at) {
+    stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
+  }
 }
+
 
 
 
@@ -666,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  
+
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
     downloadLink.addEventListener("click", (e) => {
