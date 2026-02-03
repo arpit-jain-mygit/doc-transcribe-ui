@@ -13,6 +13,9 @@ let LAST_PROGRESS = null;
 let LAST_STATUS = null;
 let LAST_STAGE = null;
 
+let JOB_COMPLETED = false;
+
+
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
@@ -396,6 +399,8 @@ requestAnimationFrame(() => {
   downloadBox.style.display = "none";
 
   pollStatus();
+  JOB_COMPLETED = false;
+
   startPolling();
 }
 
@@ -404,6 +409,9 @@ requestAnimationFrame(() => {
 let JOB_TERMINAL = false;
 
 async function pollStatus() {
+  // ⛔ HARD STOP — NOTHING runs after completion
+  if (JOB_COMPLETED) return;
+
   if (!JOB_ID || typeof JOB_ID !== "string") return;
 
   let res;
@@ -431,41 +439,37 @@ async function pollStatus() {
 
   const s = await res.json();
 
-  /* ===============================
-     🔒 HARD COMPLETION GATE
-     =============================== */
+  console.log("POLL STATUS", s);
+
   const isCompleted =
     s.status === "COMPLETED" ||
     s.stage === "Completed" ||
     Boolean(s.output_path);
 
+  /* ===============================
+     ✅ COMPLETED — ONE WAY DOOR
+     =============================== */
   if (isCompleted) {
-    // ⛔ STOP EVERYTHING FIRST
-    stopPolling();
+    JOB_COMPLETED = true;          // 🔒 LOCK
+    stopPolling();                // ⛔ stop interval
     stopThoughtSlider();
     localStorage.removeItem("active_job_id");
 
-    // 🔐 LOCK UI INTO FINAL STATE
-    LAST_STATUS = "COMPLETED";
-    LAST_PROGRESS = 100;
-    LAST_STAGE = "COMPLETED";
-
-    // Status text
+    // Status
     status.textContent = "Ready";
     status.className = "status-ready";
 
-    // Time (static, no relative ticking)
-    if (s.updated_at) {
-      stage.textContent = "Just now";
-    }
+    // Time — static
+    stage.textContent = "Just now";
 
-    // Progress bar → fade out
+    // Progress — disappear forever
     progress.value = 100;
-    progress.style.opacity = "0";
-    progress.style.height = "0";
-    progress.style.margin = "0";
+    progress.style.display = "none";
 
-    // ✅ SHOW FILE INFO ONLY NOW
+    document.body.classList.remove("progress-near", "progress-final");
+    document.body.classList.add("processing-complete");
+
+    // File info — ONLY NOW
     const uploadedEl = document.getElementById("uploadedFile");
     const generatedEl = document.getElementById("generatedFile");
 
@@ -478,8 +482,6 @@ async function pollStatus() {
       downloadBox.style.display = "block";
     }
 
-    document.body.classList.add("processing-complete");
-
     toast("Ready ✨", "success");
     loadJobs();
 
@@ -491,25 +493,17 @@ async function pollStatus() {
      =============================== */
   const pct = Number(s.progress) || 0;
 
-  if (LAST_STATUS !== s.status) {
-    status.textContent = formatStatus(s.status);
-    LAST_STATUS = s.status;
-  }
+  status.textContent = formatStatus(s.status);
+  stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
 
-  if (LAST_STAGE !== s.updated_at) {
-    stage.textContent = `(${formatRelativeTime(s.updated_at)})`;
-    LAST_STAGE = s.updated_at;
-  }
-
-  if (LAST_PROGRESS !== pct) {
-    progress.value = pct;
-    LAST_PROGRESS = pct;
-  }
+  progress.style.display = "block";
+  progress.value = pct;
 
   document.body.classList.remove("progress-near", "progress-final");
   if (pct >= 95) document.body.classList.add("progress-final");
   else if (pct >= 80) document.body.classList.add("progress-near");
 }
+
 
 
 
