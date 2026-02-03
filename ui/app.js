@@ -413,8 +413,13 @@ async function upload(type, file) {
      =============================== */
 
   if (statusBox) {
-    statusBox.style.display = "block";
-    statusBox.classList.add("processing-focus");
+const anchor = document.getElementById("processingAnchor");
+if (anchor && statusBox) {
+  anchor.appendChild(statusBox);   // ✅ hard anchor
+}
+statusBox.style.display = "block";
+
+statusBox.classList.add("processing-focus");
   }
 
   document.body.classList.add("processing-active");

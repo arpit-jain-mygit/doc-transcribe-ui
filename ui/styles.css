@@ -198,7 +198,7 @@ button:disabled {
    =============================== */
 
 .processing-panel {
-  margin: 32px auto;
+  margin: 16px auto 24px; /* 👈 tighter, predictable */
   padding: 32px;
   max-width: 720px;
   border-radius: 16px;
@@ -594,13 +594,9 @@ body.processing-enter #appContent .card:not(.processing-panel) {
 
 
 .processing-focus {
-  transform: scale(1.03);
-  background: #ffffff;
-  /* force true white */
-  box-shadow:
-    0 28px 60px rgba(0, 0, 0, 0.22),
-    0 10px 28px rgba(0, 0, 0, 0.14);
+  position: relative;
 }
+
 
 
 .processing-focus h2 {
@@ -788,3 +784,7 @@ body.processing-active progress::-moz-progress-bar {
   line-height: 1;
 }
 
+
+#processingAnchor {
+  min-height: 1px; /* prevents jump */
+}
