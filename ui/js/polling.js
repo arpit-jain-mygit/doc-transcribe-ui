@@ -116,6 +116,11 @@ function updateProcessingUI(data) {
  * Job completed successfully
  */
 function handleJobCompleted(data) {
+  const processingFilename = document.getElementById("processingFilename");
+  if (processingFilename) {
+    processingFilename.textContent = "";
+  }
+
   // --------------------------------
   // STOP PROCESSING STATE FIRST
   // --------------------------------
@@ -185,6 +190,11 @@ function handleJobCompleted(data) {
  * Job failed
  */
 function handleJobFailed(data) {
+  const processingFilename = document.getElementById("processingFilename");
+  if (processingFilename) {
+    processingFilename.textContent = "";
+  }
+
   // 🔒 Stop thoughts immediately
   if (typeof stopThoughts === "function") {
     stopThoughts();

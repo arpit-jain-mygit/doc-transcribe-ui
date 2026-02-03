@@ -4,7 +4,8 @@
   text-decoration: none;
   font-weight: 500;
 
-  pointer-events: none;   /* 🔒 no mouse / touch */
+  pointer-events: none;
+  /* 🔒 no mouse / touch */
   cursor: default;
   user-select: text;
 }

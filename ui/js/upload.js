@@ -8,6 +8,7 @@ function uploadFrom(type, inputId) {
 }
 
 async function upload(type, file) {
+
   // 🚫 Block only if a job is ACTUALLY running
   if (JOB_ID && !window.JOB_COMPLETED) {
     toast("A job is already running", "info");
@@ -99,6 +100,11 @@ async function upload(type, file) {
   }
 
   document.body.classList.add("processing-active");
+  const processingFilename = document.getElementById("processingFilename");
+  if (processingFilename) {
+    processingFilename.textContent = LAST_UPLOADED_FILENAME || "";
+  }
+
 
   // Start thoughts slider
   if (typeof startThoughts === "function") {
