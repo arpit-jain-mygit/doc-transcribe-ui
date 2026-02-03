@@ -99,53 +99,58 @@ const AUTH_STORAGE_KEY = "doc_app_auth";
 
 /* 🔐 UI STATE HELPERS */
 function formatDate(value) {
-  if (typeof value !== "string") return "";
+  const d = parseBackendTime(value);
+  if (!d) return "";
 
-  // 🔒 Force UTC interpretation
-  const utcValue = value.endsWith("Z") ? value : value + "Z";
-  const date = new Date(utcValue);
-
-  if (isNaN(date.getTime())) return "";
-
-  return (
-    date.toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
-    }) + " IST"
-  );
+  return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }) + " IST";
 }
 
+
+
+function parseBackendTime(value) {
+  if (!value || typeof value !== "string") return null;
+
+  // If backend forgot timezone, FORCE UTC
+  if (!value.endsWith("Z") && !value.includes("+")) {
+    value = value + "Z";
+  }
+
+  const d = new Date(value);
+  return isNaN(d) ? null : d;
+}
 
 function formatRelativeTime(value) {
-  if (!value) return "";
+  const past = parseBackendTime(value);
+  if (!past) return "";
 
-  const past = new Date(value);
-  if (isNaN(past)) return "";
+  const now = new Date();
+  let diffMs = now - past;
 
-  const now = new Date(); // ✅ local now (already IST on your system)
-  const diffMs = now - past;
+  if (diffMs < 0) diffMs = 0;
 
-  if (diffMs < 0) return "Just now"; // clock skew safety
+  const sec = Math.floor(diffMs / 1000);
+  if (sec < 30) return "Just now";
+  if (sec < 60) return `${sec}s ago`;
 
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 30) return "Just now";
-  if (diffSec < 60) return `${diffSec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} min ago`;
 
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
 
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr} hr ago`;
-
-  const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+  const day = Math.floor(hr / 24);
+  return `${day} day${day > 1 ? "s" : ""} ago`;
 }
+
 
 
 
