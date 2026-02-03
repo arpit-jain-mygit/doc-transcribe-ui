@@ -139,3 +139,10 @@ progress::-moz-progress-bar {
   color: #1f2937;
   word-break: break-all;
 }
+/* Completion status */
+#completionStatus {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a; /* success green */
+}

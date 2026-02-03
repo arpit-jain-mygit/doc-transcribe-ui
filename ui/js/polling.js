@@ -118,6 +118,16 @@ function handleJobCompleted(data) {
     stopThoughts();
   }
 
+  const completionStatus = document.getElementById("completionStatus");
+if (completionStatus) {
+  completionStatus.style.display = "block";
+}
+
+const downloadBox = document.getElementById("downloadBox");
+if (downloadBox) {
+  downloadBox.style.display = "block";
+}
+
   stopPolling();
 
   window.POLLING_ACTIVE = false;
