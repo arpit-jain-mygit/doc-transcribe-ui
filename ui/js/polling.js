@@ -146,6 +146,8 @@ function updateProcessingUI(data) {
  * Job completed successfully
  */
 function handleJobCompleted(data) {
+  console.log("DOWNLOAD URL =>", data.download_url);
+
   // --------------------------------
   // STOP PROCESSING UI IMMEDIATELY
   // --------------------------------
