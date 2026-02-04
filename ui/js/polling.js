@@ -15,10 +15,21 @@ function startPolling() {
 
   window.POLLING_ACTIVE = true;
 
+  // ✅ ENTER processing mode IMMEDIATELY
+  document.body.classList.add("processing-active");
+
+  // Reset progress state safely
+  const progressEl = document.getElementById("progress");
+  if (progressEl) {
+    progressEl.max = 100;
+    progressEl.value = 0;
+  }
+
   // Poll immediately, then on interval
   pollStatus();
   POLL_INTERVAL = setInterval(pollStatus, 3000);
 }
+
 
 /**
  * Stop polling safely
