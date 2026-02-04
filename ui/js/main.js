@@ -23,5 +23,20 @@ document.addEventListener("click", e => {
 
 });
 
+// ---------------------------------------------
+// WARN USER ON REFRESH / TAB CLOSE DURING PROCESSING
+// ---------------------------------------------
+window.addEventListener("beforeunload", (e) => {
+  if (window.POLLING_ACTIVE) {
+    e.preventDefault();
+
+    // Required for Chrome / Edge / Firefox
+    e.returnValue =
+      "Processing is still in progress. If you leave or refresh, the task may be interrupted.";
+
+    return e.returnValue;
+  }
+});
+
 
 waitForGoogleAndRender();
