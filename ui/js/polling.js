@@ -10,25 +10,34 @@ let POLL_INTERVAL = null;
 function startPolling() {
   if (!JOB_ID) return;
 
-  // Prevent duplicate intervals
   stopPolling();
-
   window.POLLING_ACTIVE = true;
 
-  // ✅ ENTER processing mode IMMEDIATELY
+  // ✅ FORCE SHOW processing section (THIS WAS MISSING)
+  const processingSection =
+    document.getElementById("processingSection") ||
+    document.getElementById("processingContainer") ||
+    document.getElementById("processingPanel");
+
+  if (processingSection) {
+    processingSection.style.display = "block";
+  }
+
+  // ✅ Enter processing mode
   document.body.classList.add("processing-active");
 
-  // Reset progress state safely
+  // ✅ Reset progress deterministically
   const progressEl = document.getElementById("progress");
   if (progressEl) {
     progressEl.max = 100;
     progressEl.value = 0;
   }
 
-  // Poll immediately, then on interval
+  // Start polling
   pollStatus();
   POLL_INTERVAL = setInterval(pollStatus, 3000);
 }
+
 
 
 /**
