@@ -91,6 +91,12 @@ body:not(.processing-active) progress {
   display: none;
 }
 
+/* Safety: always show during polling */
+body.processing-active progress {
+  display: block;
+}
+
+
 /* ===============================
    ANIMATION
    =============================== */

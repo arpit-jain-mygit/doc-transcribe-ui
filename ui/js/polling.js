@@ -99,21 +99,29 @@ function updateProcessingUI(data) {
   }
 
   if (
-    progressEl &&
-    typeof data.progress === "number" &&
-    !Number.isNaN(data.progress)
-  ) {
-    const target = Math.max(0, Math.min(100, data.progress));
+  progressEl &&
+  typeof data.progress === "number" &&
+  !Number.isNaN(data.progress)
+) {
+  const target = Math.max(0, Math.min(100, data.progress));
 
-    // 🔧 Smooth jump (visual only)
-    const smoothValue = Math.max(lastProgress, target);
-    lastProgress = smoothValue;
+  // 🔧 Smooth jump (visual only)
+  const smoothValue = Math.max(lastProgress, target);
+  lastProgress = smoothValue;
 
-    progressEl.value = smoothValue;
+  // ✅ REQUIRED for determinate progress bar
+  progressEl.max = 100;
+  progressEl.value = smoothValue;
 
-    // Set state attribute for CSS
-    progressEl.setAttribute("data-progress", smoothValue);
+  // ✅ ENSURE progress bar is visible while running
+  if (smoothValue < 100) {
+    document.body.classList.add("processing-active");
   }
+
+  // Optional: data attribute for debugging / CSS hooks
+  progressEl.setAttribute("data-progress", smoothValue);
+}
+
 }
 
 
@@ -135,14 +143,14 @@ function handleJobCompleted(data) {
   }
 
   const completionStatus = document.getElementById("completionStatus");
-if (completionStatus) {
-  completionStatus.style.display = "block";
-}
+  if (completionStatus) {
+    completionStatus.style.display = "block";
+  }
 
-const downloadBox = document.getElementById("downloadBox");
-if (downloadBox) {
-  downloadBox.style.display = "block";
-}
+  const downloadBox = document.getElementById("downloadBox");
+  if (downloadBox) {
+    downloadBox.style.display = "block";
+  }
 
   stopPolling();
 
