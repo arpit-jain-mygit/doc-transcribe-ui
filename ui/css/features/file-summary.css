@@ -6,8 +6,13 @@
 }
 
 .file-download {
+  cursor: pointer;
+  font-weight: 600;
   display: inline-flex;
+  align-items: center;
   gap: 6px;
-  color: var(--success);
-  font-weight: 700;
+}
+
+.file-download:visited {
+  color: #16a34a;
 }
