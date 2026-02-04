@@ -109,3 +109,15 @@ body.processing-active progress {
     background-position: -200% 0;
   }
 }
+
+.file-download {
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.file-download:visited {
+  color: #16a34a;
+}

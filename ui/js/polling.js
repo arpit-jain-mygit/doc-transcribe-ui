@@ -217,19 +217,21 @@ function handleJobCompleted(data) {
     }
 
     if (link) {
+      // ✅ Native browser download
+      link.href = data.download_url;
+      link.setAttribute("download", "transcript.txt");
+
+      // ✅ Ensure link is visible & clickable
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
-      link.removeAttribute("href");
+      link.style.color = "#16a34a"; // green
+      link.style.textDecoration = "underline";
 
-      link.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // ✅ Let browser handle cross-origin download
-        window.open(data.download_url, "_blank", "noopener,noreferrer");
-      };
+      // ✅ IMPORTANT: remove any old JS handlers
+      link.onclick = null;
     }
   }
+
 
 
 
