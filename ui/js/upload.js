@@ -37,6 +37,57 @@ async function upload(type, file) {
   JOB_ID = null;
   LAST_UPLOADED_FILENAME = file.name;
 
+  // ===============================
+  // ✅ ENTER PROCESSING MODE (IMMEDIATE)
+  // ===============================
+
+  // Defensive: ensure no leftover thoughts
+  if (typeof stopThoughts === "function") {
+    stopThoughts();
+  }
+
+  setUIBusy(true);
+
+  const statusBox = document.getElementById("statusBox");
+  const anchor = document.getElementById("processingAnchor");
+  const downloadBox = document.getElementById("downloadBox");
+
+  if (statusBox) {
+    if (anchor) anchor.appendChild(statusBox);
+    statusBox.style.display = "block";
+    statusBox.classList.add("processing-focus");
+  }
+
+  if (downloadBox) {
+    downloadBox.style.display = "none";
+  }
+
+  // Ensure file info is hidden at job start
+  const fileInfo = document.getElementById("fileInfo");
+  if (fileInfo) {
+    fileInfo.style.display = "none";
+  }
+
+  document.body.classList.add("processing-active");
+
+  const header = document.getElementById("processingHeader");
+  if (header) {
+    header.textContent = `PROCESSING ${LAST_UPLOADED_FILENAME}`;
+  }
+
+  const processingFilename = document.getElementById("processingFilename");
+  if (processingFilename) {
+    processingFilename.textContent = LAST_UPLOADED_FILENAME || "";
+  }
+
+  // Start thoughts slider immediately
+  if (typeof startThoughts === "function") {
+    startThoughts();
+  }
+
+  // ===============================
+  // BACKEND UPLOAD (ASYNC)
+  // ===============================
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
@@ -69,60 +120,12 @@ async function upload(type, file) {
   localStorage.setItem("active_job_id", JOB_ID);
 
   // ===============================
-  // ✅ ENTER PROCESSING MODE (FORCED)
-  // ===============================
-
-  // Defensive: ensure no leftover thoughts
-  if (typeof stopThoughts === "function") {
-    stopThoughts();
-  }
-
-  setUIBusy(true);
-
-
-  const statusBox = document.getElementById("statusBox");
-  const anchor = document.getElementById("processingAnchor");
-  const downloadBox = document.getElementById("downloadBox");
-
-  if (statusBox) {
-    if (anchor) anchor.appendChild(statusBox);
-    statusBox.style.display = "block";
-    statusBox.classList.add("processing-focus");
-  }
-
-  if (downloadBox) {
-    downloadBox.style.display = "none";
-  }
-  // Ensure file info is hidden at job start
-  const fileInfo = document.getElementById("fileInfo");
-  if (fileInfo) {
-    fileInfo.style.display = "none";
-  }
-
-  document.body.classList.add("processing-active");
-  const header = document.getElementById("processingHeader");
-  if (header) {
-    header.textContent = `PROCESSING ${LAST_UPLOADED_FILENAME}`;
-  }
-
-  const processingFilename = document.getElementById("processingFilename");
-  if (processingFilename) {
-    processingFilename.textContent = LAST_UPLOADED_FILENAME || "";
-  }
-
-
-  // Start thoughts slider
-  if (typeof startThoughts === "function") {
-    startThoughts();
-  }
-
-
-  // ===============================
   // START POLLING
   // ===============================
   pollStatus();
   startPolling();
 }
+
 
 
 function forceDownload(url, filename) {
