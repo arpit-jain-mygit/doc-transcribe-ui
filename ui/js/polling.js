@@ -116,38 +116,27 @@ function updateProcessingUI(data) {
   const statusEl = document.getElementById("status");
   const progressEl = document.getElementById("progress");
 
-  if (statusEl && data.stage) {
-    statusEl.textContent = data.stage;
-  }
+  // 🔑 Normalize backend progress (may arrive as string)
+  const rawProgress = Number(data.progress);
 
-  if (
-  progressEl &&
-  typeof data.progress === "number" &&
-  !Number.isNaN(data.progress)
-) {
-  const target = Math.max(0, Math.min(100, data.progress));
+  if (progressEl && Number.isFinite(rawProgress)) {
+    const target = Math.max(0, Math.min(100, rawProgress));
 
-  // 🔧 Smooth jump (visual only)
-  const smoothValue = Math.max(lastProgress, target);
-  lastProgress = smoothValue;
+    // Smooth forward-only movement
+    const smoothValue = Math.max(lastProgress, target);
+    lastProgress = smoothValue;
 
-  // ✅ REQUIRED for determinate progress bar
-  progressEl.max = 100;
-  progressEl.value = smoothValue;
+    progressEl.max = 100;
+    progressEl.value = smoothValue;
 
-  // ✅ ENSURE progress bar is visible while running
-  if (smoothValue < 100) {
+    // Keep processings
     document.body.classList.add("processing-active");
+
+    progressEl.setAttribute("data-progress", smoothValue);
   }
 
-  // Optional: data attribute for debugging / CSS hooks
-  progressEl.setAttribute("data-progress", smoothValue);
-}
 
 }
-
-
-
 
 /* =========================================================
    COMPLETION / FAILURE HANDLERS
