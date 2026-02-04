@@ -5,15 +5,29 @@
 /* Ensure processing panel creates a stacking context */
 .processing-panel {
   position: relative;
-  overflow: visible; /* 🔑 allow close button to float outside */;
+  overflow: visible;
+
+  padding: 20px;
+  padding-top: 32px;
+  /* ⬅ extra room for ❌ */
+  margin: 16px 0;
+  /* ⬅ space above & below section */
 }
+
+/* Vertical rhythm inside processing panel */
+.processing-panel > :not(.processing-close) + :not(.processing-close) {
+  margin-top: 12px;
+}
+
 
 /* Close button stays ABOVE card, not over progress bar */
 .processing-close {
   position: absolute;
-  top: -16px;
-  right: -16px;   /* ✅ force right side always */
-  left: auto;     /* ❌ prevent accidental left anchoring */
+  top: 12px;
+  /* ⬅ inside card */
+  right: 12px;
+  /* ⬅ inside card */
+  left: auto;
 
   width: 40px;
   height: 40px;
@@ -34,7 +48,6 @@
 
   z-index: 10;
 }
-
 
 
 .processing-close:hover {
@@ -76,7 +89,7 @@
   animation: pulse 1.8s ease-out infinite;
 }
 
-.processing-panel.processing-focus h2 + #status {
+.processing-panel.processing-focus h2+#status {
   display: none;
 }
 
