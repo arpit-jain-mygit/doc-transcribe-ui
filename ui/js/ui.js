@@ -54,27 +54,44 @@ function getDownloadBox() {
   return document.getElementById("downloadBox");
 }
 
-function setupDownload(url, filename) {
+function setupDownload(downloadUrl, filename) {
   const link = document.getElementById("downloadLink");
-  if (!link || !url) return;
+  if (!link || !downloadUrl) return;
 
-  // ✅ Make it a real download link
-  link.href = url;
-  link.setAttribute("download", filename || "");
-
-  // ✅ Ensure link is clickable
+  // Make link look enabled
   link.style.pointerEvents = "auto";
   link.style.opacity = "1";
+  link.href = "javascript:void(0)";
 
-  // ✅ Fallback for browsers / auth-protected URLs
-  link.onclick = (e) => {
+  link.onclick = async (e) => {
+    e.preventDefault();
     e.stopPropagation();
 
-    // If browser can navigate normally, allow it
-    if (link.href && link.href !== "#") return;
+    try {
+      const res = await fetch(downloadUrl, {
+        headers: {
+          Authorization: "Bearer " + ID_TOKEN
+        }
+      });
 
-    // Otherwise force download
-    e.preventDefault();
-    window.open(url, "_blank");
+      if (!res.ok) {
+        throw new Error("Download failed: " + res.status);
+      }
+
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename || "download";
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download error", err);
+      toast("Download failed. Please try again.", "error");
+    }
   };
 }
