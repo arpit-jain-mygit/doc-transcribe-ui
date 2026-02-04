@@ -38,5 +38,30 @@ window.addEventListener("beforeunload", (e) => {
   }
 });
 
+// ---------------------------------------------
+// HIDE PROCESSING PANEL (CLOSE BUTTON)
+// ---------------------------------------------
+window.hideProcessing = function () {
+  // Stop polling if active
+  if (typeof stopPolling === "function") {
+    stopPolling();
+  }
+
+  window.POLLING_ACTIVE = false;
+
+  // Hide processing UI
+  const statusBox = document.getElementById("statusBox");
+  if (statusBox) {
+    statusBox.style.display = "none";
+  }
+
+  document.body.classList.remove("processing-active");
+
+  // Optional: stop thoughts animation
+  if (typeof stopThoughts === "function") {
+    stopThoughts();
+  }
+};
+
 
 waitForGoogleAndRender();
