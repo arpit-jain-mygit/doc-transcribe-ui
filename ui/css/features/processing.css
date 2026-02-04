@@ -180,3 +180,52 @@ progress::-moz-progress-bar {
   color: #16a34a;
   /* success green */
 }
+
+/* ===============================
+   COMPLETION CARD
+   =============================== */
+
+.completion-panel {
+  margin: 16px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.completion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.completion-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.completion-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.completion-files {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.completion-files div + div {
+  margin-top: 6px;
+}
+
+.completion-download a {
+  color: #16a34a;
+  font-weight: 600;
+  text-decoration: underline;
+}

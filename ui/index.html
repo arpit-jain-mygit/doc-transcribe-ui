@@ -120,28 +120,43 @@
         <div id="thoughtBox" class="thought-box">
           <div id="thoughtText" class="thought-text"></div>
         </div>
-        <div id="completionStatus" style="display:none;">
-          <strong>Completed</strong>
-        </div>
+      
 
-        <div id="fileInfo" style="display:none; margin-top:16px;">
-          <div>
-            <strong>Uploaded:</strong>
-            <span id="uploadedFile"></span>
-          </div>
-          <div style="margin-top:6px;">
-            <strong>Generated:</strong>
-            <a href="#" id="generatedFile" class="history-download"></a>
-          </div>
-        </div>
+    
 
-        <div id="downloadBox" style="display:none; margin-top:12px;">
-          <a id="downloadLink" href="#" class="file-download">
-            ⬇ Download
-          </a>
-        </div>
+     
 
       </div>
+
+      <!-- ========================= -->
+<!-- COMPLETION CARD -->
+<!-- ========================= -->
+<div id="completionCard" class="completion-panel" style="display:none;">
+
+  <div class="completion-header">
+    <span class="completion-dot"></span>
+    <span class="completion-text">Completed</span>
+  </div>
+
+  <div class="completion-files">
+    <div>
+      <strong>Uploaded:</strong>
+      <span id="uploadedFile"></span>
+    </div>
+    <div>
+      <strong>Generated:</strong>
+      <a href="#" id="generatedFile" class="history-download"></a>
+    </div>
+  </div>
+
+  <div class="completion-download">
+    <a id="downloadLink" href="#" class="history-download">
+      ⬇ Download
+    </a>
+  </div>
+
+</div>
+
 
       <!-- ========================= -->
       <!-- HISTORY -->

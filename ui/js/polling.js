@@ -155,41 +155,32 @@ function handleJobCompleted(data) {
     stopThoughts();
   }
 
-  const completionStatus = document.getElementById("completionStatus");
-  if (completionStatus) {
-    completionStatus.style.display = "block";
-  }
-
-  const downloadBox = document.getElementById("downloadBox");
-  if (downloadBox) {
-    downloadBox.style.display = "block";
-  }
-
   stopPolling();
 
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
-  // Exit processing mode FIRST (hides progress bar)
+  // --------------------------------
+  // HIDE PROCESSING CARD
+  // --------------------------------
   document.body.classList.remove("processing-active");
 
-  // --------------------------------
-  // CLEAR PROCESSING HEADER
-  // --------------------------------
-  const header = document.getElementById("processingHeader");
-  if (header) {
-    header.textContent = "";
-  }
-
-  const statusEl = document.getElementById("status");
-  if (statusEl) {
-    statusEl.textContent = "";
+  const statusBox = document.getElementById("statusBox");
+  if (statusBox) {
+    statusBox.style.display = "none";
   }
 
   // --------------------------------
-  // SHOW FILE INFO (POST-COMPLETION ONLY)
+  // SHOW COMPLETION CARD
   // --------------------------------
-  const fileInfo = document.getElementById("fileInfo");
+  const completionCard = document.getElementById("completionCard");
+  if (completionCard) {
+    completionCard.style.display = "block";
+  }
+
+  // --------------------------------
+  // POPULATE FILE INFO
+  // --------------------------------
   const uploadedFile = document.getElementById("uploadedFile");
   const generatedFile = document.getElementById("generatedFile");
 
@@ -201,41 +192,20 @@ function handleJobCompleted(data) {
     generatedFile.textContent = "transcript.txt";
   }
 
-  if (fileInfo) {
-    fileInfo.style.display = "block";
-  }
-
-  // --------------------------------
-  // ENABLE DOWNLOAD (FINAL, BROWSER-NATIVE)
-  // --------------------------------
-  // --------------------------------
-  // ENABLE DOWNLOAD (FORCED LOCAL DOWNLOAD)
-  // --------------------------------
   // --------------------------------
   // ENABLE DOWNLOAD (REUSE HISTORY LOGIC)
   // --------------------------------
   if (data.download_url) {
-    const downloadBox = document.getElementById("downloadBox");
     const link = document.getElementById("downloadLink");
 
-    if (downloadBox) {
-      downloadBox.style.display = "block";
-    }
-
     if (link) {
-      // Match history downloads exactly
       link.href = "#";
       link.classList.add("history-download");
-
-      // ✅ URL for forceDownload
       link.dataset.url = data.download_url;
-
-      // ✅ Explicit filename (fixes undefined.txt)
       link.dataset.filename = "transcript.txt";
 
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
-
     }
   }
 
@@ -250,11 +220,11 @@ function handleJobCompleted(data) {
   // --------------------------------
   toast("Processing completed", "success");
 
-  // Refresh history safely
   if (typeof loadJobs === "function") {
     loadJobs();
   }
 }
+
 
 
 /**
