@@ -208,6 +208,9 @@ function handleJobCompleted(data) {
   // --------------------------------
   // ENABLE DOWNLOAD (FINAL, BROWSER-NATIVE)
   // --------------------------------
+  // --------------------------------
+  // ENABLE DOWNLOAD (FORCED LOCAL DOWNLOAD)
+  // --------------------------------
   if (data.download_url) {
     const downloadBox = document.getElementById("downloadBox");
     const link = document.getElementById("downloadLink");
@@ -217,20 +220,19 @@ function handleJobCompleted(data) {
     }
 
     if (link) {
-      // ✅ Native browser download
       link.href = data.download_url;
       link.setAttribute("download", "transcript.txt");
 
-      // ✅ Ensure link is visible & clickable
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
-      link.style.color = "#16a34a"; // green
+      link.style.color = "#16a34a";
       link.style.textDecoration = "underline";
 
-      // ✅ IMPORTANT: remove any old JS handlers
+      // Let browser handle it natively
       link.onclick = null;
     }
   }
+
 
 
 
