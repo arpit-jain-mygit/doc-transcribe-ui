@@ -73,27 +73,30 @@
 }
 
 /* Title */
-.processing-panel h2 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2937;
-
+.processing-panel h2,
+.completion-header,
+.completion-download a {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  line-height: 1.2;
 }
 
 /* Activity dot */
 .processing-panel h2::before {
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
+  margin-top: 1px; /* micro optical alignment */
   animation: pulse 1.8s ease-out infinite;
 }
 
 .completion-dot {
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
+  margin-top: 1px; /* micro optical alignment */
 }
 
 
@@ -191,12 +194,6 @@ progress::-moz-progress-bar {
    COMPLETION CARD
    =============================== */
 
-.completion-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
 
 .completion-text {
   font-size: 16px;
@@ -214,11 +211,6 @@ progress::-moz-progress-bar {
   margin-top: 6px;
 }
 
-.completion-download a {
-  color: #16a34a;
-  font-weight: 600;
-  text-decoration: underline;
-}
 
 #processingAnchor {
   margin: 24px 0;
