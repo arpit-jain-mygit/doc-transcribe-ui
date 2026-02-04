@@ -78,5 +78,3 @@ function setupDownload(url, filename) {
     window.open(url, "_blank");
   };
 }
-
-
