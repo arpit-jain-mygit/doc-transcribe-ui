@@ -228,3 +228,8 @@ progress::-moz-progress-bar {
   border-radius: 14px;
   background: #fafafa;
 }
+
+/* Vertical rhythm inside completion card */
+.completion-panel > * + * {
+  margin-top: 12px;
+}
