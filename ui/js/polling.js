@@ -204,23 +204,31 @@ function handleJobCompleted(data) {
   }
 
   // --------------------------------
-  // ENABLE DOWNLOAD
+  // ENABLE DOWNLOAD (FINAL, BROWSER-NATIVE)
   // --------------------------------
   if (data.download_url) {
-    setupDownload(data.download_url, "transcript.txt");
-
     const downloadBox = document.getElementById("downloadBox");
+    const link = document.getElementById("downloadLink");
+
     if (downloadBox) {
       downloadBox.style.display = "block";
     }
 
-    // ✅ Defensive: ensure link is active
-    const link = document.getElementById("downloadLink");
     if (link) {
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
+      link.removeAttribute("href");
+
+      link.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // ✅ Let browser handle cross-origin download
+        window.open(data.download_url, "_blank", "noopener,noreferrer");
+      };
     }
   }
+
 
 
   // --------------------------------
