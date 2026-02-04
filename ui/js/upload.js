@@ -55,6 +55,16 @@ async function upload(type, file) {
   if (statusBox) {
     if (anchor) anchor.appendChild(statusBox);
     statusBox.style.display = "block";
+
+    // Enable processing close button
+    const closeBtn = document.querySelector(".processing-close");
+    if (closeBtn) {
+      closeBtn.disabled = false;
+      closeBtn.style.pointerEvents = "auto";
+      closeBtn.style.opacity = "1";
+    }
+
+
     statusBox.classList.add("processing-focus");
   }
 
@@ -130,8 +140,8 @@ async function upload(type, file) {
 
 function forceDownload(url, filename) {
   if (!filename) {
-  throw new Error("forceDownload called without filename");
-}
+    throw new Error("forceDownload called without filename");
+  }
 
   try {
     fetch(url)

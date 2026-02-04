@@ -14,26 +14,38 @@
 /* Close button */
 .processing-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
 
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
 
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border: 1px solid #e5e7eb;
   background: #ffffff;
 
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1;
   color: #9ca3af;
+
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .processing-close:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #374151;
 }
+
+.processing-close:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 
 /* Title */
 .processing-panel h2 {
@@ -131,6 +143,7 @@ progress::-moz-progress-bar {
   color: #6b7280;
   word-break: break-all;
 }
+
 /* Primary processing header */
 #processingHeader {
   margin: 0 0 4px;
@@ -139,10 +152,12 @@ progress::-moz-progress-bar {
   color: #1f2937;
   word-break: break-all;
 }
+
 /* Completion status */
 #completionStatus {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 700;
-  color: #16a34a; /* success green */
+  color: #16a34a;
+  /* success green */
 }
