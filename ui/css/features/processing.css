@@ -229,3 +229,12 @@ progress::-moz-progress-bar {
   font-weight: 600;
   text-decoration: underline;
 }
+
+#processingAnchor {
+  margin: 24px 0;
+  padding: 8px;
+
+  /* subtle grouping, not a card */
+  border-radius: 14px;
+  background: #fafafa;
+}
