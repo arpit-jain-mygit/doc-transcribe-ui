@@ -111,6 +111,8 @@ async function pollStatus() {
 let lastProgress = 0;
 
 function updateProcessingUI(data) {
+  console.log("RAW progress value:", data.progress, "typeof:", typeof data.progress);
+
   const statusEl = document.getElementById("status");
   const progressEl = document.getElementById("progress");
 
