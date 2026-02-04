@@ -213,7 +213,15 @@ function handleJobCompleted(data) {
     if (downloadBox) {
       downloadBox.style.display = "block";
     }
+
+    // ✅ Defensive: ensure link is active
+    const link = document.getElementById("downloadLink");
+    if (link) {
+      link.style.pointerEvents = "auto";
+      link.style.opacity = "1";
+    }
   }
+
 
   // --------------------------------
   // CLEANUP JOB STATE

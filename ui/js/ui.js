@@ -54,16 +54,28 @@ function getDownloadBox() {
   return document.getElementById("downloadBox");
 }
 
-function setupDownload(downloadUrl, filename = "transcript.txt") {
-  const downloadLink = document.getElementById("downloadLink");
+function setupDownload(url, filename) {
+  const link = document.getElementById("downloadLink");
+  if (!link || !url) return;
 
-  if (!downloadUrl) {
-    downloadLink.onclick = null;
-    return;
-  }
+  // ✅ Make it a real download link
+  link.href = url;
+  link.setAttribute("download", filename || "");
 
-  downloadLink.onclick = (e) => {
+  // ✅ Ensure link is clickable
+  link.style.pointerEvents = "auto";
+  link.style.opacity = "1";
+
+  // ✅ Fallback for browsers / auth-protected URLs
+  link.onclick = (e) => {
+    e.stopPropagation();
+
+    // If browser can navigate normally, allow it
+    if (link.href && link.href !== "#") return;
+
+    // Otherwise force download
     e.preventDefault();
-    forceDownload(downloadUrl, filename);
+    window.open(url, "_blank");
   };
 }
+
