@@ -2,17 +2,23 @@
    PROCESSING PANEL — CLEAN & PROFESSIONAL
    ================================================= */
 
-/* Ensure processing panel creates a stacking context */
-.processing-panel {
-  position: relative;
-  overflow: visible;
+/* ===============================
+   PROCESSING CARD (MATCH COMPLETION)
+   =============================== */
+
+.processing-panel, .completion-panel  {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
 
   padding: 20px;
-  padding-top: 32px;
-  /* ⬅ extra room for ❌ */
+  padding-top: 32px; /* space for ❌ */
+
   margin: 16px 0;
-  /* ⬅ space above & below section */
+
+  position: relative;
 }
+
 
 /* Vertical rhythm inside processing panel */
 .processing-panel > :not(.processing-close) + :not(.processing-close) {
@@ -80,18 +86,18 @@
 
 /* Activity dot */
 .processing-panel h2::before {
-  content: "";
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   animation: pulse 1.8s ease-out infinite;
 }
 
-.processing-panel.processing-focus h2+#status {
-  display: none;
+.completion-dot {
+  width: 8px;
+  height: 8px;
 }
+
+
+
 
 /* Secondary status line */
 #status {
@@ -185,27 +191,11 @@ progress::-moz-progress-bar {
    COMPLETION CARD
    =============================== */
 
-.completion-panel {
-  margin: 16px 0;
-  padding: 20px;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-}
-
 .completion-header {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
-}
-
-.completion-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
 .completion-text {
