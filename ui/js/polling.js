@@ -216,6 +216,14 @@ function handleJobCompleted(data) {
   localStorage.removeItem("active_job_id");
 
   // --------------------------------
+// RE-ENABLE UPLOAD UI
+// --------------------------------
+if (typeof setUIBusy === "function") {
+  setUIBusy(false);
+}
+
+
+  // --------------------------------
   // USER FEEDBACK
   // --------------------------------
   toast("Processing completed", "success");
