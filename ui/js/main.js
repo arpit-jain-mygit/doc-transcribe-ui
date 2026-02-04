@@ -10,7 +10,18 @@ document.addEventListener("click", e => {
   const link = e.target.closest(".history-download");
   if (!link) return;
   e.preventDefault();
-  forceDownload(link.dataset.url);
+
+  if (!link.dataset.filename) {
+    console.warn("Missing filename for download", link.dataset.url);
+    return;
+  }
+
+  forceDownload(
+    link.dataset.url,
+    link.dataset.filename
+  );
+
 });
+
 
 waitForGoogleAndRender();

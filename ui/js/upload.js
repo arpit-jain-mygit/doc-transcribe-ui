@@ -125,24 +125,25 @@ async function upload(type, file) {
 }
 
 
-async function forceDownload(url, filename) {
+function forceDownload(url, filename) {
+  if (!filename) {
+  throw new Error("forceDownload called without filename");
+}
+
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Download failed");
-
-    const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = objectUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-
-    document.body.removeChild(a);
-    URL.revokeObjectURL(objectUrl);
-  } catch (err) {
-    toast("Download failed", "error");
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+  } catch (e) {
+    console.error("forceDownload failed", e);
   }
 }
+
 
