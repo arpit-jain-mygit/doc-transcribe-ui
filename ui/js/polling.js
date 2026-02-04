@@ -226,17 +226,18 @@ function handleJobCompleted(data) {
       // Match history downloads exactly
       link.href = "#";
       link.classList.add("history-download");
+
+      // ✅ URL for forceDownload
       link.dataset.url = data.download_url;
+
+      // ✅ Explicit filename (fixes undefined.txt)
+      link.dataset.filename = "transcript.txt";
 
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
+
     }
   }
-
-
-
-
-
 
   // --------------------------------
   // CLEANUP JOB STATE
@@ -254,9 +255,6 @@ function handleJobCompleted(data) {
     loadJobs();
   }
 }
-
-
-
 
 
 /**
