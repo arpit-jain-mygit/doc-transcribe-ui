@@ -211,6 +211,9 @@ function handleJobCompleted(data) {
   // --------------------------------
   // ENABLE DOWNLOAD (FORCED LOCAL DOWNLOAD)
   // --------------------------------
+  // --------------------------------
+  // ENABLE DOWNLOAD (REUSE HISTORY LOGIC)
+  // --------------------------------
   if (data.download_url) {
     const downloadBox = document.getElementById("downloadBox");
     const link = document.getElementById("downloadLink");
@@ -220,18 +223,16 @@ function handleJobCompleted(data) {
     }
 
     if (link) {
-      link.href = data.download_url;
-      link.setAttribute("download", "transcript.txt");
+      // Match history downloads exactly
+      link.href = "#";
+      link.classList.add("history-download");
+      link.dataset.url = data.download_url;
 
       link.style.pointerEvents = "auto";
       link.style.opacity = "1";
-      link.style.color = "#16a34a";
-      link.style.textDecoration = "underline";
-
-      // Let browser handle it natively
-      link.onclick = null;
     }
   }
+
 
 
 
