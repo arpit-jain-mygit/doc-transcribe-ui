@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("partials:loaded", () => {
   stopPolling();
 
   // Default UI state

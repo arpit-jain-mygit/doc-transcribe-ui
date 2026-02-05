@@ -18,14 +18,26 @@ function setUIBusy(isBusy) {
 }
 
 function showLoggedInUI() {
-  userProfile.style.display = "flex";
-  authBox.style.display = "none";
+  const userProfile = document.getElementById("userProfile");
+  const authBox = document.getElementById("authBox");
+  const userEmail = document.getElementById("userEmail");
+  const userAvatar = document.getElementById("userAvatar");
+
+  if (authBox) authBox.style.display = "none";
+  if (userProfile) userProfile.style.display = "flex";
+
+  if (userEmail) userEmail.textContent = user.email || "";
+  if (userAvatar) userAvatar.src = user.picture || "";
 }
 
 function showLoggedOutUI() {
-  userProfile.style.display = "none";
-  authBox.style.display = "flex";
+  const userProfile = document.getElementById("userProfile");
+  const authBox = document.getElementById("authBox");
+
+  if (userProfile) userProfile.style.display = "none";
+  if (authBox) authBox.style.display = "block";
 }
+
 
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
