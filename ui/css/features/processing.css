@@ -21,10 +21,12 @@
 /* -------------------------------
    VERTICAL RHYTHM
 -------------------------------- */
-.processing-panel > :not(.processing-close) + :not(.processing-close),
-.completion-panel > * + * {
+.processing-panel > 
+  :not(.processing-close):not(.processing-hint) + 
+  :not(.processing-close):not(.processing-hint) {
   margin-top: 12px;
 }
+
 
 /* -------------------------------
    CLOSE BUTTON
@@ -217,9 +219,17 @@ progress::-moz-progress-bar {
 }
 
 /* Processing polite hint */
+/* Polite patience message */
 .processing-hint {
-  margin-top: 12px;
+  margin: 4px 0 10px;   /* ⬅ tight but breathable */
+  padding: 0;
+
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.45;   /* ⬅ fixes “tight fight” */
   color: #6b7280;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
