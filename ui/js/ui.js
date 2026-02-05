@@ -1,3 +1,6 @@
+let UI_BUSY = false;
+let IS_PENDING = false;
+
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
@@ -14,7 +17,6 @@ function setUIBusy(isBusy) {
     z.classList.toggle("disabled", isBusy);
   });
 }
-
 
 function showLoggedInUI() {
   userProfile.style.display = "flex";
@@ -50,15 +52,15 @@ function hidePending() {
 function getStatusBox() {
   return document.getElementById("statusBox");
 }
+
 function getDownloadBox() {
-  return document.getElementById("downloadBox");
+  return document.getElementById("completionCard");
 }
 
 function setupDownload(downloadUrl, filename) {
   const link = document.getElementById("downloadLink");
   if (!link || !downloadUrl) return;
 
-  // Make link look enabled
   link.style.pointerEvents = "auto";
   link.style.opacity = "1";
   link.href = "javascript:void(0)";
@@ -69,29 +71,34 @@ function setupDownload(downloadUrl, filename) {
 
     try {
       const res = await fetch(downloadUrl, {
-        headers: {
-          Authorization: "Bearer " + ID_TOKEN
-        }
+        headers: { Authorization: "Bearer " + ID_TOKEN }
       });
 
-      if (!res.ok) {
-        throw new Error("Download failed: " + res.status);
-      }
+      if (!res.ok) throw new Error("Download failed");
 
       const blob = await res.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
-      a.href = blobUrl;
+      a.href = url;
       a.download = filename || "download";
       document.body.appendChild(a);
       a.click();
-
       a.remove();
-      window.URL.revokeObjectURL(blobUrl);
+
+      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Download error", err);
+      console.error(err);
       toast("Download failed. Please try again.", "error");
     }
   };
 }
+
+// ================================
+// AUTH-ONLY UI TOGGLE (KEY PIECE)
+// ================================
+window.toggleAuthOnly = function (isLoggedIn) {
+  const authOnly = document.getElementById("authOnly");
+  if (!authOnly) return;
+  authOnly.style.display = isLoggedIn ? "block" : "none";
+};

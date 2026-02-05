@@ -22,7 +22,9 @@
     <!-- ========================= -->
     <div id="appContent">
 
-      <!-- HEADER -->
+      <!-- ========================= -->
+      <!-- HEADER (ALWAYS VISIBLE) -->
+      <!-- ========================= -->
       <div class="top-bar">
         <h1>श्रुत एवं जिनवाणी संरक्षण</h1>
 
@@ -42,147 +44,150 @@
           <div id="authBox" class="signin-box">
             <div id="google-signin-btn"></div>
           </div>
+
         </div>
       </div>
 
-      <!-- INTRO -->
+      <!-- ========================= -->
+      <!-- INTRO (ALWAYS VISIBLE) -->
+      <!-- ========================= -->
       <div id="appIntro">
         🪔📜 इस ऐप के माध्यम से आप जैन प्रवचन, स्तुतियां या प्राचीन ग्रंथों का
         शुद्ध एवं सटीक अनुवाद हिंदी, संस्कृत एवं प्राकृत भाषाओँ में कर सकते हैं।
       </div>
 
-      <!-- PENDING APPROVAL -->
-      <div id="approvalBanner" style="display:none;">
-        ⏳ Your account is pending approval. Uploads are disabled until approval.
-      </div>
+      <!-- ================================================= -->
+      <!-- AUTHENTICATED CONTENT ONLY -->
+      <!-- ================================================= -->
+      <div id="authOnly" style="display:none;">
 
-      <!-- ========================= -->
-      <!-- UPLOAD GRID -->
-      <!-- ========================= -->
-      <div class="upload-grid">
+        <!-- PENDING APPROVAL -->
+        <div id="approvalBanner" style="display:none;">
+          ⏳ Your account is pending approval. Uploads are disabled until approval.
+        </div>
 
-        <!-- OCR -->
-        <div class="card">
-          <h2>PDF to Hindi Text</h2>
-          <div class="upload-row">
-            <div class="drop-zone" id="ocrDrop">
-              <input type="file" id="ocrFile" accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" hidden />
-              <span class="label">Drag PDF / Image or click</span>
-              <span class="filename" id="ocrFilename"></span>
+        <!-- ========================= -->
+        <!-- UPLOAD GRID -->
+        <!-- ========================= -->
+        <div class="upload-grid">
+
+          <!-- OCR -->
+          <div class="card">
+            <h2>PDF to Hindi Text</h2>
+            <div class="upload-row">
+              <div class="drop-zone" id="ocrDrop">
+                <input type="file" id="ocrFile"
+                  accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" hidden />
+                <span class="label">Drag PDF / Image or click</span>
+                <span class="filename" id="ocrFilename"></span>
+              </div>
+              <button class="btn-primary"
+                onclick="uploadFrom('OCR','ocrFile')">
+                Convert
+              </button>
             </div>
-            <button class="btn-primary" onclick="uploadFrom('OCR','ocrFile')">
-              Convert
-            </button>
+            <div class="hint">Supported: PDF, Images</div>
           </div>
-          <div class="hint">Supported: PDF, Images</div>
-        </div>
 
-        <!-- TRANSCRIPTION -->
-        <div class="card">
-          <h2>Video / Audio to Hindi Text</h2>
-          <div class="upload-row">
-            <div class="drop-zone" id="transcribeDrop">
-              <input type="file" id="transcribeFile" accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" hidden />
-              <span class="label">Drag audio/video or click</span>
-              <span class="filename" id="transcribeFilename"></span>
+          <!-- TRANSCRIPTION -->
+          <div class="card">
+            <h2>Video / Audio to Hindi Text</h2>
+            <div class="upload-row">
+              <div class="drop-zone" id="transcribeDrop">
+                <input type="file" id="transcribeFile"
+                  accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" hidden />
+                <span class="label">Drag audio/video or click</span>
+                <span class="filename" id="transcribeFilename"></span>
+              </div>
+              <button class="btn-primary"
+                onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
+                Convert
+              </button>
             </div>
-            <button class="btn-primary" onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
-              Convert
-            </button>
-          </div>
-          <div class="hint">
-            Supported: MP3, WAV, M4A, MP4, MOV, WEBM
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ========================= -->
-      <!-- PROCESSING ANCHOR -->
-      <!-- ========================= -->
-      <div id="processingAnchor"></div>
-
-      <!-- ========================= -->
-      <!-- PROCESSING PANEL -->
-      <!-- ========================= -->
-      <div id="statusBox" class="processing-panel" style="display:none;">
-        <div id="processingHint" class="processing-hint" style="display:none;">
-          🙏 आपके धैर्य के लिए धन्यवाद — 20 मिनट की ऑडियो/वीडियो सामग्री का रूपांतरण लगभग 2–3 मिनट ले सकता है। 🙏
-        </div>
-
-        <button class="processing-close" onclick="hideProcessing()">✕</button>
-
-        <h2 id="processingHeader"></h2>
-        <div id="status"></div>
-
-
-        <div id="stage"></div>
-
-        <progress id="progress" value="0" max="100"></progress>
-
-        <div id="thoughtBox" class="thought-box">
-          <div id="thoughtText" class="thought-text"></div>
-        </div>
-
-
-
-
-
-
-      </div>
-
-      <!-- ========================= -->
-      <!-- COMPLETION CARD -->
-      <!-- ========================= -->
-      <div id="completionCard" class="completion-panel" style="display:none;">
-
-        <div class="completion-header">
-          <span class="completion-dot"></span>
-          <span class="completion-text">Completed</span>
-        </div>
-
-        <div class="completion-files">
-          <div class="file-info-row">
-            <span>Uploaded:</span>
-            <span id="uploadedFile" class="file-info-name"></span>
+            <div class="hint">
+              Supported: MP3, WAV, M4A, MP4, MOV, WEBM
+            </div>
           </div>
 
-          <div class="file-info-row">
-            <span>Generated:</span>
-            <span id="generatedFile" class="file-info-name"></span>
+        </div>
+
+        <!-- ========================= -->
+        <!-- PROCESSING ANCHOR -->
+        <!-- ========================= -->
+        <div id="processingAnchor"></div>
+
+        <!-- ========================= -->
+        <!-- PROCESSING PANEL -->
+        <!-- ========================= -->
+        <div id="statusBox" class="processing-panel" style="display:none;">
+          <div id="processingHint" class="processing-hint" style="display:none;">
+            🙏 आपके धैर्य के लिए धन्यवाद —
+            20 मिनट की ऑडियो/वीडियो सामग्री का रूपांतरण
+            लगभग 2–3 मिनट ले सकता है।
+          </div>
+
+          <button class="processing-close" onclick="hideProcessing()">✕</button>
+
+          <h2 id="processingHeader"></h2>
+          <div id="status"></div>
+          <div id="stage"></div>
+
+          <progress id="progress" value="0" max="100"></progress>
+
+          <div id="thoughtBox" class="thought-box">
+            <div id="thoughtText" class="thought-text"></div>
           </div>
         </div>
 
+        <!-- ========================= -->
+        <!-- COMPLETION CARD -->
+        <!-- ========================= -->
+        <div id="completionCard" class="completion-panel" style="display:none;">
 
-        <div class="completion-download">
-          <a id="downloadLink" href="#" class="history-download">
-            ⬇ Download
-          </a>
+          <div class="completion-header">
+            <span class="completion-dot"></span>
+            <span class="completion-text">Completed</span>
+          </div>
+
+          <div class="completion-files">
+            <div class="file-info-row">
+              <span>Uploaded:</span>
+              <span id="uploadedFile" class="file-info-name"></span>
+            </div>
+
+            <div class="file-info-row">
+              <span>Generated:</span>
+              <span id="generatedFile" class="file-info-name"></span>
+            </div>
+          </div>
+
+          <div class="completion-download">
+            <a id="downloadLink" href="#" class="history-download">
+              ⬇ Download
+            </a>
+          </div>
         </div>
 
-      </div>
-
-
-      <!-- ========================= -->
-      <!-- HISTORY -->
-      <!-- ========================= -->
-      <div class="card">
-        <div class="top-bar" style="margin-bottom:12px;">
-          <h2>Old converted files history</h2>
-          <button onclick="loadJobs()">🔄 Refresh</button>
+        <!-- ========================= -->
+        <!-- HISTORY -->
+        <!-- ========================= -->
+        <div class="card">
+          <div class="top-bar" style="margin-bottom:12px;">
+            <h2>Old converted files history</h2>
+            <button onclick="loadJobs()">🔄 Refresh</button>
+          </div>
+          <div id="jobs"></div>
         </div>
-        <div id="jobs"></div>
-      </div>
 
-    </div>
-    <!-- END appContent -->
+      </div><!-- END authOnly -->
+
+    </div><!-- END appContent -->
 
   </div>
 
   <!-- ========================= -->
   <!-- SCRIPTS -->
   <!-- ========================= -->
-
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script src="js/config.js"></script>
@@ -198,5 +203,4 @@
   <script src="js/main.js"></script>
 
 </body>
-
 </html>
