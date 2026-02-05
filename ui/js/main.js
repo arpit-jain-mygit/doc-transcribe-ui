@@ -1,27 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   stopPolling();
-  restoreSession();
+
+  // Always start in logged-out visual state
+  showLoggedOutUI();
+  toggleAuthOnly(false);
+
+  const restored = restoreSession();
+
+  // If session was NOT restored, render Google Sign-in
+  if (!restored) {
+    waitForGoogleAndRender();
+  }
 
   attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
   attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
 });
 
-document.addEventListener("click", e => {
-  const link = e.target.closest(".history-download");
-  if (!link) return;
-  e.preventDefault();
-
-  if (!link.dataset.filename) {
-    console.warn("Missing filename for download", link.dataset.url);
-    return;
-  }
-
-  forceDownload(
-    link.dataset.url,
-    link.dataset.filename
-  );
-
-});
 
 // ---------------------------------------------
 // WARN USER ON REFRESH / TAB CLOSE DURING PROCESSING
