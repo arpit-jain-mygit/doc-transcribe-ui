@@ -1,19 +1,39 @@
 
+let googleButtonRendered = false;
+
 function renderGoogleButton() {
-  showLoggedOutUI();
-  toggleAuthOnly(false);
+  if (googleButtonRendered) return;
+
+  if (
+    !window.google ||
+    !google.accounts ||
+    !google.accounts.id
+  ) {
+    console.warn("Google Identity not loaded yet");
+    return;
+  }
+
+  const btn = document.getElementById("google-signin-btn");
+
+  if (!btn) {
+    console.warn("Google Sign-In container not found");
+    return;
+  }
 
   google.accounts.id.initialize({
-    client_id: "320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com",
-    callback: onGoogleSignIn,
-    auto_select: false
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleCredentialResponse
   });
 
-  google.accounts.id.renderButton(
-  document.getElementById("google-signin-btn"),
-  { theme: "outline", size: "large" }
-);
+  google.accounts.id.renderButton(btn, {
+    theme: "outline",
+    size: "large",
+    type: "standard"
+  });
+
+  googleButtonRendered = true;
 }
+
 
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
@@ -21,7 +41,7 @@ function onGoogleSignIn(resp) {
   let payload = {};
   try {
     payload = JSON.parse(atob(resp.credential.split(".")[1]));
-  } catch {}
+  } catch { }
 
   USER_EMAIL = payload.email || "";
 
@@ -59,7 +79,10 @@ function logout() {
   toast("Logged out", "info");
 
   SESSION_RESTORED = false;
-  renderGoogleButton();
+  document.addEventListener("partials:loaded", () => {
+    renderGoogleButton();
+  });
+
 }
 
 function restoreSession() {
@@ -108,8 +131,8 @@ function waitForGoogleAndRender() {
 
   if (window.google?.accounts?.id) {
     document.addEventListener("partials:loaded", () => {
-  renderGoogleButton();
-});
+      renderGoogleButton();
+    });
 
   } else {
     setTimeout(waitForGoogleAndRender, 50);
