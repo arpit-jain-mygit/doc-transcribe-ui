@@ -1,6 +1,8 @@
 {
-  "outputDirectory": ".",
   "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": ".",
   "routes": [
     {
       "src": "/(.*\\.(html|js|css|png|jpg|svg|ico|json|txt|woff|woff2))",
