@@ -1,0 +1,88 @@
+/* =================================================
+   HERO & LANDING EXPERIENCE
+   ================================================= */
+
+.hero {
+  text-align: center;
+  padding: 48px 16px 32px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.hero-values {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 28px;
+}
+
+.hero-values span {
+  padding: 6px 12px;
+  background: #f9fafb;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+}
+
+.hero-cta {
+  display: flex;
+  justify-content: center;
+}
+
+/* ========================= */
+
+.how-it-works {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.how-step {
+  text-align: center;
+}
+
+.step-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.step-text strong {
+  display: block;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.step-text span {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ========================= */
+
+.trust-note {
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+  margin: 24px auto 40px;
+  max-width: 720px;
+  padding: 0 16px;
+}
