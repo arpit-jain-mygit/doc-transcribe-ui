@@ -3,14 +3,20 @@
 // =====================================================
 
 document.addEventListener("partials:loaded", () => {
-  // Default UI state (logged out)
+  // Default UI state
   showLoggedOutUI();
 
-  // Try restoring session (if available)
-  if (typeof restoreSession === "function") {
-    restoreSession();
+  // Try restoring session
+  if (typeof restoreSession === "function" && restoreSession()) {
+    return; // session restored, no sign-in button needed
+  }
+
+  // No session → render Google Sign-In
+  if (typeof renderGoogleButton === "function") {
+    renderGoogleButton();
   }
 });
+
 
 // =====================================================
 // WARN USER ON REFRESH / TAB CLOSE DURING PROCESSING
