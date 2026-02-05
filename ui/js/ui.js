@@ -101,3 +101,29 @@ window.toggleAuthOnly = function (isLoggedIn) {
   if (!authOnly) return;
   authOnly.style.display = isLoggedIn ? "block" : "none";
 };
+
+function showCompletion(job) {
+  const card = document.getElementById("completionCard");
+  card.style.display = "block";
+
+  document.getElementById("sourceType").textContent =
+    job.source === "youtube" ? "YouTube URL" : "File";
+
+  if (job.source === "youtube") {
+    document.getElementById("uploadedFileRow").style.display = "none";
+    document.getElementById("uploadedUrlRow").style.display = "flex";
+    document.getElementById("uploadedUrl").href = job.url;
+    document.getElementById("uploadedUrl").textContent = job.url;
+  } else {
+    document.getElementById("uploadedFileRow").style.display = "flex";
+    document.getElementById("uploadedUrlRow").style.display = "none";
+    document.getElementById("uploadedFile").textContent =
+      job.input_file || "—";
+  }
+
+  document.getElementById("generatedFile").textContent =
+    job.output_file || "—";
+
+  document.getElementById("downloadLink").href =
+    job.download_url || "#";
+}

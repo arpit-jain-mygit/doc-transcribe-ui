@@ -165,3 +165,92 @@ function forceDownload(url, filename) {
 }
 
 
+function submitUrl(type) {
+  const input =
+    type === "OCR"
+      ? document.getElementById("ocrUrl")
+      : document.getElementById("transcribeUrl");
+
+  const url = input.value.trim();
+
+  if (!url) {
+    alert("Please enter a YouTube URL");
+    return;
+  }
+
+  console.log("URL submit:", {
+    mode: type,
+    source: "youtube",
+    url
+  });
+
+  // NEXT STEP:
+  // POST { mode, source: "youtube", url }
+}
+
+/**
+ * Handle YouTube URL submission (OCR / TRANSCRIPTION)
+ */
+function submitUrl(mode) {
+  const input =
+    mode === "OCR"
+      ? document.getElementById("ocrUrl")
+      : document.getElementById("transcribeUrl");
+
+  const url = input.value.trim();
+
+  if (!url) {
+    alert("Please enter a YouTube URL");
+    return;
+  }
+
+  if (!isValidYoutubeUrl(url)) {
+    alert("Please enter a valid YouTube URL");
+    return;
+  }
+
+  console.log("Submitting URL job:", {
+    mode,
+    source: "youtube",
+    url
+  });
+
+  // 🔒 TEMP: UI-only (API wiring later)
+  // This is where you will POST:
+  // { mode, source: "youtube", url }
+
+  showProcessing(mode);
+}
+
+/**
+ * Basic YouTube URL validation
+ */
+function isValidYoutubeUrl(url) {
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(url);
+}
+
+/**
+ * Show processing panel for URL jobs
+ */
+function showProcessing(mode) {
+  document.getElementById("processingHeader").textContent =
+    mode === "OCR"
+      ? "Processing YouTube (OCR)"
+      : "Processing YouTube (Transcription)";
+
+  document.getElementById("statusBox").style.display = "block";
+  document.getElementById("progress").value = 5;
+}
+
+function bindUrlDisabling() {
+  ["ocr", "transcribe"].forEach(prefix => {
+    const url = document.getElementById(`${prefix}Url`);
+    const file = document.getElementById(`${prefix}File`);
+
+    if (!url || !file) return;
+
+    url.addEventListener("input", () => {
+      file.disabled = url.value.trim().length > 0;
+    });
+  });
+}

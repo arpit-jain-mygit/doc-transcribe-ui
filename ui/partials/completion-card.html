@@ -1,0 +1,48 @@
+<div id="completionCard" class="completion-panel" style="display:none;">
+
+  <div class="completion-header">
+    <span class="completion-dot"></span>
+    <span class="completion-text">Completed</span>
+  </div>
+
+  <div class="completion-files">
+
+    <!-- SOURCE TYPE -->
+    <div class="file-info-row">
+      <span>Source:</span>
+      <span id="sourceType" class="file-info-name">File</span>
+    </div>
+
+    <!-- FILE UPLOAD (default) -->
+    <div class="file-info-row" id="uploadedFileRow">
+      <span>Uploaded:</span>
+      <span id="uploadedFile" class="file-info-name"></span>
+    </div>
+
+    <!-- YOUTUBE URL (hidden by default) -->
+    <div class="file-info-row" id="uploadedUrlRow" style="display:none;">
+      <span>YouTube:</span>
+      <a
+        id="uploadedUrl"
+        class="file-info-name"
+        href="#"
+        target="_blank"
+        rel="noopener"
+      ></a>
+    </div>
+
+    <!-- GENERATED OUTPUT -->
+    <div class="file-info-row">
+      <span>Generated:</span>
+      <span id="generatedFile" class="file-info-name"></span>
+    </div>
+
+  </div>
+
+  <div class="completion-download">
+    <a id="downloadLink" href="#" class="history-download">
+      ⬇ Download
+    </a>
+  </div>
+
+</div>

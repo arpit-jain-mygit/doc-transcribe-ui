@@ -39,3 +39,42 @@ async function loadJobs() {
     box.appendChild(div);
   });
 }
+
+function renderJob(job) {
+  const row = document.createElement("div");
+  row.className = "job-row";
+
+  const isYoutube = job.source === "youtube";
+
+  row.innerHTML = `
+    <div class="job-main">
+      <strong>${job.mode || "JOB"}</strong>
+      <span class="job-source">
+        ${isYoutube ? "🔗 YouTube" : "📄 File"}
+      </span>
+    </div>
+
+    <div class="job-meta">
+      ${
+        isYoutube
+          ? `<a href="${job.url}" target="_blank" rel="noopener">
+               ${job.url}
+             </a>`
+          : `<span>${job.input_file || "—"}</span>`
+      }
+    </div>
+
+    <div class="job-actions">
+      ${
+        job.output_file
+          ? `<a href="${job.download_url}" class="history-download">
+               ⬇ Download
+             </a>`
+          : `<span class="job-pending">Processing…</span>`
+      }
+    </div>
+  `;
+
+  return row;
+}
+

@@ -1,250 +1,38 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>श्रुत एवं जिनवाणी संरक्षण</title>
 
-  <!-- Modular CSS entry point -->
   <link rel="stylesheet" href="css/main.css" />
 </head>
 
 <body>
 
-  <!-- Toasts -->
   <div id="toasts"></div>
 
   <div class="container">
-
-    <!-- ========================= -->
-    <!-- APP CONTENT -->
-    <!-- ========================= -->
     <div id="appContent">
 
-      <!-- ========================= -->
-      <!-- HEADER (ALWAYS VISIBLE) -->
-      <!-- ========================= -->
-      <div class="top-bar">
-        <h1>श्रुत एवं जिनवाणी संरक्षण</h1>
+      <div data-include="partials/header.html"></div>
+      <div data-include="partials/hero.html"></div>
+      <div data-include="partials/how-it-works.html"></div>
+      <div data-include="partials/trust-note.html"></div>
 
-        <div class="user-column">
-
-          <!-- SIGNED IN -->
-          <div id="userProfile" class="user-profile" style="display:none;">
-            <img id="userAvatar" class="user-avatar" />
-            <div class="user-meta">
-              <div class="user-welcome">Welcome</div>
-              <div id="userEmail" class="user-email"></div>
-            </div>
-            <button class="logout-link" onclick="logout()">Sign out</button>
-          </div>
-
-          <!-- SIGNED OUT -->
-          <div id="authBox" class="signin-box">
-            <div id="google-signin-btn"></div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ========================= -->
-      <!-- HERO (VISIBLE BEFORE SIGN-IN) -->
-      <!-- ========================= -->
-      <section class="hero">
-
-        <h2 class="hero-title">
-          श्रुत एवं जिनवाणी संरक्षण
-        </h2>
-
-        <p class="hero-subtitle">
-          श्रुत को बिना परिवर्तन, शुद्धता और सम्मान के साथ
-          डिजिटल रूप में संरक्षित करने का प्रयास
-        </p>
-
-        <div class="hero-values">
-          <span>शब्दशः लिप्यंतरण</span>
-          <span>मूल अर्थ की रक्षा</span>
-          <span>परंपरा-संवेदी प्रक्रिया</span>
-        </div>
-
-        <div class="hero-cta">
-          <div id="google-signin-btn"></div>
-        </div>
-
-      </section>
-
-      <!-- ========================= -->
-      <!-- HOW IT WORKS -->
-      <!-- ========================= -->
-      <section class="how-it-works">
-
-        <div class="how-step">
-          <div class="step-icon">📤</div>
-          <div class="step-text">
-            <strong>Upload</strong>
-            <span>ऑडियो, वीडियो या PDF</span>
-          </div>
-        </div>
-
-        <div class="how-step">
-          <div class="step-icon">⚙️</div>
-          <div class="step-text">
-            <strong>Process</strong>
-            <span>बिना संशोधन, मूल रूप में</span>
-          </div>
-        </div>
-
-        <div class="how-step">
-          <div class="step-icon">📄</div>
-          <div class="step-text">
-            <strong>Download</strong>
-            <span>सुरक्षित टेक्स्ट आउटपुट</span>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ========================= -->
-      <!-- TRUST NOTE -->
-      <!-- ========================= -->
-      <div class="trust-note">
-        यह प्रणाली पाठ को “सुधारती” नहीं है —
-        केवल यथासंभव मूल स्वरूप में प्रस्तुत करती है।
-      </div>
-
-      <!-- ================================================= -->
-      <!-- AUTHENTICATED CONTENT ONLY -->
-      <!-- ================================================= -->
       <div id="authOnly" style="display:none;">
+        <div data-include="partials/upload-grid.html"></div>
+        <div data-include="partials/processing-panel.html"></div>
+        <div data-include="partials/completion-card.html"></div>
+        <div data-include="partials/history.html"></div>
+      </div>
 
-        <!-- PENDING APPROVAL -->
-        <div id="approvalBanner" style="display:none;">
-          ⏳ Your account is pending approval. Uploads are disabled until approval.
-        </div>
-
-        <!-- ========================= -->
-        <!-- UPLOAD GRID -->
-        <!-- ========================= -->
-        <div class="upload-grid">
-
-          <!-- OCR -->
-          <div class="card">
-            <h2>PDF to Hindi Text</h2>
-            <div class="upload-row">
-              <div class="drop-zone" id="ocrDrop">
-                <input type="file" id="ocrFile"
-                  accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp" hidden />
-                <span class="label">Drag PDF / Image or click</span>
-                <span class="filename" id="ocrFilename"></span>
-              </div>
-              <button class="btn-primary"
-                onclick="uploadFrom('OCR','ocrFile')">
-                Convert
-              </button>
-            </div>
-            <div class="hint">Supported: PDF, Images</div>
-          </div>
-
-          <!-- TRANSCRIPTION -->
-          <div class="card">
-            <h2>Video / Audio to Hindi Text</h2>
-            <div class="upload-row">
-              <div class="drop-zone" id="transcribeDrop">
-                <input type="file" id="transcribeFile"
-                  accept=".mp3,.wav,.m4a,.mp4,.mov,.webm" hidden />
-                <span class="label">Drag audio/video or click</span>
-                <span class="filename" id="transcribeFilename"></span>
-              </div>
-              <button class="btn-primary"
-                onclick="uploadFrom('TRANSCRIPTION','transcribeFile')">
-                Convert
-              </button>
-            </div>
-            <div class="hint">
-              Supported: MP3, WAV, M4A, MP4, MOV, WEBM
-            </div>
-          </div>
-
-        </div>
-
-        <!-- ========================= -->
-        <!-- PROCESSING ANCHOR -->
-        <!-- ========================= -->
-        <div id="processingAnchor"></div>
-
-        <!-- ========================= -->
-        <!-- PROCESSING PANEL -->
-        <!-- ========================= -->
-        <div id="statusBox" class="processing-panel" style="display:none;">
-          <div id="processingHint" class="processing-hint" style="display:none;">
-            🙏 आपके धैर्य के लिए धन्यवाद —
-            20 मिनट की ऑडियो/वीडियो सामग्री का रूपांतरण
-            लगभग 2–3 मिनट ले सकता है।
-          </div>
-
-          <button class="processing-close" onclick="hideProcessing()">✕</button>
-
-          <h2 id="processingHeader"></h2>
-          <div id="status"></div>
-          <div id="stage"></div>
-
-          <progress id="progress" value="0" max="100"></progress>
-
-          <div id="thoughtBox" class="thought-box">
-            <div id="thoughtText" class="thought-text"></div>
-          </div>
-        </div>
-
-        <!-- ========================= -->
-        <!-- COMPLETION CARD -->
-        <!-- ========================= -->
-        <div id="completionCard" class="completion-panel" style="display:none;">
-
-          <div class="completion-header">
-            <span class="completion-dot"></span>
-            <span class="completion-text">Completed</span>
-          </div>
-
-          <div class="completion-files">
-            <div class="file-info-row">
-              <span>Uploaded:</span>
-              <span id="uploadedFile" class="file-info-name"></span>
-            </div>
-
-            <div class="file-info-row">
-              <span>Generated:</span>
-              <span id="generatedFile" class="file-info-name"></span>
-            </div>
-          </div>
-
-          <div class="completion-download">
-            <a id="downloadLink" href="#" class="history-download">
-              ⬇ Download
-            </a>
-          </div>
-        </div>
-
-        <!-- ========================= -->
-        <!-- HISTORY -->
-        <!-- ========================= -->
-        <div class="card">
-          <div class="top-bar" style="margin-bottom:12px;">
-            <h2>Old converted files history</h2>
-            <button onclick="loadJobs()">🔄 Refresh</button>
-          </div>
-          <div id="jobs"></div>
-        </div>
-
-      </div><!-- END authOnly -->
-
-    </div><!-- END appContent -->
-
+    </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- SCRIPTS -->
-  <!-- ========================= -->
+  <!-- JS -->
+  <script src="js/include.js"></script>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script src="js/config.js"></script>
@@ -258,6 +46,10 @@
   <script src="js/dragdrop.js"></script>
   <script src="js/thoughts.js"></script>
   <script src="js/main.js"></script>
+
+  <script>
+    includeHTML();
+  </script>
 
 </body>
 </html>
