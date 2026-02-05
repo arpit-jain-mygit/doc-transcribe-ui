@@ -233,3 +233,25 @@ progress::-moz-progress-bar {
   gap: 6px;
 }
 
+/* File info rows */
+.file-info-row {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+
+  display: flex;
+  gap: 6px;
+}
+
+/* Filenames — uploaded & generated (same style) */
+.file-info-name {
+  font-weight: 600;
+  color: #111827;
+  word-break: break-all;
+}
+
+/* Generated filename should NOT look like a link */
+.file-info-name.generated {
+  text-decoration: none;
+  cursor: default;
+}
