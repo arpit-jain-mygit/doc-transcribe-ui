@@ -4,21 +4,40 @@ function attachDragDrop(zoneId, inputId, nameId) {
   const name = document.getElementById(nameId);
   if (!zone || !input) return;
 
-  zone.onclick = () => !zone.classList.contains("disabled") && input.click();
-  input.onchange = () => name && (name.textContent = input.files[0]?.name || "");
+  zone.onclick = () => {
+    if (!zone.classList.contains("disabled")) {
+      input.click();
+    }
+  };
 
-  zone.ondragover = e => {
+  input.onchange = () => {
+    if (name && input.files[0]) {
+      name.textContent = input.files[0].name;
+    }
+  };
+
+  zone.ondragover = (e) => {
     if (zone.classList.contains("disabled")) return;
     e.preventDefault();
     zone.classList.add("dragover");
   };
 
-  zone.ondragleave = () => zone.classList.remove("dragover");
+  zone.ondragleave = () => {
+    zone.classList.remove("dragover");
+  };
 
-  zone.ondrop = e => {
+  zone.ondrop = (e) => {
     e.preventDefault();
     zone.classList.remove("dragover");
-    input.files = e.dataTransfer.files;
+
+    if (zone.classList.contains("disabled")) return;
+
+    const dt = new DataTransfer();
+    for (const file of e.dataTransfer.files) {
+      dt.items.add(file);
+    }
+
+    input.files = dt.files;
     input.dispatchEvent(new Event("change"));
   };
 }

@@ -1,26 +1,21 @@
+// =====================================================
+// APP BOOTSTRAP (AFTER HTML PARTIALS ARE LOADED)
+// =====================================================
+
 document.addEventListener("partials:loaded", () => {
-  stopPolling();
-
-  // Default UI state
+  // Default UI state (logged out)
   showLoggedOutUI();
-  toggleAuthOnly(false);
 
-  const restored = restoreSession();
-
-  if (!restored) {
-    // 🔑 THIS IS THE FIX
-    renderGoogleButton();
+  // Try restoring session (if available)
+  if (typeof restoreSession === "function") {
+    restoreSession();
   }
-
-  attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
-  attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
 });
 
-
-
-// ---------------------------------------------
+// =====================================================
 // WARN USER ON REFRESH / TAB CLOSE DURING PROCESSING
-// ---------------------------------------------
+// =====================================================
+
 window.addEventListener("beforeunload", (e) => {
   if (window.POLLING_ACTIVE) {
     e.preventDefault();
@@ -33,9 +28,10 @@ window.addEventListener("beforeunload", (e) => {
   }
 });
 
-// ---------------------------------------------
+// =====================================================
 // HIDE PROCESSING PANEL (CLOSE BUTTON)
-// ---------------------------------------------
+// =====================================================
+
 window.hideProcessing = function () {
   // Stop polling safely (UI only)
   if (typeof stopPolling === "function") {
@@ -57,7 +53,7 @@ window.hideProcessing = function () {
     hint.style.display = "none";
   }
 
-  // Clear progress bar visually (safe)
+  // Clear progress bar visually
   const progress = document.getElementById("progress");
   if (progress) {
     progress.value = 0;
@@ -78,7 +74,3 @@ window.hideProcessing = function () {
   // Do NOT clear JOB_ID here.
   // Backend job continues safely.
 };
-
-
-
-waitForGoogleAndRender();

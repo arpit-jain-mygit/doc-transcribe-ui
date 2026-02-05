@@ -1,16 +1,13 @@
-
-
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
-  // ⚠️ DO NOT disable auth UI
-  document.querySelectorAll(
-    "button:not(.logout-link):not(#google-signin-btn button), input[type='file'], a.history-download"
-  ).forEach(el => {
-    el.disabled = isBusy;
-    el.style.pointerEvents = isBusy ? "none" : "auto";
-    el.style.opacity = isBusy ? "0.6" : "1";
-  });
+  document
+    .querySelectorAll("button:not(.logout-link), input[type='file'], a.history-download")
+    .forEach(el => {
+      el.disabled = isBusy;
+      el.style.pointerEvents = isBusy ? "none" : "auto";
+      el.style.opacity = isBusy ? "0.6" : "1";
+    });
 
   document.querySelectorAll(".drop-zone").forEach(z => {
     z.classList.toggle("disabled", isBusy);
@@ -26,8 +23,10 @@ function showLoggedInUI() {
   if (authBox) authBox.style.display = "none";
   if (userProfile) userProfile.style.display = "flex";
 
-  if (userEmail) userEmail.textContent = user.email || "";
-  if (userAvatar) userAvatar.src = user.picture || "";
+  if (userEmail) userEmail.textContent = USER_EMAIL || "";
+  if (userAvatar) {
+    userAvatar.src = "https://www.gravatar.com/avatar?d=mp";
+  }
 }
 
 function showLoggedOutUI() {
@@ -38,84 +37,48 @@ function showLoggedOutUI() {
   if (authBox) authBox.style.display = "block";
 }
 
-
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
+  if (!box) return;
+
   const div = document.createElement("div");
   div.className = `toast ${type}`;
   div.textContent = message;
   box.appendChild(div);
+
   setTimeout(() => div.remove(), 4000);
 }
 
 function showPending() {
   IS_PENDING = true;
-  approvalBanner.style.display = "block";
-  document.querySelectorAll(".drop-zone").forEach(z => z.classList.add("disabled"));
+  const banner = document.getElementById("approvalBanner");
+  if (banner) banner.style.display = "block";
+
+  document.querySelectorAll(".drop-zone")
+    .forEach(z => z.classList.add("disabled"));
 }
 
 function hidePending() {
   IS_PENDING = false;
-  approvalBanner.style.display = "none";
-  document.querySelectorAll(".drop-zone").forEach(z => z.classList.remove("disabled"));
+  const banner = document.getElementById("approvalBanner");
+  if (banner) banner.style.display = "none";
+
+  document.querySelectorAll(".drop-zone")
+    .forEach(z => z.classList.remove("disabled"));
 }
 
-function getStatusBox() {
-  return document.getElementById("statusBox");
-}
-
-function getDownloadBox() {
-  return document.getElementById("completionCard");
-}
-
-function setupDownload(downloadUrl, filename) {
-  const link = document.getElementById("downloadLink");
-  if (!link || !downloadUrl) return;
-
-  link.style.pointerEvents = "auto";
-  link.style.opacity = "1";
-  link.href = "javascript:void(0)";
-
-  link.onclick = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    try {
-      const res = await fetch(downloadUrl, {
-        headers: { Authorization: "Bearer " + ID_TOKEN }
-      });
-
-      if (!res.ok) throw new Error("Download failed");
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename || "download";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      toast("Download failed. Please try again.", "error");
-    }
-  };
-}
-
-// ================================
-// AUTH-ONLY UI TOGGLE (KEY PIECE)
-// ================================
+// AUTH-ONLY SECTION TOGGLE
 window.toggleAuthOnly = function (isLoggedIn) {
   const authOnly = document.getElementById("authOnly");
   if (!authOnly) return;
   authOnly.style.display = isLoggedIn ? "block" : "none";
 };
 
+// COMPLETION RENDER (FILE + YOUTUBE READY)
 function showCompletion(job) {
   const card = document.getElementById("completionCard");
+  if (!card) return;
+
   card.style.display = "block";
 
   document.getElementById("sourceType").textContent =
@@ -130,11 +93,11 @@ function showCompletion(job) {
     document.getElementById("uploadedFileRow").style.display = "flex";
     document.getElementById("uploadedUrlRow").style.display = "none";
     document.getElementById("uploadedFile").textContent =
-      job.input_file || "—";
+      job.input_file || "";
   }
 
   document.getElementById("generatedFile").textContent =
-    job.output_file || "—";
+    job.output_file || "";
 
   document.getElementById("downloadLink").href =
     job.download_url || "#";

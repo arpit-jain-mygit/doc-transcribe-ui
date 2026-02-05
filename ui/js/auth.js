@@ -1,39 +1,59 @@
+// =====================================================
+// AUTH STATE
+// =====================================================
 
 let googleButtonRendered = false;
+
+// These are assumed to already exist globally
+// let ID_TOKEN, USER_EMAIL, JOB_ID, SESSION_RESTORED;
+// const GOOGLE_CLIENT_ID, AUTH_STORAGE_KEY;
+
+// =====================================================
+// GOOGLE SIGN-IN RENDERING (SAFE + SINGLE ENTRY)
+// =====================================================
 
 function renderGoogleButton() {
   if (googleButtonRendered) return;
 
-  if (
-    !window.google ||
-    !google.accounts ||
-    !google.accounts.id
-  ) {
-    console.warn("Google Identity not loaded yet");
-    return;
-  }
-
   const btn = document.getElementById("google-signin-btn");
+  const authBox = document.getElementById("authBox");
 
-  if (!btn) {
+  if (!btn || !authBox) {
     console.warn("Google Sign-In container not found");
     return;
   }
 
+  if (!window.google?.accounts?.id) {
+    console.warn("Google Identity not ready");
+    return;
+  }
+
+  // Google requires visible parent
+  authBox.style.display = "block";
+
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
-    callback: handleCredentialResponse
+    callback: onGoogleSignIn
   });
 
   google.accounts.id.renderButton(btn, {
     theme: "outline",
-    size: "large",
-    type: "standard"
+    size: "large"
   });
 
   googleButtonRendered = true;
 }
 
+// 🔑 SINGLE, AUTHORITATIVE BOOTSTRAP POINT
+document.addEventListener("partials:loaded", () => {
+  if (!SESSION_RESTORED) {
+    renderGoogleButton();
+  }
+});
+
+// =====================================================
+// GOOGLE SIGN-IN CALLBACK
+// =====================================================
 
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
@@ -41,18 +61,26 @@ function onGoogleSignIn(resp) {
   let payload = {};
   try {
     payload = JSON.parse(atob(resp.credential.split(".")[1]));
-  } catch { }
+  } catch {}
 
   USER_EMAIL = payload.email || "";
 
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
-    token: ID_TOKEN,
-    email: USER_EMAIL,
-    picture: payload.picture || null
-  }));
+  localStorage.setItem(
+    AUTH_STORAGE_KEY,
+    JSON.stringify({
+      token: ID_TOKEN,
+      email: USER_EMAIL,
+      picture: payload.picture || null
+    })
+  );
 
-  userEmail.innerText = USER_EMAIL;
-  userAvatar.src = payload.picture || "https://www.gravatar.com/avatar?d=mp";
+  const userEmailEl = document.getElementById("userEmail");
+  const userAvatarEl = document.getElementById("userAvatar");
+
+  if (userEmailEl) userEmailEl.innerText = USER_EMAIL;
+  if (userAvatarEl)
+    userAvatarEl.src =
+      payload.picture || "https://www.gravatar.com/avatar?d=mp";
 
   showLoggedInUI();
   toggleAuthOnly(true);
@@ -62,8 +90,14 @@ function onGoogleSignIn(resp) {
   loadJobs();
 }
 
+// =====================================================
+// LOGOUT
+// =====================================================
+
 function logout() {
-  stopPolling();
+  if (typeof stopPolling === "function") {
+    stopPolling();
+  }
 
   ID_TOKEN = null;
   USER_EMAIL = null;
@@ -79,11 +113,11 @@ function logout() {
   toast("Logged out", "info");
 
   SESSION_RESTORED = false;
-  document.addEventListener("partials:loaded", () => {
-    renderGoogleButton();
-  });
-
 }
+
+// =====================================================
+// SESSION RESTORE
+// =====================================================
 
 function restoreSession() {
   const saved = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -102,8 +136,13 @@ function restoreSession() {
     ID_TOKEN = token;
     USER_EMAIL = email;
 
-    userEmail.innerText = email;
-    userAvatar.src = picture || "https://www.gravatar.com/avatar?d=mp";
+    const userEmailEl = document.getElementById("userEmail");
+    const userAvatarEl = document.getElementById("userAvatar");
+
+    if (userEmailEl) userEmailEl.innerText = email;
+    if (userAvatarEl)
+      userAvatarEl.src =
+        picture || "https://www.gravatar.com/avatar?d=mp";
 
     SESSION_RESTORED = true;
 
@@ -115,7 +154,6 @@ function restoreSession() {
     if (job) {
       JOB_ID = job;
       document.body.classList.add("processing-active");
-      getStatusBox()?.classList.add("processing-focus");
       startPolling();
     }
 
@@ -123,18 +161,5 @@ function restoreSession() {
   } catch {
     toggleAuthOnly(false);
     return false;
-  }
-}
-
-function waitForGoogleAndRender() {
-  if (SESSION_RESTORED) return;
-
-  if (window.google?.accounts?.id) {
-    document.addEventListener("partials:loaded", () => {
-      renderGoogleButton();
-    });
-
-  } else {
-    setTimeout(waitForGoogleAndRender, 50);
   }
 }

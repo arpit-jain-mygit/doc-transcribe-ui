@@ -1,48 +1,32 @@
 /* =========================================================
-   POLLING — SINGLE SOURCE OF TRUTH
+   POLLING — SINGLE SOURCE OF TRUTH (FINAL)
    ========================================================= */
 
 let POLL_INTERVAL = null;
+let lastProgress = 0;
 
-/**
- * Start polling job status
- */
 function startPolling() {
   if (!JOB_ID) return;
 
   stopPolling();
   window.POLLING_ACTIVE = true;
 
-  // ✅ FORCE SHOW processing section (THIS WAS MISSING)
-  const processingSection =
-    document.getElementById("processingSection") ||
-    document.getElementById("processingContainer") ||
-    document.getElementById("processingPanel");
+  const statusBox = document.getElementById("statusBox");
+  if (statusBox) statusBox.style.display = "block";
 
-  if (processingSection) {
-    processingSection.style.display = "block";
-  }
-
-  // ✅ Enter processing mode
   document.body.classList.add("processing-active");
 
-  // ✅ Reset progress deterministically
+  lastProgress = 0;
   const progressEl = document.getElementById("progress");
   if (progressEl) {
     progressEl.max = 100;
     progressEl.value = 0;
   }
 
-  // Start polling
   pollStatus();
   POLL_INTERVAL = setInterval(pollStatus, 3000);
 }
 
-
-
-/**
- * Stop polling safely
- */
 function stopPolling() {
   if (POLL_INTERVAL) {
     clearInterval(POLL_INTERVAL);
@@ -50,21 +34,15 @@ function stopPolling() {
   }
 }
 
-/**
- * Poll backend for job status
- */
 async function pollStatus() {
   if (!JOB_ID || !ID_TOKEN) return;
 
   let res;
   try {
     res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: {
-        Authorization: "Bearer " + ID_TOKEN
-      }
+      headers: { Authorization: "Bearer " + ID_TOKEN }
     });
-  } catch (err) {
-    console.error("Polling network error", err);
+  } catch {
     return;
   }
 
@@ -73,224 +51,76 @@ async function pollStatus() {
     return;
   }
 
-  if (!res.ok) {
-    console.error("Polling failed", res.status);
-    return;
-  }
+  if (!res.ok) return;
 
   const data = await res.json();
-
-  /*
-    Expected backend payload (example):
-    {
-      status: "RUNNING" | "COMPLETED" | "FAILED",
-      stage: "Transcribing audio",
-      progress: 42,
-      download_url: "https://..."
-    }
-  */
 
   updateProcessingUI(data);
 
   if (data.status === "COMPLETED") {
     handleJobCompleted(data);
-  }
-
-  if (data.status === "FAILED") {
+  } else if (data.status === "FAILED") {
     handleJobFailed(data);
   }
 }
 
-/* =========================================================
-   UI UPDATE HELPERS
-   ========================================================= */
-
-/**
- * Update status text, stage, progress bar
- */
-let lastProgress = 0;
-
 function updateProcessingUI(data) {
-  console.log("RAW progress value:", data.progress, "typeof:", typeof data.progress);
-
-  const statusEl = document.getElementById("status");
   const progressEl = document.getElementById("progress");
+  const stageEl = document.getElementById("stage");
 
-  // 🔑 Normalize backend progress (may arrive as string)
-  const rawProgress = Number(data.progress);
-
-  if (progressEl && Number.isFinite(rawProgress)) {
-    const target = Math.max(0, Math.min(100, rawProgress));
-
-    // Smooth forward-only movement
-    const smoothValue = Math.max(lastProgress, target);
-    lastProgress = smoothValue;
-
-    progressEl.max = 100;
-    progressEl.value = smoothValue;
-
-    // Keep processings
-    document.body.classList.add("processing-active");
-
-    progressEl.setAttribute("data-progress", smoothValue);
+  const raw = Number(data.progress);
+  if (progressEl && Number.isFinite(raw)) {
+    const target = Math.max(0, Math.min(100, raw));
+    lastProgress = Math.max(lastProgress, target);
+    progressEl.value = lastProgress;
   }
 
-
+  if (stageEl && data.stage) {
+    stageEl.textContent = data.stage;
+  }
 }
 
-/* =========================================================
-   COMPLETION / FAILURE HANDLERS
-   ========================================================= */
-
-/**
- * Job completed successfully
- */
 function handleJobCompleted(data) {
-  console.log("DOWNLOAD URL =>", data.download_url);
-
-  const hint = document.getElementById("processingHint");
-  if (hint) {
-    hint.style.display = "none";
-  }
-
-  // --------------------------------
-  // STOP PROCESSING UI IMMEDIATELY
-  // --------------------------------
-  if (typeof stopThoughts === "function") {
-    stopThoughts();
-  }
+  if (typeof stopThoughts === "function") stopThoughts();
 
   stopPolling();
-
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
-  // --------------------------------
-  // HIDE PROCESSING CARD
-  // --------------------------------
   document.body.classList.remove("processing-active");
 
   const statusBox = document.getElementById("statusBox");
-  if (statusBox) {
-    statusBox.style.display = "none";
-  }
+  if (statusBox) statusBox.style.display = "none";
 
-  // --------------------------------
-  // SHOW COMPLETION CARD
-  // --------------------------------
-  const completionCard = document.getElementById("completionCard");
-  if (completionCard) {
-    completionCard.style.display = "block";
-  }
-
-  // --------------------------------
-  // POPULATE FILE INFO
-  // --------------------------------
-  const uploadedFile = document.getElementById("uploadedFile");
-  const generatedFile = document.getElementById("generatedFile");
-
-  if (uploadedFile) {
-    uploadedFile.textContent = LAST_UPLOADED_FILENAME || "";
-  }
-
-  if (generatedFile) {
-    generatedFile.textContent = "transcript.txt";
-  }
-
-  // --------------------------------
-  // ENABLE DOWNLOAD (REUSE HISTORY LOGIC)
-  // --------------------------------
-  if (data.download_url) {
-    const link = document.getElementById("downloadLink");
-
-    if (link) {
-      link.href = "#";
-      link.classList.add("history-download");
-      link.dataset.url = data.download_url;
-      link.dataset.filename = "transcript.txt";
-
-      link.style.pointerEvents = "auto";
-      link.style.opacity = "1";
-    }
-  }
-
-  // --------------------------------
-  // CLEANUP JOB STATE
-  // --------------------------------
   JOB_ID = null;
   localStorage.removeItem("active_job_id");
 
-  // --------------------------------
-  // RE-ENABLE UPLOAD UI
-  // --------------------------------
-  if (typeof setUIBusy === "function") {
-    setUIBusy(false);
-  }
+  if (typeof setUIBusy === "function") setUIBusy(false);
+  if (typeof showCompletion === "function") showCompletion(data);
 
-
-  // --------------------------------
-  // USER FEEDBACK
-  // --------------------------------
   toast("Processing completed", "success");
-
-  if (typeof loadJobs === "function") {
-    loadJobs();
-  }
+  if (typeof loadJobs === "function") loadJobs();
 }
 
-
-
-/**
- * Job failed
- */
-function handleJobFailed(data) {
-  // --------------------------------
-  // STOP PROCESSING UI IMMEDIATELY
-  // --------------------------------
-  if (typeof stopThoughts === "function") {
-    stopThoughts();
-  }
+function handleJobFailed() {
+  if (typeof stopThoughts === "function") stopThoughts();
 
   stopPolling();
-
   window.POLLING_ACTIVE = false;
   window.JOB_COMPLETED = true;
 
-  // Exit processing mode
   document.body.classList.remove("processing-active");
 
-  // --------------------------------
-  // CLEAR PROCESSING HEADER
-  // --------------------------------
-  const header = document.getElementById("processingHeader");
-  if (header) {
-    header.textContent = "";
-  }
-
-  const statusEl = document.getElementById("status");
-  if (statusEl) {
-    statusEl.textContent = "";
-  }
-
-  // --------------------------------
-  // CLEANUP JOB STATE
-  // --------------------------------
   JOB_ID = null;
   localStorage.removeItem("active_job_id");
 
-  // --------------------------------
-  // USER FEEDBACK
-  // --------------------------------
+  if (typeof setUIBusy === "function") setUIBusy(false);
+
   toast("Processing failed. Please try again.", "error");
 }
 
-
-
-/* =========================================================
-   RESUME AFTER REFRESH (OPTIONAL BUT SAFE)
-   ========================================================= */
-
-(function resumePollingIfNeeded() {
+// Resume after refresh
+document.addEventListener("partials:loaded", () => {
   const savedJobId = localStorage.getItem("active_job_id");
   if (savedJobId && ID_TOKEN) {
     JOB_ID = savedJobId;
@@ -298,5 +128,4 @@ function handleJobFailed(data) {
     document.body.classList.add("processing-active");
     startPolling();
   }
-})();
-
+});
