@@ -1,4 +1,3 @@
-let SESSION_RESTORED = false;
 
 function renderGoogleButton() {
   showLoggedOutUI();

@@ -1,5 +1,4 @@
-let UI_BUSY = false;
-let IS_PENDING = false;
+
 
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
