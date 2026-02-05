@@ -2,8 +2,6 @@
 // AUTH STATE
 // =====================================================
 
-let googleButtonRendered = false;
-
 // These are assumed to already exist globally
 // let ID_TOKEN, USER_EMAIL, JOB_ID, SESSION_RESTORED;
 // const GOOGLE_CLIENT_ID, AUTH_STORAGE_KEY;
@@ -12,27 +10,21 @@ let googleButtonRendered = false;
 // GOOGLE SIGN-IN RENDERING (SAFE + SINGLE ENTRY)
 // =====================================================
 
-function renderGoogleButton(retry = true) {
-  if (googleButtonRendered) return;
+let googleRendered = false;
+
+function renderGoogleButton() {
+  if (googleRendered) return;
 
   const btn = document.getElementById("google-signin-btn");
-  const authBox = document.getElementById("authBox");
-
-  if (!btn || !authBox) {
+  if (!btn) {
     console.warn("Google Sign-In container not found");
-
-    if (retry) {
-      setTimeout(() => renderGoogleButton(false), 100);
-    }
     return;
   }
 
-  if (!window.google?.accounts?.id) {
+  if (!window.google || !google.accounts || !google.accounts.id) {
     console.warn("Google Identity not ready");
     return;
   }
-
-  authBox.style.display = "block";
 
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
@@ -41,11 +33,13 @@ function renderGoogleButton(retry = true) {
 
   google.accounts.id.renderButton(btn, {
     theme: "outline",
-    size: "large"
+    size: "large",
+    text: "signin_with"
   });
 
-  googleButtonRendered = true;
+  googleRendered = true;
 }
+
 
 
 // =====================================================
