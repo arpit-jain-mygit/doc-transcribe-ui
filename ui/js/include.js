@@ -1,12 +1,17 @@
 async function includeHTML() {
-  const elements = document.querySelectorAll("[data-include]");
-  for (const el of elements) {
+  const nodes = document.querySelectorAll("[data-include]");
+  const tasks = [];
+
+  for (const el of nodes) {
     const file = el.getAttribute("data-include");
-    try {
-      const resp = await fetch(file);
-      el.innerHTML = await resp.text();
-    } catch (e) {
-      console.error("Failed to load", file, e);
-    }
+    tasks.push(
+      fetch(file)
+        .then(res => res.text())
+        .then(html => {
+          el.innerHTML = html;
+        })
+    );
   }
+
+  await Promise.all(tasks);
 }

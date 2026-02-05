@@ -48,8 +48,11 @@
   <script src="js/main.js"></script>
 
   <script>
-    includeHTML();
-  </script>
+  includeHTML().then(() => {
+    document.dispatchEvent(new Event("partials:loaded"));
+  });
+</script>
+
 
 </body>
 </html>

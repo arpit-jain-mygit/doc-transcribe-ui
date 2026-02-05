@@ -10,9 +10,9 @@ function renderGoogleButton() {
   });
 
   google.accounts.id.renderButton(
-    document.getElementById("google-signin-btn"),
-    { theme: "outline", size: "medium", text: "signin_with", shape: "pill" }
-  );
+  document.getElementById("google-signin-btn"),
+  { theme: "outline", size: "large" }
+);
 }
 
 function onGoogleSignIn(resp) {
@@ -107,7 +107,10 @@ function waitForGoogleAndRender() {
   if (SESSION_RESTORED) return;
 
   if (window.google?.accounts?.id) {
-    renderGoogleButton();
+    document.addEventListener("partials:loaded", () => {
+  renderGoogleButton();
+});
+
   } else {
     setTimeout(waitForGoogleAndRender, 50);
   }

@@ -3,8 +3,9 @@
 
   <div class="user-column">
 
+    <!-- SIGNED IN -->
     <div id="userProfile" class="user-profile" style="display:none;">
-      <img id="userAvatar" class="user-avatar" />
+      <img id="userAvatar" class="user-avatar" alt="User avatar" />
       <div class="user-meta">
         <div class="user-welcome">Welcome</div>
         <div id="userEmail" class="user-email"></div>
@@ -12,8 +13,12 @@
       <button class="logout-link" onclick="logout()">Sign out</button>
     </div>
 
-    <div id="authBox" class="signin-box">
-      <div id="google-signin-btn"></div>
+    <!-- SIGNED OUT -->
+    <div id="authBox" class="signin-box" style="display:none;">
+      <!-- IMPORTANT: Stable parent for Google Sign-In -->
+      <div id="googleSignInContainer">
+        <div id="google-signin-btn"></div>
+      </div>
     </div>
 
   </div>
