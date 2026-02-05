@@ -1,19 +1,17 @@
 async function includeHTML() {
-  const nodes = Array.from(document.querySelectorAll("[data-include]"));
+  const nodes = document.querySelectorAll("[data-include]");
 
   for (const el of nodes) {
     const file = el.getAttribute("data-include");
-    if (!file) continue;
+    console.log("Loading partial:", file);
 
     try {
       const res = await fetch(file);
-      if (!res.ok) {
-        console.error("Failed to load partial:", file);
-        continue;
-      }
+      console.log(file, "→", res.status);
+
       el.innerHTML = await res.text();
     } catch (e) {
-      console.error("Error loading partial:", file, e);
+      console.error("Failed loading", file, e);
     }
   }
 }
