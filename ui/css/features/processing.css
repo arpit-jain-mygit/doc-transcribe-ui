@@ -215,3 +215,11 @@ progress::-moz-progress-bar {
   border-radius: 14px;
   background: #fafafa;
 }
+
+/* Processing polite hint */
+.processing-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6b7280;
+}

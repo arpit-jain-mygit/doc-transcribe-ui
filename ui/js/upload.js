@@ -80,6 +80,11 @@ async function upload(type, file) {
 
   document.body.classList.add("processing-active");
 
+  const hint = document.getElementById("processingHint");
+if (hint) {
+  hint.style.display = "block";
+}
+
   const header = document.getElementById("processingHeader");
   if (header) {
     header.textContent = `PROCESSING ${LAST_UPLOADED_FILENAME}`;

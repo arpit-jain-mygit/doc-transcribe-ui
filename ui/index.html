@@ -106,6 +106,9 @@
       <!-- PROCESSING PANEL -->
       <!-- ========================= -->
       <div id="statusBox" class="processing-panel" style="display:none;">
+        <div id="processingHint" class="processing-hint" style="display:none;">
+          🙏 आपके धैर्य के लिए धन्यवाद — 20 मिनट की ऑडियो/वीडियो सामग्री का रूपांतरण लगभग 2–3 मिनट ले सकता है। 🙏
+        </div>
 
         <button class="processing-close" onclick="hideProcessing()">✕</button>
 
@@ -120,42 +123,42 @@
         <div id="thoughtBox" class="thought-box">
           <div id="thoughtText" class="thought-text"></div>
         </div>
-      
 
-    
 
-     
+
+
+
 
       </div>
 
       <!-- ========================= -->
-<!-- COMPLETION CARD -->
-<!-- ========================= -->
-<div id="completionCard" class="completion-panel" style="display:none;">
+      <!-- COMPLETION CARD -->
+      <!-- ========================= -->
+      <div id="completionCard" class="completion-panel" style="display:none;">
 
-  <div class="completion-header">
-    <span class="completion-dot"></span>
-    <span class="completion-text">Completed</span>
-  </div>
+        <div class="completion-header">
+          <span class="completion-dot"></span>
+          <span class="completion-text">Completed</span>
+        </div>
 
-  <div class="completion-files">
-    <div>
-      <strong>Uploaded:</strong>
-      <span id="uploadedFile"></span>
-    </div>
-    <div>
-      <strong>Generated:</strong>
-      <a href="#" id="generatedFile" class="history-download"></a>
-    </div>
-  </div>
+        <div class="completion-files">
+          <div>
+            <strong>Uploaded:</strong>
+            <span id="uploadedFile"></span>
+          </div>
+          <div>
+            <strong>Generated:</strong>
+            <a href="#" id="generatedFile" class="history-download"></a>
+          </div>
+        </div>
 
-  <div class="completion-download">
-    <a id="downloadLink" href="#" class="history-download">
-      ⬇ Download
-    </a>
-  </div>
+        <div class="completion-download">
+          <a id="downloadLink" href="#" class="history-download">
+            ⬇ Download
+          </a>
+        </div>
 
-</div>
+      </div>
 
 
       <!-- ========================= -->

@@ -148,6 +148,11 @@ function updateProcessingUI(data) {
 function handleJobCompleted(data) {
   console.log("DOWNLOAD URL =>", data.download_url);
 
+  const hint = document.getElementById("processingHint");
+  if (hint) {
+    hint.style.display = "none";
+  }
+
   // --------------------------------
   // STOP PROCESSING UI IMMEDIATELY
   // --------------------------------
@@ -216,11 +221,11 @@ function handleJobCompleted(data) {
   localStorage.removeItem("active_job_id");
 
   // --------------------------------
-// RE-ENABLE UPLOAD UI
-// --------------------------------
-if (typeof setUIBusy === "function") {
-  setUIBusy(false);
-}
+  // RE-ENABLE UPLOAD UI
+  // --------------------------------
+  if (typeof setUIBusy === "function") {
+    setUIBusy(false);
+  }
 
 
   // --------------------------------

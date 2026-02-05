@@ -42,26 +42,48 @@ window.addEventListener("beforeunload", (e) => {
 // HIDE PROCESSING PANEL (CLOSE BUTTON)
 // ---------------------------------------------
 window.hideProcessing = function () {
-  // Stop polling if active
+  // Stop polling safely (UI only)
   if (typeof stopPolling === "function") {
     stopPolling();
   }
 
-  window.POLLING_ACTIVE = false;
+  // Exit processing mode (UI only)
+  document.body.classList.remove("processing-active");
 
-  // Hide processing UI
+  // Hide processing panel
   const statusBox = document.getElementById("statusBox");
   if (statusBox) {
     statusBox.style.display = "none";
   }
 
-  document.body.classList.remove("processing-active");
-
-  // Optional: stop thoughts animation
-  if (typeof stopThoughts === "function") {
-    stopThoughts();
+  // Hide polite processing hint
+  const hint = document.getElementById("processingHint");
+  if (hint) {
+    hint.style.display = "none";
   }
+
+  // Clear progress bar visually (safe)
+  const progress = document.getElementById("progress");
+  if (progress) {
+    progress.value = 0;
+  }
+
+  // Clear status text
+  const status = document.getElementById("status");
+  if (status) {
+    status.textContent = "";
+  }
+
+  const stage = document.getElementById("stage");
+  if (stage) {
+    stage.textContent = "";
+  }
+
+  // ⚠️ IMPORTANT:
+  // Do NOT clear JOB_ID here.
+  // Backend job continues safely.
 };
+
 
 
 waitForGoogleAndRender();
