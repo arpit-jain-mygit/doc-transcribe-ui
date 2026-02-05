@@ -1,20 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   stopPolling();
 
-  // Always start in logged-out visual state
+  // Default UI state
   showLoggedOutUI();
   toggleAuthOnly(false);
 
   const restored = restoreSession();
 
-  // If session was NOT restored, render Google Sign-in
   if (!restored) {
-    waitForGoogleAndRender();
+    // 🔑 THIS IS THE FIX
+    renderGoogleButton();
   }
 
   attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
   attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
 });
+
 
 
 // ---------------------------------------------
