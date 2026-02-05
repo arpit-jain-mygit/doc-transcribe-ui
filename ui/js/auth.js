@@ -12,7 +12,7 @@ let googleButtonRendered = false;
 // GOOGLE SIGN-IN RENDERING (SAFE + SINGLE ENTRY)
 // =====================================================
 
-function renderGoogleButton() {
+function renderGoogleButton(retry = true) {
   if (googleButtonRendered) return;
 
   const btn = document.getElementById("google-signin-btn");
@@ -20,6 +20,10 @@ function renderGoogleButton() {
 
   if (!btn || !authBox) {
     console.warn("Google Sign-In container not found");
+
+    if (retry) {
+      setTimeout(() => renderGoogleButton(false), 100);
+    }
     return;
   }
 
@@ -28,7 +32,6 @@ function renderGoogleButton() {
     return;
   }
 
-  // Google requires visible parent
   authBox.style.display = "block";
 
   google.accounts.id.initialize({
@@ -44,12 +47,6 @@ function renderGoogleButton() {
   googleButtonRendered = true;
 }
 
-// 🔑 SINGLE, AUTHORITATIVE BOOTSTRAP POINT
-document.addEventListener("partials:loaded", () => {
-  if (!SESSION_RESTORED) {
-    renderGoogleButton();
-  }
-});
 
 // =====================================================
 // GOOGLE SIGN-IN CALLBACK

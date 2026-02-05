@@ -47,11 +47,17 @@
   <script src="js/thoughts.js"></script>
   <script src="js/main.js"></script>
 
-  <script>
+<script>
   includeHTML().then(() => {
+    // Hard guarantee header is present
+    const headerCheck = document.getElementById("google-signin-btn");
+    if (!headerCheck) {
+      console.error("Header not loaded correctly");
+    }
     document.dispatchEvent(new Event("partials:loaded"));
   });
 </script>
+
 
 
 </body>
