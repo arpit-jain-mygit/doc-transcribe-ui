@@ -1,4 +1,6 @@
 {
+  "outputDirectory": ".",
+  "framework": null,
   "routes": [
     {
       "src": "/(.*\\.(html|js|css|png|jpg|svg|ico|json|txt|woff|woff2))",
