@@ -1,4 +1,23 @@
 /* ===== Unified Job Card Density ===== */
+.job-card {
+  max-width: 760px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+/* Header */
+.job-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 12px;
+}
+
+/* ...rest of the CSS exactly as provided */
 
 .completion-card {
   padding: 16px 18px;        /* reduced */
