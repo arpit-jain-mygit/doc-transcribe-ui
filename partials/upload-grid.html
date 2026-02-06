@@ -9,20 +9,26 @@
     <h2>PDF to Hindi Text</h2>
 
     <!-- URL input -->
-    <div class="url-line">
-      <input
-        type="url"
-        id="ocrUrl"
-        placeholder="YouTube URL (optional)"
-      />
+    <div class="input-row">
+      <div class="input-box">
+        <span class="url-icon">🔗</span>
+        <input
+          type="url"
+          id="ocrUrl"
+          placeholder="Paste YouTube URL (optional)"
+        />
+      </div>
 
-      <button class="url-btn" onclick="submitUrl('OCR')">
-        Use
+      <button
+        class="btn-primary url-btn"
+        onclick="submitUrl('OCR')"
+      >
+        Use URL
       </button>
     </div>
 
     <!-- File upload -->
-    <div class="upload-row">
+    <div class="input-row">
       <div class="drop-zone" id="ocrDrop">
         <input
           type="file"
@@ -50,20 +56,26 @@
     <h2>Video / Audio to Hindi Text</h2>
 
     <!-- URL input -->
-    <div class="url-line">
-      <input
-        type="url"
-        id="transcribeUrl"
-        placeholder="YouTube URL (optional)"
-      />
+    <div class="input-row">
+      <div class="input-box">
+        <span class="url-icon">🔗</span>
+        <input
+          type="url"
+          id="transcribeUrl"
+          placeholder="Paste YouTube URL (optional)"
+        />
+      </div>
 
-      <button class="url-btn" onclick="submitUrl('TRANSCRIPTION')">
-        Use
+      <button
+        class="btn-primary url-btn"
+        onclick="submitUrl('TRANSCRIPTION')"
+      >
+        Use URL
       </button>
     </div>
 
     <!-- File upload -->
-    <div class="upload-row">
+    <div class="input-row">
       <div class="drop-zone" id="transcribeDrop">
         <input
           type="file"

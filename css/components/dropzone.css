@@ -72,3 +72,50 @@
   border-color: #6366f1;
   background: #ffffff;
 }
+
+/* Shared row layout (URL + Upload) */
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* URL input container (matches drop-zone) */
+.input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 48px;
+  padding: 0 14px;
+
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background: #ffffff;
+
+  font-size: 15px;
+}
+
+/* URL icon */
+.input-box .url-icon {
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+/* URL input */
+.input-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+
+  font-size: 15px;
+  background: transparent;
+}
+
+/* URL button = Convert button height */
+.url-btn {
+  height: 48px;
+  padding: 0 18px;
+}
