@@ -1,20 +1,26 @@
-<div class="user-column">
+<div class="top-bar">
 
-  <div id="userProfile" class="user-profile" style="display:none;">
-    <img id="userAvatar" class="user-avatar" />
+  <h1>श्रुत एवं जिनवाणी संरक्षण</h1>
 
-    <div class="user-info">
-      <div class="user-welcome">Welcome</div>
-      <div id="userEmail" class="user-email"></div>
+  <div class="user-column">
+
+    <div id="userProfile" class="user-profile" style="display:none;">
+      <img id="userAvatar" class="user-avatar" />
+
+      <div class="user-info">
+        <div class="user-welcome">Welcome</div>
+        <div id="userEmail" class="user-email"></div>
+      </div>
+
+      <button class="logout-link" onclick="logout()">Sign out</button>
     </div>
 
-    <button class="logout-link" onclick="logout()">Sign out</button>
-  </div>
+    <div id="authBox" class="signin-box">
+      <div class="google-btn-wrapper">
+        <div id="google-signin-btn"></div>
+      </div>
+    </div>
 
-<div id="authBox" class="signin-box">
-  <div class="google-btn-wrapper">
-    <div id="google-signin-btn"></div>
   </div>
-</div>
 
 </div>
