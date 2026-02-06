@@ -12,3 +12,69 @@
   border-color: #2563eb;
   background: #eef4ff;
 }
+
+/* ================= URL DROP (YouTube) ================= */
+
+.url-drop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 10px;
+  background: #fafafa;
+
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.url-drop:hover {
+  background: #f9fafb;
+  border-color: #c7d2fe;
+}
+
+/* Icon */
+.url-icon {
+  font-size: 16px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* Input */
+.url-drop input {
+  flex: 1;
+  border: none;
+  background: transparent;
+
+  font-size: 14px;
+  outline: none;
+  color: #111827;
+}
+
+.url-drop input::placeholder {
+  color: #9ca3af;
+}
+
+/* Button */
+.url-action {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.url-action:hover {
+  background: #f3f4f6;
+}
+
+.url-drop:focus-within {
+  border-color: #6366f1;
+  background: #ffffff;
+}
