@@ -196,3 +196,87 @@
 .download-mini-btn:hover {
   background: #16a34a;
 }
+
+/* ================= Completion Row (Compact) ================= */
+
+.completion-row {
+  max-width: 900px;              /* SAME width as history & upload sections */
+  margin: 16px auto 32px;
+  padding: 12px 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+/* Left: status */
+.completion-row-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.completion-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completion-status {
+  font-size: 14px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+/* Middle: file info */
+.completion-row-middle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 14px;
+  color: #374151;
+  overflow: hidden;
+}
+
+.completion-label {
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.completion-filename {
+  font-weight: 600;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Right: CTA */
+.completion-row-right {
+  white-space: nowrap;
+}
+
+.completion-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+  border-radius: 8px;
+
+  font-size: 13px;
