@@ -96,11 +96,49 @@ function handleJobCompleted(data) {
   localStorage.removeItem("active_job_id");
 
   if (typeof setUIBusy === "function") setUIBusy(false);
-  if (typeof showCompletion === "function") showCompletion(data);
 
+  // -----------------------------
+  // SHOW COMPLETION UI
+  // -----------------------------
+  if (typeof showCompletion === "function") {
+    showCompletion(data);
+  }
+
+  // -----------------------------
+  // FIX DOWNLOAD BEHAVIOR
+  // -----------------------------
+  const link = document.getElementById("downloadLink");
+  if (link && data.download_url) {
+    link.href = "javascript:void(0)";
+    link.style.pointerEvents = "auto";
+    link.style.opacity = "1";
+
+    link.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (typeof forceDownload !== "function") {
+        console.error("forceDownload is not defined");
+        return;
+      }
+
+      forceDownload(
+        data.download_url,
+        data.output_file || "transcript.txt"
+      );
+    };
+  }
+
+  // -----------------------------
+  // USER FEEDBACK
+  // -----------------------------
   toast("Processing completed", "success");
-  if (typeof loadJobs === "function") loadJobs();
+
+  if (typeof loadJobs === "function") {
+    loadJobs();
+  }
 }
+
 
 function handleJobFailed() {
   if (typeof stopThoughts === "function") stopThoughts();
