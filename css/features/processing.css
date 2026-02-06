@@ -211,12 +211,6 @@ progress::-moz-progress-bar {
 /* -------------------------------
    PROCESSING ANCHOR
 -------------------------------- */
-#processingAnchor {
-  margin: 24px 0;
-  padding: 8px;
-  border-radius: 14px;
-  background: #fafafa;
-}
 
 /* Processing polite hint */
 /* Polite patience message */
