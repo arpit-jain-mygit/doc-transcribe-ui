@@ -3,11 +3,19 @@
 // =====================================================
 
 document.addEventListener("partials:loaded", () => {
-  if (typeof restoreSession === "function" && restoreSession()) {
-    return;
+  const restored =
+    typeof restoreSession === "function" && restoreSession();
+
+  // ✅ Drag & drop must be attached in ALL cases
+  if (typeof attachDragDrop === "function") {
+    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
+    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
   }
 
-  bootstrapLoggedOutUI();
+  // Logged-out path
+  if (!restored) {
+    bootstrapLoggedOutUI();
+  }
 });
 
 
