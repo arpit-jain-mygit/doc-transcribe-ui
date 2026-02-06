@@ -8,12 +8,18 @@ document.addEventListener("partials:loaded", () => {
 
   // Try restoring session
   if (typeof restoreSession === "function" && restoreSession()) {
-    return; // session restored, no sign-in button needed
+    return;
   }
 
-  // No session → render Google Sign-In
+  // Render Google Sign-In if logged out
   if (typeof renderGoogleButton === "function") {
     renderGoogleButton();
+  }
+
+  // ✅ ATTACH DRAG & DROP (THIS WAS MISSING)
+  if (typeof attachDragDrop === "function") {
+    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
+    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
   }
 });
 
