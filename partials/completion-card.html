@@ -1,44 +1,17 @@
-<div id="completionCard" class="completion-hero" style="display:none;">
+<div id="completionCard" class="completion-mini" style="display:none;">
 
-  <div class="completion-hero-header">
+  <div class="completion-mini-header">
     <span class="completion-check">✓</span>
-    <h2 class="completion-title">Completed</h2>
+    <span class="completion-title">Completed</span>
   </div>
 
-  <p class="completion-subtitle">
-    Your content has been processed successfully.
-  </p>
-
-  <div class="completion-summary">
-    <div class="summary-row">
-      <span class="summary-label">Source</span>
-      <span id="sourceType" class="summary-value">File</span>
-    </div>
-
-    <div class="summary-row" id="uploadedFileRow">
-      <span class="summary-label">Uploaded</span>
-      <span id="uploadedFile" class="summary-value"></span>
-    </div>
-
-    <div class="summary-row" id="uploadedUrlRow" style="display:none;">
-      <span class="summary-label">YouTube</span>
-      <a
-        id="uploadedUrl"
-        class="summary-value summary-link"
-        href="#"
-        target="_blank"
-        rel="noopener"
-      ></a>
-    </div>
-
-    <div class="summary-row">
-      <span class="summary-label">Output</span>
-      <span id="generatedFile" class="summary-value"></span>
-    </div>
+  <div class="completion-mini-body">
+    <span class="mini-label">Uploaded file</span>
+    <span id="uploadedFile" class="mini-value"></span>
   </div>
 
-  <div class="completion-cta">
-    <a id="downloadLink" href="#" class="download-cta">
+  <div class="completion-mini-cta">
+    <a id="downloadLink" href="#" class="download-mini-btn">
       ⬇ Download output
     </a>
   </div>

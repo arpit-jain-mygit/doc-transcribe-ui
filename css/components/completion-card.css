@@ -108,3 +108,91 @@
 .download-cta:hover {
   opacity: 0.95;
 }
+
+/* ================= Completion Mini (Simple Success) ================= */
+
+.completion-mini {
+  max-width: 520px;
+  margin: 24px auto 48px;
+  padding: 18px 20px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+
+  text-align: center;
+}
+
+/* Header */
+.completion-mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.completion-mini-header .completion-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completion-mini-header .completion-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+/* Body */
+.completion-mini-body {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.mini-label {
+  color: #64748b;
+}
+
+.mini-value {
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+/* CTA */
+.completion-mini-cta {
+  display: flex;
+  justify-content: center;
+}
+
+.download-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+
+  border-radius: 10px;
+  background: #22c55e;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.download-mini-btn:hover {
+  background: #16a34a;
+}
