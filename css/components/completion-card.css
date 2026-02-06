@@ -1,0 +1,82 @@
+/* ================= Completion Card ================= */
+
+.completion-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: #ffffff;
+  max-width: 760px;
+}
+
+/* Status */
+.completion-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.completion-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.completion-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #166534;
+}
+
+/* Meta grid */
+.completion-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 28px;
+  padding: 14px 0;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 16px;
+}
+
+.meta-item {
+  min-width: 0;
+}
+
+.meta-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+/* Actions */
+.completion-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.completion-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.completion-download-btn:hover {
+  background: #16a34a;
+}

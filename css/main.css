@@ -21,3 +21,5 @@
 
 @import "./components/downloads.css";
 @import "./features/hero.css";
+
+@import "./components/completion-card.css";

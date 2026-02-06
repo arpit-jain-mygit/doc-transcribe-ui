@@ -1,46 +1,45 @@
-<div id="completionCard" class="completion-panel" style="display:none;">
+<div id="completionCard" class="completion-card" style="display:none;">
 
-  <div class="completion-header">
+  <!-- Status -->
+  <div class="completion-status">
     <span class="completion-dot"></span>
     <span class="completion-text">Completed</span>
   </div>
 
-  <div class="completion-files">
+  <!-- Metadata -->
+  <div class="completion-meta">
 
-    <!-- SOURCE TYPE -->
-    <div class="file-info-row">
-      <span>Source:</span>
-      <span id="sourceType" class="file-info-name">File</span>
+    <div class="meta-item">
+      <span class="meta-label">Source</span>
+      <span id="sourceType" class="meta-value">File</span>
     </div>
 
-    <!-- FILE UPLOAD (default) -->
-    <div class="file-info-row" id="uploadedFileRow">
-      <span>Uploaded:</span>
-      <span id="uploadedFile" class="file-info-name"></span>
+    <div class="meta-item" id="uploadedFileRow">
+      <span class="meta-label">Uploaded</span>
+      <span id="uploadedFile" class="meta-value"></span>
     </div>
 
-    <!-- YOUTUBE URL (hidden by default) -->
-    <div class="file-info-row" id="uploadedUrlRow" style="display:none;">
-      <span>YouTube:</span>
+    <div class="meta-item" id="uploadedUrlRow" style="display:none;">
+      <span class="meta-label">YouTube</span>
       <a
         id="uploadedUrl"
-        class="file-info-name"
+        class="meta-value"
         href="#"
         target="_blank"
         rel="noopener"
       ></a>
     </div>
 
-    <!-- GENERATED OUTPUT -->
-    <div class="file-info-row">
-      <span>Generated:</span>
-      <span id="generatedFile" class="file-info-name"></span>
+    <div class="meta-item">
+      <span class="meta-label">Generated</span>
+      <span id="generatedFile" class="meta-value"></span>
     </div>
 
   </div>
 
-  <div class="completion-download">
-    <a id="downloadLink" href="#" class="history-download">
+  <!-- Action -->
+  <div class="completion-actions">
+    <a id="downloadLink" href="#" class="completion-download-btn">
       ⬇ Download
     </a>
   </div>
