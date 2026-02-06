@@ -16,14 +16,25 @@ async function loadJobs() {
     div.className = "job";
 
     div.innerHTML = `
-      <div class="job-title">${j.job_type} — ${formatStatus(j.status)}</div>
-      <div class="job-meta">${formatRelativeTime(j.updated_at)}</div>
-      ${
-        j.output_path
-          ? `<a href="#" class="history-download" data-url="${j.output_path}">⬇ Download</a>`
-          : ""
+  <div class="job-row-inline">
+    <div class="job-left">
+      <span class="job-type">${j.job_type}</span>
+      <span class="job-status">— ${formatStatus(j.status)}</span>
+    </div>
+
+    <div class="job-time">
+      ${formatRelativeTime(j.updated_at)}
+    </div>
+
+    ${j.output_path
+        ? `<a href="#" class="history-download" data-url="${j.output_path}">
+             ⬇ Download
+           </a>`
+        : `<span class="job-pending">Processing…</span>`
       }
-    `;
+  </div>
+`;
+
 
     // -------------------------------
     // FIX: FORCE DOWNLOAD WITH NAME
@@ -55,23 +66,21 @@ function renderJob(job) {
     </div>
 
     <div class="job-meta">
-      ${
-        isYoutube
-          ? `<a href="${job.url}" target="_blank" rel="noopener">
+      ${isYoutube
+      ? `<a href="${job.url}" target="_blank" rel="noopener">
                ${job.url}
              </a>`
-          : `<span>${job.input_file || "—"}</span>`
-      }
+      : `<span>${job.input_file || "—"}</span>`
+    }
     </div>
 
     <div class="job-actions">
-      ${
-        job.output_file
-          ? `<a href="${job.download_url}" class="history-download">
+      ${job.output_file
+      ? `<a href="${job.download_url}" class="history-download">
                ⬇ Download
              </a>`
-          : `<span class="job-pending">Processing…</span>`
-      }
+      : `<span class="job-pending">Processing…</span>`
+    }
     </div>
   `;
 
