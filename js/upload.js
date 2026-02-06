@@ -66,25 +66,59 @@ async function upload(type, file) {
 // -----------------------------
 // YOUTUBE URL (UI ONLY FOR NOW)
 // -----------------------------
-function submitUrl(mode) {
+async function submitUrl(mode) {
   const input =
     mode === "OCR"
       ? document.getElementById("ocrUrl")
       : document.getElementById("transcribeUrl");
 
-  const url = input?.value.trim();
+  const url = input.value.trim();
+
   if (!url) {
     toast("Please enter a YouTube URL", "error");
     return;
   }
 
-  if (!/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(url)) {
-    toast("Invalid YouTube URL", "error");
+  if (!ID_TOKEN) {
+    toast("Please sign in first", "error");
     return;
   }
 
-  toast("YouTube processing not wired yet", "info");
+  try {
+    setUIBusy(true);
+
+    const res = await fetch(`${API}/youtube`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ID_TOKEN,
+      },
+      body: JSON.stringify({
+        url,
+        type: mode === "OCR" ? "OCR" : "TRANSCRIPTION",
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`YouTube submit failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    JOB_ID = data.job_id;
+    localStorage.setItem("active_job_id", JOB_ID);
+
+    document.body.classList.add("processing-active");
+    startPolling();
+
+  } catch (err) {
+    console.error(err);
+    toast("Failed to submit YouTube URL", "error");
+    setUIBusy(false);
+  }
 }
+
+
 
 function forceDownload(url, filename) {
   if (!filename) {
