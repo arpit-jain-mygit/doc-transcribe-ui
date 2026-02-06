@@ -103,7 +103,42 @@ function updateProcessingUI(data) {
     const target = Math.max(0, Math.min(100, raw));
     lastProgress = Math.max(lastProgress, target);
     progressEl.value = lastProgress;
+
+    // ----------------------------------------
+    // 🧘 SLOW BREATHING AS WE APPROACH COMPLETION
+    // ----------------------------------------
+    const dot = document.querySelector(".processing-panel h2::before");
+
+    // We cannot query ::before directly,
+    // so apply CSS variable on the parent
+    const header = document.querySelector(".processing-panel h2");
+
+    if (header) {
+      /*
+        Progress → pulse speed mapping:
+  
+        0%   → 1.6s (active)
+        50%  → 2.2s (calmer)
+        80%  → 3.2s (very calm)
+        100% → 4.5s (almost still)
+      */
+
+      let pulseSpeed;
+
+      if (target < 50) {
+        pulseSpeed = 1.6;
+      } else if (target < 80) {
+        pulseSpeed = 2.2;
+      } else if (target < 95) {
+        pulseSpeed = 3.2;
+      } else {
+        pulseSpeed = 4.5;
+      }
+
+      header.style.setProperty("--pulse-speed", `${pulseSpeed}s`);
+    }
   }
+
 
   if (stageEl && data.stage) {
     stageEl.textContent = data.stage;
@@ -113,6 +148,12 @@ function updateProcessingUI(data) {
 
 function handleJobCompleted(data) {
   if (typeof stopThoughts === "function") stopThoughts();
+
+  const header = document.querySelector(".processing-panel h2");
+  if (header) {
+    header.style.setProperty("--pulse-speed", "0s");
+  }
+
 
   stopPolling();
   window.POLLING_ACTIVE = false;
