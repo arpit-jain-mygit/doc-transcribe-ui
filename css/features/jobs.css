@@ -12,3 +12,8 @@
   font-size: 12px;
   color: #6b7280;
 }
+
+/* Separate history from completion hero */
+.old-history-section {
+  margin-top: 48px;
+}

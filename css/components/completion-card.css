@@ -1,15 +1,23 @@
 /* ================= Completion Hero (Marketing UI) ================= */
 
+/* ================= Layout overrides (safe) ================= */
+
+/* Reduce excessive space above completion card */
+/* ================= Completion Hero (Marketing UI) ================= */
+
 .completion-hero {
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 680px;
+  margin: 24px auto 48px;   /* ✅ top | horizontal | bottom */
   padding: 28px 32px;
+
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid #eef2f7;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+
   text-align: center;
 }
+
 
 /* Header */
 .completion-hero-header {

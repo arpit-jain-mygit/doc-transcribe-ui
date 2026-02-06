@@ -86,3 +86,8 @@
   max-width: 720px;
   padding: 0 16px;
 }
+
+/* When results are visible, tighten hero spacing */
+.hero {
+  padding-bottom: 24px;   /* was 32px */
+}
