@@ -5,11 +5,15 @@
 
     <div id="userProfile" class="user-profile" style="display:none;">
       <img id="userAvatar" class="user-avatar" />
-      <div class="user-meta">
+
+      <!-- 🔧 CHANGE user-meta → user-info -->
+      <div class="user-info">
         <div class="user-welcome">Welcome</div>
-        <div id="userEmail"></div>
+        <div id="userEmail" class="user-email"></div>
       </div>
-      <button onclick="logout()">Sign out</button>
+
+      <!-- 🔧 ADD class -->
+      <button class="logout-link" onclick="logout()">Sign out</button>
     </div>
 
     <div id="authBox" class="signin-box">
