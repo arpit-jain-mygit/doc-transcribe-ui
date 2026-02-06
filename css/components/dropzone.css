@@ -1,11 +1,65 @@
+/* =================================================
+   UNIFIED INPUT SYSTEM (URL + DROP + BUTTON)
+   ================================================= */
+
+/* Shared row layout */
+.url-line,
+.upload-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+/* =================================================
+   URL INPUT (professional, solid)
+   ================================================= */
+
+.url-line input {
+  height: 52px;                     /* 🔑 same everywhere */
+  padding: 0 14px;
+
+  font-size: 15px;
+  color: #111827;
+
+  border: 1.5px solid #d1d5db;      /* SOLID, not dashed */
+  border-radius: 10px;
+  background: #ffffff;
+
+  outline: none;
+}
+
+.url-line input::placeholder {
+  color: #9ca3af;
+}
+
+.url-line input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+/* =================================================
+   DROP ZONE (matched to URL height)
+   ================================================= */
+
 .drop-zone {
-  flex: 1;
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-  padding: 10px 12px;
+  height: 52px;                     /* 🔑 SAME HEIGHT */
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  border: 1.5px dashed #d1d5db;
+  border-radius: 10px;
   background: #fafafa;
-  font-size: 14px;
+
+  font-size: 15px;
   cursor: pointer;
+}
+
+.drop-zone:hover {
+  background: #f9fafb;
 }
 
 .drop-zone.dragover {
@@ -13,109 +67,42 @@
   background: #eef4ff;
 }
 
-/* ================= URL DROP (YouTube) ================= */
+/* =================================================
+   BUTTONS — SINGLE SOURCE OF TRUTH
+   ================================================= */
 
-.url-drop {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  padding: 12px 14px;
-  border: 1.5px dashed #d1d5db;
-  border-radius: 10px;
-  background: #fafafa;
-
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.url-drop:hover {
-  background: #f9fafb;
-  border-color: #c7d2fe;
-}
-
-
-/* Input */
-.url-drop input {
-  flex: 1;
-  border: none;
-  background: transparent;
-
-  font-size: 14px;
-  outline: none;
-  color: #111827;
-}
-
-.url-drop input::placeholder {
-  color: #9ca3af;
-}
-
-/* Button */
-.url-action {
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  color: #374151;
-
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.url-action:hover {
-  background: #f3f4f6;
-}
-
-.url-drop:focus-within {
-  border-color: #6366f1;
-  background: #ffffff;
-}
-
-/* Shared row layout (URL + Upload) */
-.input-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-/* URL input container (matches drop-zone) */
-.input-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  height: 48px;
-  padding: 0 14px;
-
-  border: 2px dashed #d1d5db;
-  border-radius: 12px;
-  background: #ffffff;
-
-  font-size: 15px;
-}
-
-/* URL icon */
-.input-box .url-icon {
-  font-size: 16px;
-  opacity: 0.6;
-}
-
-/* URL input */
-.input-box input {
-  border: none;
-  outline: none;
-  width: 100%;
-
-  font-size: 15px;
-  background: transparent;
-}
-
-/* URL button = Convert button height */
+.btn-primary,
 .url-btn {
-  height: 48px;
-  padding: 0 18px;
+  height: 52px;                     /* 🔑 SAME HEIGHT */
+  padding: 0 20px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  border-radius: 10px;
+  white-space: nowrap;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Primary look */
+.btn-primary,
+.url-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover,
+.url-btn:hover {
+  background: #1d4ed8;
+}
+
+.btn-primary:disabled,
+.url-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
