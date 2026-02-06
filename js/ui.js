@@ -15,6 +15,8 @@ function setUIBusy(isBusy) {
 }
 
 function showLoggedInUI() {
+  document.body.classList.add("logged-in");   // ✅ ADD THIS
+
   const userProfile = document.getElementById("userProfile");
   const authBox = document.getElementById("authBox");
   const userEmail = document.getElementById("userEmail");
@@ -29,13 +31,17 @@ function showLoggedInUI() {
   }
 }
 
+
 function showLoggedOutUI() {
+  document.body.classList.remove("logged-in"); // ✅ ADD THIS
+
   const userProfile = document.getElementById("userProfile");
   const authBox = document.getElementById("authBox");
 
   if (userProfile) userProfile.style.display = "none";
   if (authBox) authBox.style.display = "block";
 }
+
 
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");

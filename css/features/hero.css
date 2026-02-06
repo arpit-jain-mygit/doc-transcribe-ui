@@ -91,3 +91,25 @@
 .hero {
   padding-bottom: 24px;   /* was 32px */
 }
+
+/* ================= AUTH STATE ================= */
+
+/* When user is logged in */
+body.logged-in {
+
+  /* Hide full marketing sections */
+  #appContent > [data-include="/partials/how-it-works.html"],
+  #appContent > [data-include="/partials/trust-note.html"] {
+    display: none;
+  }
+
+  /* Hide hero marketing bits */
+  .hero-marketing {
+    display: none;
+  }
+
+  /* Tighten hero spacing */
+  .hero {
+    padding-bottom: 24px;
+  }
+}
