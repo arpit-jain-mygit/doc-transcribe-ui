@@ -3,25 +3,13 @@
 // =====================================================
 
 document.addEventListener("partials:loaded", () => {
-  // Default UI state
-  showLoggedOutUI();
-
-  // Try restoring session
   if (typeof restoreSession === "function" && restoreSession()) {
     return;
   }
 
-  // Render Google Sign-In if logged out
-  if (typeof renderGoogleButton === "function") {
-    renderGoogleButton();
-  }
-
-  // ✅ ATTACH DRAG & DROP (THIS WAS MISSING)
-  if (typeof attachDragDrop === "function") {
-    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
-    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
-  }
+  bootstrapLoggedOutUI();
 });
+
 
 
 // =====================================================
@@ -86,3 +74,24 @@ window.hideProcessing = function () {
   // Do NOT clear JOB_ID here.
   // Backend job continues safely.
 };
+
+function bootstrapLoggedOutUI() {
+  // Ensure logged-out UI is visible
+  showLoggedOutUI();
+
+  // Reset Google render guard (safe on logout only)
+  if (typeof resetGoogleAuth === "function") {
+    resetGoogleAuth();
+  }
+
+  // Render Google Sign-In
+  if (typeof renderGoogleButton === "function") {
+    renderGoogleButton();
+  }
+
+  // Reattach drag & drop
+  if (typeof attachDragDrop === "function") {
+    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
+    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
+  }
+}

@@ -22,9 +22,11 @@ function renderGoogleButton() {
   }
 
   if (!window.google || !google.accounts || !google.accounts.id) {
-    console.warn("Google Identity not ready");
+    console.warn("Google Identity not ready, retrying...");
+    setTimeout(renderGoogleButton, 100);
     return;
   }
+
 
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
@@ -52,7 +54,7 @@ function onGoogleSignIn(resp) {
   let payload = {};
   try {
     payload = JSON.parse(atob(resp.credential.split(".")[1]));
-  } catch {}
+  } catch { }
 
   USER_EMAIL = payload.email || "";
 
@@ -98,12 +100,17 @@ function logout() {
   localStorage.removeItem("active_job_id");
 
   hidePending();
-  showLoggedOutUI();
   toggleAuthOnly(false);
+
+  SESSION_RESTORED = false;
+
+  // 🔑 Re-bootstrap logged-out UI safely
+  if (typeof bootstrapLoggedOutUI === "function") {
+    bootstrapLoggedOutUI();
+  }
 
   toast("Logged out", "info");
 
-  SESSION_RESTORED = false;
 }
 
 // =====================================================
@@ -153,4 +160,11 @@ function restoreSession() {
     toggleAuthOnly(false);
     return false;
   }
+}
+
+function resetGoogleAuth() {
+  googleRendered = false;
+
+  const btn = document.getElementById("google-signin-btn");
+  if (btn) btn.innerHTML = "";
 }
