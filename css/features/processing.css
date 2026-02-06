@@ -7,12 +7,12 @@
 -------------------------------- */
 .processing-panel,
 .completion-panel {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #f8fafc;            /* inked surface */
+  border: 1px solid #e2e8f0;       /* slate-200 */
   border-radius: 12px;
 
   padding: 20px;
-  padding-top: 32px; /* space for ❌ */
+  padding-top: 32px;
   margin: 16px 0;
 
   position: relative;
@@ -21,12 +21,11 @@
 /* -------------------------------
    VERTICAL RHYTHM
 -------------------------------- */
-.processing-panel > 
-  :not(.processing-close):not(.processing-hint) + 
+.processing-panel >
+  :not(.processing-close):not(.processing-hint) +
   :not(.processing-close):not(.processing-hint) {
   margin-top: 12px;
 }
-
 
 /* -------------------------------
    CLOSE BUTTON
@@ -48,7 +47,7 @@
   line-height: 1;
 
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   cursor: pointer;
@@ -56,8 +55,8 @@
 }
 
 .processing-close:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .processing-close:disabled {
@@ -85,30 +84,34 @@
 .processing-panel h2 {
   font-size: 15px;
   font-weight: 700;
-  color: #1f2937;
+  color: #0f172a; /* slate-900 */
 }
 
-/* Processing activity dot */
-/* Processing activity dot — Jain Flag (1s per color, snap) */
+/* -------------------------------
+   PROCESSING DOT — JAIN FLAG
+-------------------------------- */
 .processing-panel h2::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
 
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+  background-color: #ffffff;
+
+  /* inner contrast ring + outer glow */
+  box-shadow:
+    0 0 0 1.5px rgba(15, 23, 42, 0.35),
+    0 0 0 3px rgba(255, 255, 255, 0.25);
 
   flex-shrink: 0;
   margin-top: 1px;
 
   animation:
-    pulse 2.5s ease-in-out infinite,
-    jain-colors 5s steps(1, end) infinite;
+    jain-colors 5s steps(1, end) infinite,
+    pulse 2.5s ease-in-out infinite;
 
-  will-change: transform, box-shadow;
+  will-change: transform, box-shadow, background-color;
 }
-
 
 /* -------------------------------
    COMPLETION HEADER
@@ -162,12 +165,16 @@
 #status {
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
+  color: #475569;
 }
 
 #stage {
   font-size: 12px;
-  color: #6b7280;
+  color: #475569;
+}
+
+#stage.error {
+  color: #dc2626;
 }
 
 /* -------------------------------
@@ -185,12 +192,12 @@ progress {
 
   appearance: none;
   -webkit-appearance: none;
-  background: #e5e7eb;
+  background: #e2e8f0;
   overflow: hidden;
 }
 
 progress::-webkit-progress-bar {
-  background: #e5e7eb;
+  background: #e2e8f0;
 }
 
 progress::-webkit-progress-value,
@@ -200,51 +207,62 @@ progress::-moz-progress-bar {
 }
 
 /* -------------------------------
-   ANIMATION
+   BREATHING ANIMATION (REDUCED)
 -------------------------------- */
-/* Expanding + shrinking breathing ring */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 1px currentColor;
     transform: scale(1);
-    opacity: 0.8;
+    box-shadow:
+      0 0 0 1.5px rgba(15, 23, 42, 0.35),
+      0 0 0 2px currentColor;
   }
 
   50% {
-    box-shadow: 0 0 0 2px transparent;
-    transform: scale(1.07);
-    opacity: 0.95;
+    transform: scale(1.035); /* reduced radius */
+    box-shadow:
+      0 0 0 1.5px rgba(15, 23, 42, 0.35),
+      0 0 0 4px transparent;
   }
 
   100% {
-    box-shadow: 0 0 0 1px transparent;
     transform: scale(1);
-    opacity: 0.8;
+    box-shadow:
+      0 0 0 1.5px rgba(15, 23, 42, 0.35),
+      0 0 0 2px transparent;
   }
 }
 
-
+/* -------------------------------
+   JAIN FLAG COLORS — ROUND ROBIN
+-------------------------------- */
+@keyframes jain-colors {
+  0%   { background-color: #ffffff; }
+  20%  { background-color: #d32f2f; }
+  40%  { background-color: #fbc02d; }
+  60%  { background-color: #388e3c; }
+  80%  { background-color: #1976d2; }
+  100% { background-color: #ffffff; }
+}
 
 /* -------------------------------
-   PROCESSING ANCHOR
+   PROCESSING HINT
 -------------------------------- */
-
-/* Processing polite hint */
-/* Polite patience message */
 .processing-hint {
-  margin: 4px 0 10px;   /* ⬅ tight but breathable */
+  margin: 4px 0 10px;
   padding: 0;
 
   font-size: 13px;
-  line-height: 1.45;   /* ⬅ fixes “tight fight” */
-  color: #6b7280;
+  line-height: 1.45;
+  color: #475569;
 
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-/* File info rows */
+/* -------------------------------
+   FILE INFO ROWS
+-------------------------------- */
 .file-info-row {
   font-size: 14px;
   color: #374151;
@@ -254,30 +272,23 @@ progress::-moz-progress-bar {
   gap: 6px;
 }
 
-/* Filenames — uploaded & generated (same style) */
 .file-info-name {
   font-weight: 600;
   color: #111827;
   word-break: break-all;
 }
 
-/* Generated filename should NOT look like a link */
 .file-info-name.generated {
   text-decoration: none;
   cursor: default;
 }
+
+/* -------------------------------
+   PROCESSING ANCHOR
+-------------------------------- */
 .processing-anchor {
   height: 0;
   margin: 0;
   padding: 0;
   overflow: hidden;
-}
-
-@keyframes jain-colors {
-  0%   { background: #ffffff; color: #ffffff; }
-  20%  { background: #d32f2f; color: #d32f2f; }
-  40%  { background: #fbc02d; color: #fbc02d; }
-  60%  { background: #388e3c; color: #388e3c; }
-  80%  { background: #1976d2; color: #1976d2; }
-  100% { background: #ffffff; color: #ffffff; }
 }
