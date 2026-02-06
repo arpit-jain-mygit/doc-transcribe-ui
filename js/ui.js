@@ -76,27 +76,30 @@ window.toggleAuthOnly = function (isLoggedIn) {
 
 // COMPLETION RENDER (FILE + YOUTUBE READY)
 function showCompletion(job) {
+  const wrapper = document.querySelector(".completion-wrapper");
+  if (wrapper) {
+    wrapper.style.display = "block"; // show the card container
+  }
+
   const completionRow = document.getElementById("completionRow");
   if (completionRow) {
-    completionRow.style.display = "flex";
+    completionRow.style.display = "flex"; // row layout
   }
 
-  // Uploaded file / URL label
   const uploadedFileEl = document.getElementById("uploadedFile");
   if (uploadedFileEl) {
-    if (job.source === "youtube" && job.url) {
-      uploadedFileEl.textContent = job.url;
-    } else {
-      uploadedFileEl.textContent = job.input_file || "";
-    }
+    uploadedFileEl.textContent =
+      job.source === "youtube" && job.url
+        ? job.url
+        : job.input_file || "";
   }
 
-  // Download link
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
     downloadLink.href = job.download_url || "#";
   }
 }
+
 
 
 function updateProcessingHeader(job) {
