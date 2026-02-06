@@ -5,6 +5,32 @@
 let POLL_INTERVAL = null;
 let lastProgress = 0;
 
+/* ---------------------------------------------------------
+   IMMEDIATE PROGRESS BOOTSTRAP (UI ONLY)
+   --------------------------------------------------------- */
+function bootstrapProgress(stageText = "Preparing…", value = 3) {
+  const statusBox = document.getElementById("statusBox");
+  const progressEl = document.getElementById("progress");
+  const stageEl = document.getElementById("stage");
+
+  if (statusBox) statusBox.style.display = "block";
+  document.body.classList.add("processing-active");
+
+  if (progressEl) {
+    progressEl.max = 100;
+    progressEl.value = value;
+    lastProgress = value; // prevent backward jump
+  }
+
+  if (stageEl) {
+    stageEl.textContent = stageText;
+    stageEl.classList.remove("error");
+  }
+}
+
+// expose for upload.js
+window.bootstrapProgress = bootstrapProgress;
+
 function startPolling() {
   if (!JOB_ID) return;
 
@@ -16,11 +42,11 @@ function startPolling() {
 
   document.body.classList.add("processing-active");
 
-  lastProgress = 0;
   const progressEl = document.getElementById("progress");
   if (progressEl) {
     progressEl.max = 100;
-    progressEl.value = 0;
+    // DO NOT reset progress — bootstrap already set it
+    progressEl.value = Math.max(progressEl.value || 0, lastProgress);
   }
 
   pollStatus();
@@ -69,8 +95,8 @@ function updateProcessingUI(data) {
   const stageEl = document.getElementById("stage");
 
   if (typeof updateProcessingHeader === "function") {
-  updateProcessingHeader(data);
-}
+    updateProcessingHeader(data);
+  }
 
   const raw = Number(data.progress);
   if (progressEl && Number.isFinite(raw)) {
@@ -81,6 +107,7 @@ function updateProcessingUI(data) {
 
   if (stageEl && data.stage) {
     stageEl.textContent = data.stage;
+    stageEl.classList.remove("error");
   }
 }
 
@@ -101,16 +128,10 @@ function handleJobCompleted(data) {
 
   if (typeof setUIBusy === "function") setUIBusy(false);
 
-  // -----------------------------
-  // SHOW COMPLETION UI
-  // -----------------------------
   if (typeof showCompletion === "function") {
     showCompletion(data);
   }
 
-  // -----------------------------
-  // FIX DOWNLOAD BEHAVIOR
-  // -----------------------------
   const link = document.getElementById("downloadLink");
   if (link && data.download_url) {
     link.href = "javascript:void(0)";
@@ -133,16 +154,12 @@ function handleJobCompleted(data) {
     };
   }
 
-  // -----------------------------
-  // USER FEEDBACK
-  // -----------------------------
   toast("Processing completed", "success");
 
   if (typeof loadJobs === "function") {
     loadJobs();
   }
 }
-
 
 function handleJobFailed(data) {
   if (typeof stopThoughts === "function") stopThoughts();
@@ -158,8 +175,6 @@ function handleJobFailed(data) {
 
   if (typeof setUIBusy === "function") setUIBusy(false);
 
-  // 🔑 IMPORTANT RULE:
-  // If stage is present, render error inline (no toast)
   if (data && data.stage) {
     const stageEl = document.getElementById("stage");
     if (stageEl) {
@@ -169,12 +184,9 @@ function handleJobFailed(data) {
     return;
   }
 
-  // Fallback (network / unexpected)
   toast("Processing failed. Please try again.", "error");
 }
 
-
-// Resume after refresh
 document.addEventListener("partials:loaded", () => {
   const savedJobId = localStorage.getItem("active_job_id");
   if (savedJobId && ID_TOKEN) {

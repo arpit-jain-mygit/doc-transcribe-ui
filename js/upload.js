@@ -30,6 +30,10 @@ async function upload(type, file) {
   setUIBusy(true);
   document.body.classList.add("processing-active");
 
+  if (typeof bootstrapProgress === "function") {
+    bootstrapProgress("Uploading file…", 5);
+  }
+
   const header = document.getElementById("processingHeader");
   if (header) header.textContent = `PROCESSING ${file.name}`;
 
@@ -64,7 +68,7 @@ async function upload(type, file) {
 }
 
 // -----------------------------
-// YOUTUBE URL (UI ONLY FOR NOW)
+// YOUTUBE URL
 // -----------------------------
 async function submitUrl(mode) {
   const input =
@@ -85,20 +89,18 @@ async function submitUrl(mode) {
   }
 
   try {
-    // 🔑 RESET PROCESSING UI (CRITICAL)
-window.JOB_COMPLETED = false;
-JOB_ID = null;
-
-const progress = document.getElementById("progress");
-if (progress) progress.value = 0;
-
-const stage = document.getElementById("stage");
-if (stage) stage.textContent = "";
-
-const header = document.getElementById("processingHeader");
-if (header) header.textContent = "PROCESSING YouTube URL";
+    window.JOB_COMPLETED = false;
+    JOB_ID = null;
 
     setUIBusy(true);
+    document.body.classList.add("processing-active");
+
+    if (typeof bootstrapProgress === "function") {
+      bootstrapProgress("Queuing YouTube job…", 3);
+    }
+
+    const header = document.getElementById("processingHeader");
+    if (header) header.textContent = "PROCESSING YouTube URL";
 
     const res = await fetch(`${API}/youtube`, {
       method: "POST",
@@ -121,7 +123,6 @@ if (header) header.textContent = "PROCESSING YouTube URL";
     JOB_ID = data.job_id;
     localStorage.setItem("active_job_id", JOB_ID);
 
-    document.body.classList.add("processing-active");
     startPolling();
 
   } catch (err) {
@@ -130,8 +131,6 @@ if (header) header.textContent = "PROCESSING YouTube URL";
     setUIBusy(false);
   }
 }
-
-
 
 function forceDownload(url, filename) {
   if (!filename) {
