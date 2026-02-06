@@ -77,32 +77,27 @@ window.toggleAuthOnly = function (isLoggedIn) {
 // COMPLETION RENDER (FILE + YOUTUBE READY)
 function showCompletion(job) {
   const completionRow = document.getElementById("completionRow");
-if (completionRow) {
-  completionRow.style.display = "flex"; // IMPORTANT: flex, not block
-}
-
-
-  document.getElementById("sourceType").textContent =
-    job.source === "youtube" ? "YouTube URL" : "File";
-
-  if (job.source === "youtube") {
-    document.getElementById("uploadedFileRow").style.display = "none";
-    document.getElementById("uploadedUrlRow").style.display = "flex";
-    document.getElementById("uploadedUrl").href = job.url;
-    document.getElementById("uploadedUrl").textContent = job.url;
-  } else {
-    document.getElementById("uploadedFileRow").style.display = "flex";
-    document.getElementById("uploadedUrlRow").style.display = "none";
-    document.getElementById("uploadedFile").textContent =
-      job.input_file || "";
+  if (completionRow) {
+    completionRow.style.display = "flex";
   }
 
-  document.getElementById("generatedFile").textContent =
-    job.output_file || "";
+  // Uploaded file / URL label
+  const uploadedFileEl = document.getElementById("uploadedFile");
+  if (uploadedFileEl) {
+    if (job.source === "youtube" && job.url) {
+      uploadedFileEl.textContent = job.url;
+    } else {
+      uploadedFileEl.textContent = job.input_file || "";
+    }
+  }
 
-  document.getElementById("downloadLink").href =
-    job.download_url || "#";
+  // Download link
+  const downloadLink = document.getElementById("downloadLink");
+  if (downloadLink) {
+    downloadLink.href = job.download_url || "#";
+  }
 }
+
 
 function updateProcessingHeader(job) {
   const header = document.getElementById("processingHeader");
