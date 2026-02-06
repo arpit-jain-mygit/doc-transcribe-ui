@@ -102,3 +102,14 @@ function showCompletion(job) {
   document.getElementById("downloadLink").href =
     job.download_url || "#";
 }
+
+function updateProcessingHeader(job) {
+  const header = document.getElementById("processingHeader");
+  if (!header || !job) return;
+
+  if (job.source === "youtube") {
+    header.textContent = "PROCESSING YouTube URL";
+  } else if (job.input_file) {
+    header.textContent = `PROCESSING ${job.input_file}`;
+  }
+}

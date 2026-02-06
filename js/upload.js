@@ -85,6 +85,19 @@ async function submitUrl(mode) {
   }
 
   try {
+    // 🔑 RESET PROCESSING UI (CRITICAL)
+window.JOB_COMPLETED = false;
+JOB_ID = null;
+
+const progress = document.getElementById("progress");
+if (progress) progress.value = 0;
+
+const stage = document.getElementById("stage");
+if (stage) stage.textContent = "";
+
+const header = document.getElementById("processingHeader");
+if (header) header.textContent = "PROCESSING YouTube URL";
+
     setUIBusy(true);
 
     const res = await fetch(`${API}/youtube`, {

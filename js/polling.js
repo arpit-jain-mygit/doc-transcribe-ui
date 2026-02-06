@@ -68,6 +68,10 @@ function updateProcessingUI(data) {
   const progressEl = document.getElementById("progress");
   const stageEl = document.getElementById("stage");
 
+  if (typeof updateProcessingHeader === "function") {
+  updateProcessingHeader(data);
+}
+
   const raw = Number(data.progress);
   if (progressEl && Number.isFinite(raw)) {
     const target = Math.max(0, Math.min(100, raw));
@@ -140,7 +144,7 @@ function handleJobCompleted(data) {
 }
 
 
-function handleJobFailed() {
+function handleJobFailed(data) {
   if (typeof stopThoughts === "function") stopThoughts();
 
   stopPolling();
@@ -154,8 +158,21 @@ function handleJobFailed() {
 
   if (typeof setUIBusy === "function") setUIBusy(false);
 
+  // 🔑 IMPORTANT RULE:
+  // If stage is present, render error inline (no toast)
+  if (data && data.stage) {
+    const stageEl = document.getElementById("stage");
+    if (stageEl) {
+      stageEl.textContent = data.stage;
+      stageEl.classList.add("error");
+    }
+    return;
+  }
+
+  // Fallback (network / unexpected)
   toast("Processing failed. Please try again.", "error");
 }
+
 
 // Resume after refresh
 document.addEventListener("partials:loaded", () => {
