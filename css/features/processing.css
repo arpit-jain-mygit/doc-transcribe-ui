@@ -255,3 +255,9 @@ progress::-moz-progress-bar {
   text-decoration: none;
   cursor: default;
 }
+.processing-anchor {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
