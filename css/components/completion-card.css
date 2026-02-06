@@ -1,68 +1,102 @@
-/* ===== Unified Job Card Density ===== */
-.job-card {
-  max-width: 760px;
+/* ================= Completion Hero (Marketing UI) ================= */
+
+.completion-hero {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 32px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  text-align: center;
 }
 
 /* Header */
-.job-card-header {
+.completion-hero-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-/* ...rest of the CSS exactly as provided */
-
-.completion-card {
-  padding: 16px 18px;        /* reduced */
-}
-
-/* Header stays compact */
-.completion-status {
-  margin-bottom: 10px;
-}
-
-/* Meta grid tighter + intentional */
-.completion-meta {
-  padding: 10px 0;
-  margin-bottom: 10px;
-  gap: 10px 24px;
-}
-
-/* Remove visual emptiness */
-.meta-label {
-  font-size: 12px;
-}
-
-.meta-value {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-/* Action row looks anchored, not floating */
-.completion-actions {
-  border-top: 1px solid #f1f5f9;
-  padding-top: 12px;
-  justify-content: space-between;
+.completion-check {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: white;
+  font-weight: 700;
   align-items: center;
+  justify-content: center;
 }
 
-/* Optional: left hint text */
-.completion-actions::before {
-  content: "Output ready";
+.completion-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.completion-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+/* Summary */
+.completion-summary {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.summary-label {
   font-size: 13px;
   color: #64748b;
 }
 
-/* Button less “marketing”, more “tool” */
-.completion-download-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
+.summary-value {
   font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  max-width: 60%;
+  text-align: right;
+  word-break: break-all;
+}
+
+.summary-link {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* CTA */
+.completion-cta {
+  display: flex;
+  justify-content: center;
+}
+
+.download-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.download-cta:hover {
+  opacity: 0.95;
 }

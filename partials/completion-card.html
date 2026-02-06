@@ -1,47 +1,45 @@
-<div id="completionCard" class="job-card state-completed" style="display:none;">
+<div id="completionCard" class="completion-hero" style="display:none;">
 
-  <!-- Header -->
-  <div class="job-card-header">
-    <span class="status-indicator"></span>
-    <span class="status-text">Completed</span>
+  <div class="completion-hero-header">
+    <span class="completion-check">✓</span>
+    <h2 class="completion-title">Completed</h2>
   </div>
 
-  <!-- Body -->
-  <div class="job-card-body">
+  <p class="completion-subtitle">
+    Your content has been processed successfully.
+  </p>
 
-    <div class="job-row">
-      <div class="job-label">Source</div>
-      <div id="sourceType" class="job-value">File</div>
+  <div class="completion-summary">
+    <div class="summary-row">
+      <span class="summary-label">Source</span>
+      <span id="sourceType" class="summary-value">File</span>
     </div>
 
-    <div class="job-row" id="uploadedFileRow">
-      <div class="job-label">Uploaded</div>
-      <div id="uploadedFile" class="job-value"></div>
+    <div class="summary-row" id="uploadedFileRow">
+      <span class="summary-label">Uploaded</span>
+      <span id="uploadedFile" class="summary-value"></span>
     </div>
 
-    <div class="job-row" id="uploadedUrlRow" style="display:none;">
-      <div class="job-label">YouTube</div>
+    <div class="summary-row" id="uploadedUrlRow" style="display:none;">
+      <span class="summary-label">YouTube</span>
       <a
         id="uploadedUrl"
-        class="job-value job-link"
+        class="summary-value summary-link"
         href="#"
         target="_blank"
         rel="noopener"
       ></a>
     </div>
 
-    <div class="job-row">
-      <div class="job-label">Generated</div>
-      <div id="generatedFile" class="job-value"></div>
+    <div class="summary-row">
+      <span class="summary-label">Output</span>
+      <span id="generatedFile" class="summary-value"></span>
     </div>
-
   </div>
 
-  <!-- Footer -->
-  <div class="job-card-footer">
-    <span class="job-footer-hint">Output ready</span>
-    <a id="downloadLink" href="#" class="job-primary-btn">
-      ⬇ Download
+  <div class="completion-cta">
+    <a id="downloadLink" href="#" class="download-cta">
+      ⬇ Download output
     </a>
   </div>
 
