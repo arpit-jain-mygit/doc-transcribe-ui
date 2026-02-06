@@ -76,10 +76,11 @@ window.toggleAuthOnly = function (isLoggedIn) {
 
 // COMPLETION RENDER (FILE + YOUTUBE READY)
 function showCompletion(job) {
-  const card = document.getElementById("completionCard");
-  if (!card) return;
+  const completionRow = document.getElementById("completionRow");
+if (completionRow) {
+  completionRow.style.display = "flex"; // IMPORTANT: flex, not block
+}
 
-  card.style.display = "block";
 
   document.getElementById("sourceType").textContent =
     job.source === "youtube" ? "YouTube URL" : "File";
