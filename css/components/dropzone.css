@@ -7,12 +7,10 @@
 -------------------------------- */
 .url-line,
 .upload-row {
-  width: 100%;
-  display: grid; /* 🔑 REQUIRED */
-  grid-template-columns: minmax(0, 1fr) 140px; /* input | button */
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 140px;
   gap: 12px;
   align-items: stretch;
-  margin-bottom: 12px;
 }
 
 /* =================================================
