@@ -103,8 +103,8 @@
   margin-top: 1px;
 
   animation:
-    jain-colors 5s steps(2, end) infinite,
-    pulse var(--pulse-speed, 3.6s) ease-in-out infinite;
+    pulse 2.5s ease-in-out infinite,
+    jain-colors 5s steps(1, end) infinite;
 
   will-change: transform, box-shadow;
 }
@@ -271,4 +271,13 @@ progress::-moz-progress-bar {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+@keyframes jain-colors {
+  0%   { background: #ffffff; color: #ffffff; }
+  20%  { background: #d32f2f; color: #d32f2f; }
+  40%  { background: #fbc02d; color: #fbc02d; }
+  60%  { background: #388e3c; color: #388e3c; }
+  80%  { background: #1976d2; color: #1976d2; }
+  100% { background: #ffffff; color: #ffffff; }
 }
