@@ -1,9 +1,8 @@
 .upload-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;   /* single column after OCR removal */
   gap: 20px;
-  margin-bottom: 16px;   /* was visually too large */
-
+  margin-bottom: 16px;
 }
 
 .upload-row {
