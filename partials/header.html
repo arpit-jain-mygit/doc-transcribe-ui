@@ -1,24 +1,18 @@
-<div class="top-bar">
-  <h1>श्रुत एवं जिनवाणी संरक्षण</h1>
+<div class="user-column">
 
-  <div class="user-column">
+  <div id="userProfile" class="user-profile" style="display:none;">
+    <img id="userAvatar" class="user-avatar" />
 
-    <div id="userProfile" class="user-profile" style="display:none;">
-      <img id="userAvatar" class="user-avatar" />
-
-      <!-- 🔧 CHANGE user-meta → user-info -->
-      <div class="user-info">
-        <div class="user-welcome">Welcome</div>
-        <div id="userEmail" class="user-email"></div>
-      </div>
-
-      <!-- 🔧 ADD class -->
-      <button class="logout-link" onclick="logout()">Sign out</button>
+    <div class="user-info">
+      <div class="user-welcome">Welcome</div>
+      <div id="userEmail" class="user-email"></div>
     </div>
 
-    <div id="authBox" class="signin-box">
-      <div id="google-signin-btn"></div>
-    </div>
-
+    <button class="logout-link" onclick="logout()">Sign out</button>
   </div>
+
+  <div id="authBox" class="signin-box">
+    <div id="google-signin-btn"></div>
+  </div>
+
 </div>
