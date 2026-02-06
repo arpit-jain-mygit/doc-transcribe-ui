@@ -16,6 +16,9 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
   if (statusBox) statusBox.style.display = "block";
   document.body.classList.add("processing-active");
 
+  // 🧘 Start Jain thoughts as soon as processing begins
+  if (typeof startThoughts === "function") startThoughts();
+
   if (progressEl) {
     progressEl.max = 100;
     progressEl.value = value;
