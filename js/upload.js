@@ -85,3 +85,24 @@ function submitUrl(mode) {
 
   toast("YouTube processing not wired yet", "info");
 }
+
+function forceDownload(url, filename) {
+  if (!filename) {
+    throw new Error("forceDownload called without filename");
+  }
+
+  try {
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+  } catch (e) {
+    console.error("forceDownload failed", e);
+  }
+}
