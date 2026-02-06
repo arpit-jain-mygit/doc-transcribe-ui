@@ -88,3 +88,25 @@
   transform: scale(0.92);
   transform-origin: center;
 }
+
+/* Google sign-in container */
+#authBox {
+  display: flex;
+  align-items: center;
+}
+
+/* Visual padding wrapper */
+.google-btn-wrapper {
+  padding: 6px 10px;          /* 👈 balances left/right */
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+/* Google iframe scaling */
+#google-signin-btn {
+  display: flex;
+  align-items: center;
+
+  transform: scale(0.92);
+  transform-origin: center;
+}
