@@ -2,13 +2,14 @@
 
 .top-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-/* Right column */
+/* Push auth section to the right */
 .user-column {
+  margin-left: auto;
+
   display: flex;
   align-items: center;
   gap: 10px;
@@ -36,7 +37,7 @@
   flex-shrink: 0;
 }
 
-/* Text block */
+/* User text */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -44,13 +45,11 @@
   min-width: 0;
 }
 
-/* Welcome */
 .user-welcome {
   font-size: 11px;
   color: #6b7280;
 }
 
-/* Email */
 .user-email {
   font-size: 13px;
   font-weight: 600;
@@ -62,8 +61,9 @@
   text-overflow: ellipsis;
 }
 
-/* Sign out */
-.logout-link {
+/* Logout */
+.logout-link,
+.user-profile button {
   margin-left: 8px;
   padding: 6px 12px;
 
@@ -72,6 +72,7 @@
   border: 1px solid #e5e7eb;
   background: #f9fafb;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .logout-link:hover {
@@ -85,28 +86,8 @@
 }
 
 #google-signin-btn {
-  transform: scale(0.92);
-  transform-origin: center;
-}
-
-/* Google sign-in container */
-#authBox {
   display: flex;
   align-items: center;
-}
-
-/* Visual padding wrapper */
-.google-btn-wrapper {
-  padding: 6px 10px;          /* 👈 balances left/right */
-  border-radius: 10px;
-  background: #ffffff;
-}
-
-/* Google iframe scaling */
-#google-signin-btn {
-  display: flex;
-  align-items: center;
-
   transform: scale(0.92);
   transform-origin: center;
 }
