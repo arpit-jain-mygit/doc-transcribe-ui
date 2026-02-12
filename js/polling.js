@@ -257,11 +257,13 @@ function handleJobFailed(data) {
       stageEl.textContent = data.stage;
       stageEl.classList.add("error");
     }
-    toast("Processing failed", "error");
-    return;
   }
 
-  toast("Processing failed. Please try again.", "error");
+  const raw = (data && data.error) ? String(data.error) : "";
+  const shortError = raw ? raw.split("\n")[0].trim() : "";
+  const detail = shortError || (data && data.stage) || "Please try again.";
+
+  toast(`Processing failed: ${detail}`, "error");
 }
 
 function handleJobCancelled(data) {
