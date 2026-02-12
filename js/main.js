@@ -3,13 +3,19 @@
 // =====================================================
 
 document.addEventListener("partials:loaded", () => {
+  if (typeof initWorkspaceView === "function") {
+    initWorkspaceView();
+  }
+
   const restored =
     typeof restoreSession === "function" && restoreSession();
 
   // ✅ Drag & drop must be attached in ALL cases
   if (typeof attachDragDrop === "function") {
-    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
-    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
+    attachDragDrop("unifiedDrop", "unifiedFile", "unifiedFilename");
+  }
+  if (typeof initUnifiedUpload === "function") {
+    initUnifiedUpload();
   }
 
   // Logged-out path
@@ -45,9 +51,7 @@ window.addEventListener("keydown", (e) => {
 
   e.preventDefault();
 
-  // Ctrl/Cmd+U => transcription picker, Ctrl/Cmd+Shift+U => OCR picker.
-  const pickerId = e.shiftKey ? "ocrFile" : "transcribeFile";
-  const picker = document.getElementById(pickerId);
+  const picker = document.getElementById("unifiedFile");
   if (picker) picker.click();
 });
 
@@ -114,7 +118,9 @@ function bootstrapLoggedOutUI() {
 
   // Reattach drag & drop
   if (typeof attachDragDrop === "function") {
-    attachDragDrop("ocrDrop", "ocrFile", "ocrFilename");
-    attachDragDrop("transcribeDrop", "transcribeFile", "transcribeFilename");
+    attachDragDrop("unifiedDrop", "unifiedFile", "unifiedFilename");
+  }
+  if (typeof initUnifiedUpload === "function") {
+    initUnifiedUpload();
   }
 }

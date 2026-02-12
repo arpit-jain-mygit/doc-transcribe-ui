@@ -4,8 +4,58 @@ function uploadFrom(type, inputId) {
     toast("Please select a file", "error");
     return;
   }
-  upload(type, input.files[0]);
+  const picked = input.files[0];
+  upload(type, picked);
+  clearUploadInputState(inputId);
 }
+
+const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"];
+const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
+const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
+let UPLOAD_MODE = "OCR";
+
+function detectModeForFile(file) {
+  const name = String(file?.name || "").toLowerCase();
+  if (OCR_EXTENSIONS.some((ext) => name.endsWith(ext))) return "OCR";
+  if (AV_EXTENSIONS.some((ext) => name.endsWith(ext))) return "TRANSCRIPTION";
+  return UPLOAD_MODE;
+}
+
+function applyUploadMode(mode) {
+  const next = String(mode || "").toUpperCase() === "TRANSCRIPTION" ? "TRANSCRIPTION" : "OCR";
+  UPLOAD_MODE = next;
+
+  const input = document.getElementById("unifiedFile");
+  const label = document.getElementById("unifiedDropLabel");
+
+  if (input) {
+    input.dataset.autoUploadType = next;
+    input.accept = ALL_EXTENSIONS;
+  }
+  if (label) label.textContent = "Files start processing automatically after selection.";
+}
+
+function clearUploadInputState(inputId = "unifiedFile") {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.value = "";
+  delete input.dataset.lastAutoUploadToken;
+
+  const name = document.getElementById("unifiedFilename");
+  if (name) name.textContent = "";
+}
+
+window.clearUploadInputState = clearUploadInputState;
+
+window.autoselectUploadModeForFile = function autoselectUploadModeForFile(file) {
+  const detected = detectModeForFile(file);
+  applyUploadMode(detected);
+  return detected;
+};
+
+window.initUnifiedUpload = function initUnifiedUpload() {
+  applyUploadMode(UPLOAD_MODE);
+};
 
 async function upload(type, file) {
   if (JOB_ID && !window.JOB_COMPLETED) {
@@ -25,6 +75,7 @@ async function upload(type, file) {
 
   window.JOB_COMPLETED = false;
   JOB_ID = null;
+  window.ACTIVE_JOB_TYPE = String(type || "").toUpperCase();
   LAST_UPLOADED_FILENAME = file.name;
 
   setUIBusy(true);

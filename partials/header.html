@@ -3,19 +3,46 @@
   <div class="user-column">
 
     <div id="userProfile" class="user-profile" style="display:none;">
-      <img id="userAvatar" class="user-avatar" />
-
-      <div class="user-info">
-        <div class="user-welcome">Welcome</div>
-        <div id="userEmail" class="user-email"></div>
+      <div class="welcome-copy">
+        <div class="welcome-title">Welcome back</div>
+        <div class="welcome-subtitle">Ready to process files</div>
       </div>
 
-      <button class="logout-link" onclick="logout()">Sign out</button>
+      <div id="accountMenu" class="account-menu">
+        <button
+          id="accountChip"
+          class="account-chip"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          onclick="toggleAccountMenu(event)"
+        >
+          <span class="user-avatar-wrap" aria-hidden="true">
+            <img id="userAvatar" class="user-avatar" alt="User avatar" />
+            <span id="userAvatarFallback" class="user-avatar-fallback"></span>
+          </span>
+          <span id="userName" class="user-name"></span>
+          <span class="chip-caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div id="accountDropdown" class="account-dropdown" role="menu" hidden>
+          <div id="userEmail" class="user-email"></div>
+          <button class="account-menu-item" type="button" onclick="logout()">Sign out</button>
+        </div>
+      </div>
     </div>
 
     <div id="authBox" class="signin-box">
-      <div class="google-btn-wrapper">
-        <div id="google-signin-btn"></div>
+      <div class="signin-card">
+        <div class="signin-value">Secure access for OCR and transcription</div>
+        <div class="google-btn-wrapper">
+          <div id="google-signin-btn"></div>
+        </div>
+        <div class="signin-trust" aria-label="Trust indicators">
+          <span>Google-authenticated</span>
+          <span>•</span>
+          <span>No password stored</span>
+        </div>
       </div>
     </div>
 

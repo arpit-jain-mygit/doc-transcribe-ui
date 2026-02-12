@@ -12,9 +12,11 @@ function formatJobDuration(secondsRaw) {
 
 let JOBS_LOADING = false;
 let JOBS_FILTER = "COMPLETED";
-let JOBS_TYPE_FILTER = "TRANSCRIPTION";
+let JOBS_TYPE_FILTER = "OCR";
 let JOBS_STATUS_CONTROL_VISIBLE = false;
 const JOBS_PAGE_SIZE = 10;
+let JOBS_LAST_REFRESH_AT = null;
+let JOBS_LAST_REFRESH_TIMER = null;
 const JOBS_STATUS_COUNTS_BY_TYPE = {
   TRANSCRIPTION: null,
   OCR: null,
@@ -56,6 +58,13 @@ function formatJobTypeLabel(job) {
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
   if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
   return job?.job_type || job?.mode || "Processing";
+}
+
+function getJobTypeThemeClass(job) {
+  const jobType = String(job?.job_type || job?.mode || "").toUpperCase();
+  if (jobType === "OCR") return "job-type-label-ocr";
+  if (jobType === "TRANSCRIPTION") return "job-type-label-transcription";
+  return "job-type-label-neutral";
 }
 
 function buildStatusBadgeHtml(statusRaw) {
@@ -229,6 +238,57 @@ function clearHistoryCountsUi() {
   }
 }
 
+function formatLastRefreshedLabel(date) {
+  if (!date) return "Last refreshed: --";
+  const deltaSec = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (deltaSec < 5) return "Last refreshed: just now";
+  if (deltaSec < 60) return `Last refreshed: ${deltaSec}s ago`;
+  const mins = Math.floor(deltaSec / 60);
+  if (mins < 60) return `Last refreshed: ${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  return `Last refreshed: ${hrs}h ago`;
+}
+
+function updateLastRefreshedUi() {
+  const el = document.getElementById("historyLastRefreshed");
+  if (!el) return;
+  el.textContent = formatLastRefreshedLabel(JOBS_LAST_REFRESH_AT);
+}
+
+function ensureLastRefreshedTicker() {
+  if (JOBS_LAST_REFRESH_TIMER) return;
+  JOBS_LAST_REFRESH_TIMER = setInterval(updateLastRefreshedUi, 10000);
+}
+
+async function retryJobById(jobId) {
+  if (!jobId || !ID_TOKEN) return false;
+
+  try {
+    const res = await fetch(`${API}/jobs/${jobId}/retry`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + ID_TOKEN },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return false;
+    }
+
+    const payload = await safeJson(res);
+    if (!res.ok) {
+      toast(responseErrorMessage(res, payload, "Unable to retry job"), "error");
+      return false;
+    }
+
+    toast("Retry requested", "success");
+    refreshJobs();
+    return true;
+  } catch {
+    toast("Network error while retrying job", "error");
+    return false;
+  }
+}
+
 function renderJobsList(jobs) {
   const box = document.getElementById("jobs");
   if (!box) return;
@@ -249,15 +309,17 @@ function renderJobsList(jobs) {
     const detailsHtml = buildJobDetailsHtml(j);
     const uploadedFile = (j.input_filename || j.input_file || "-");
     const status = formatStatus(j.status);
-    const statusBadgeHtml = buildStatusBadgeHtml(j.status);
     const statusDotSymbol = getStatusDotSymbol(j.status);
     const typeLabel = formatJobTypeLabel(j);
+    const typeThemeClass = getJobTypeThemeClass(j);
     const rowStatusClass = String(j.status || "").toUpperCase();
 
     let actionHtml = "";
     if (j.output_path) {
-      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(j.output_path)}">⬇ Download</a>`;
-    } else if (j.status === "CANCELLED" || j.status === "FAILED") {
+      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(j.output_path)}">⬇ Download output</a>`;
+    } else if (j.status === "FAILED") {
+      actionHtml = `<a href="#" class="history-retry" data-job-id="${escapeHtml(j.job_id)}">↻ Retry</a>`;
+    } else if (j.status === "CANCELLED") {
       actionHtml = `<span class="job-pending">${escapeHtml(status)}</span>`;
     } else {
       actionHtml = `
@@ -270,8 +332,7 @@ function renderJobsList(jobs) {
     <div class="job-row-inline">
       <div class="job-left job-left-${rowStatusClass}">
         <span class="job-status-dot">${escapeHtml(statusDotSymbol)}</span>
-        <span class="job-type-label">${escapeHtml(typeLabel)}</span>
-        ${statusBadgeHtml}
+        <span class="job-type-label ${escapeHtml(typeThemeClass)}">${escapeHtml(typeLabel)}</span>
       </div>
 
       <div class="job-middle">
@@ -305,6 +366,14 @@ function renderJobsList(jobs) {
         e.preventDefault();
         if (typeof cancelJobById !== "function") return;
         await cancelJobById(j.job_id);
+      };
+    }
+
+    const retryLink = div.querySelector(".history-retry");
+    if (retryLink) {
+      retryLink.onclick = async (e) => {
+        e.preventDefault();
+        await retryJobById(j.job_id);
       };
     }
 
@@ -474,6 +543,9 @@ async function loadJobs({ reset = false, append = false } = {}) {
         setHistoryStatusControlVisible(true);
       }
       renderFilteredJobs();
+      JOBS_LAST_REFRESH_AT = new Date();
+      updateLastRefreshedUi();
+      ensureLastRefreshedTicker();
       return;
     }
 
@@ -501,6 +573,9 @@ async function loadJobs({ reset = false, append = false } = {}) {
       setHistoryStatusControlVisible(true);
     }
     renderFilteredJobs();
+    JOBS_LAST_REFRESH_AT = new Date();
+    updateLastRefreshedUi();
+    ensureLastRefreshedTicker();
   } finally {
     if (loadingEl) loadingEl.style.display = "none";
     box.style.display = "block";
@@ -511,12 +586,22 @@ async function loadJobs({ reset = false, append = false } = {}) {
   }
 }
 
+window.ensureHistoryLoaded = function ensureHistoryLoaded({ force = false } = {}) {
+  if (!ID_TOKEN) return;
+  const state = ensureJobsState(JOBS_TYPE_FILTER, JOBS_FILTER);
+  if (!force && state && state.loaded) {
+    renderFilteredJobs();
+    return;
+  }
+  loadJobs({ reset: force, append: false });
+};
+
 window.refreshJobs = function refreshJobs() {
   if (!ID_TOKEN) {
     toast("Please sign in first", "info");
     return;
   }
-  JOBS_TYPE_FILTER = "TRANSCRIPTION";
+  JOBS_TYPE_FILTER = "OCR";
   JOBS_FILTER = "COMPLETED";
   JOBS_STATUS_CONTROL_VISIBLE = false;
   setHistoryStatusControlVisible(false);
@@ -580,7 +665,7 @@ function renderJob(job) {
     <div class="job-actions">
       ${job.output_file
       ? `<a href="${job.download_url}" class="history-download">
-               ⬇ Download
+               ⬇ Download output
              </a>`
       : `<span class="job-pending">Processing…</span>`
     }

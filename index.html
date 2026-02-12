@@ -10,22 +10,48 @@
 </head>
 
 <body>
-
-  <div id="toasts"></div>
-
   <div class="container">
     <div id="appContent">
 
       <div data-include="/partials/header.html"></div>
+      <div id="toasts" aria-live="polite" aria-atomic="true"></div>
       <div data-include="/partials/hero.html"></div>
       <div data-include="/partials/how-it-works.html"></div>
       <div data-include="/partials/trust-note.html"></div>
 
       <div id="authOnly" style="display:none;">
-        <div data-include="/partials/upload-grid.html"></div>
-        <div data-include="/partials/processing-panel.html"></div>
-        <div data-include="/partials/completion-card.html"></div>
-        <div data-include="/partials/history.html"></div>
+        <div class="workspace-switcher" role="tablist" aria-label="Workspace view">
+          <button
+            id="workspaceTabConversion"
+            class="workspace-tab active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            onclick="setWorkspaceView('conversion')"
+          >
+            New Conversion
+          </button>
+          <button
+            id="workspaceTabHistory"
+            class="workspace-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            onclick="setWorkspaceView('history')"
+          >
+            History
+          </button>
+        </div>
+
+        <section id="workspaceConversionView">
+          <div data-include="/partials/upload-grid.html"></div>
+          <div data-include="/partials/processing-panel.html"></div>
+          <div data-include="/partials/completion-card.html"></div>
+        </section>
+
+        <section id="workspaceHistoryView" style="display:none;">
+          <div data-include="/partials/history.html"></div>
+        </section>
       </div>
 
     </div>

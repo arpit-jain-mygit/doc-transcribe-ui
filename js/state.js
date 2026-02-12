@@ -1,5 +1,6 @@
 let ID_TOKEN = null;
 let USER_EMAIL = null;
+let USER_PICTURE = null;
 let JOB_ID = null;
 let POLLER = null;
 

@@ -57,6 +57,7 @@ function onGoogleSignIn(resp) {
   } catch { }
 
   USER_EMAIL = payload.email || "";
+  USER_PICTURE = payload.picture || "";
 
   localStorage.setItem(
     AUTH_STORAGE_KEY,
@@ -67,20 +68,15 @@ function onGoogleSignIn(resp) {
     })
   );
 
-  const userEmailEl = document.getElementById("userEmail");
-  const userAvatarEl = document.getElementById("userAvatar");
-
-  if (userEmailEl) userEmailEl.innerText = USER_EMAIL;
-  if (userAvatarEl)
-    userAvatarEl.src =
-      payload.picture || "https://www.gravatar.com/avatar?d=mp";
+  if (typeof setUserProfileIdentity === "function") {
+    setUserProfileIdentity({ email: USER_EMAIL, picture: USER_PICTURE });
+  }
 
   showLoggedInUI();
   toggleAuthOnly(true);
   hidePending();
 
   toast("Signed in successfully", "success");
-  loadJobs();
 }
 
 // =====================================================
@@ -94,6 +90,7 @@ function logout() {
 
   ID_TOKEN = null;
   USER_EMAIL = null;
+  USER_PICTURE = null;
   JOB_ID = null;
 
   localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -133,20 +130,15 @@ function restoreSession() {
 
     ID_TOKEN = token;
     USER_EMAIL = email;
-
-    const userEmailEl = document.getElementById("userEmail");
-    const userAvatarEl = document.getElementById("userAvatar");
-
-    if (userEmailEl) userEmailEl.innerText = email;
-    if (userAvatarEl)
-      userAvatarEl.src =
-        picture || "https://www.gravatar.com/avatar?d=mp";
+    USER_PICTURE = picture || "";
+    if (typeof setUserProfileIdentity === "function") {
+      setUserProfileIdentity({ email: USER_EMAIL, picture: USER_PICTURE });
+    }
 
     SESSION_RESTORED = true;
 
     showLoggedInUI();
     toggleAuthOnly(true);
-    loadJobs();
 
     const job = localStorage.getItem("active_job_id");
     if (job) {

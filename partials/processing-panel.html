@@ -7,12 +7,14 @@
     लगभग 2–3 मिनट ले सकता है।
   </div>
 
-  <button class="processing-close" onclick="hideProcessing()">✕</button>
   <button id="cancelJobBtn" class="processing-cancel" onclick="cancelCurrentJob()">Cancel Job</button>
 
   <h2 id="processingHeader"></h2>
   <div id="status"></div>
   <div id="stage"></div>
+  <div id="processingMetrics" class="processing-metrics">
+    <span id="progressPct" class="processing-progress-pct">0%</span>
+  </div>
 
   <progress id="progress" value="0" max="100"></progress>
 

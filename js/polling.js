@@ -4,6 +4,14 @@
 
 let POLL_INTERVAL = null;
 let lastProgress = 0;
+let CANCEL_REQUESTED = false;
+function updateProcessingMetrics({ progressValue }) {
+  const pctEl = document.getElementById("progressPct");
+  if (!pctEl) return;
+
+  const pct = Number.isFinite(progressValue) ? Math.max(0, Math.min(100, Math.round(progressValue))) : 0;
+  pctEl.textContent = `${pct}%`;
+}
 
 function humanizeStage(stage) {
   if (!stage) return "";
@@ -54,12 +62,15 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
     stageEl.textContent = stageText;
     stageEl.classList.remove("error");
   }
+
+  updateProcessingMetrics({ progressValue: value });
 }
 
 window.bootstrapProgress = bootstrapProgress;
 
 async function cancelJobById(jobId, { silent = false } = {}) {
   if (!jobId || !ID_TOKEN) return false;
+  const activeType = String(window.ACTIVE_JOB_TYPE || "").toUpperCase();
 
   try {
     const res = await fetch(`${API}/jobs/${jobId}/cancel`, {
@@ -80,11 +91,19 @@ async function cancelJobById(jobId, { silent = false } = {}) {
     if (!silent) toast("Cancellation requested", "info");
 
     if (jobId === JOB_ID) {
+      if (activeType && typeof setJobsTypeFilter === "function") {
+        setJobsTypeFilter(activeType);
+      }
+      if (typeof setJobsFilter === "function") {
+        setJobsFilter("CANCELLED");
+      }
       handleJobCancelled({ stage: "Cancelled by user" });
     }
-
+    if (typeof setJobsFilter === "function") {
+      setJobsFilter("CANCELLED");
+    }
     if (typeof loadJobs === "function") {
-      loadJobs();
+      loadJobs({ reset: true, append: false });
     }
 
     return true;
@@ -102,10 +121,22 @@ window.cancelCurrentJob = async function cancelCurrentJob() {
     return;
   }
 
+  const confirmed = window.confirm(
+    "Cancel this running job?\n\nCurrent processing will stop and the job will move to Cancelled history."
+  );
+  if (!confirmed) return;
+  CANCEL_REQUESTED = true;
+
   const cancelBtn = document.getElementById("cancelJobBtn");
   if (cancelBtn) cancelBtn.disabled = true;
 
-  await cancelJobById(JOB_ID);
+  const ok = await cancelJobById(JOB_ID);
+  if (!ok && cancelBtn) {
+    cancelBtn.disabled = false;
+  }
+  if (!ok) {
+    CANCEL_REQUESTED = false;
+  }
 };
 
 function startPolling() {
@@ -127,6 +158,8 @@ function startPolling() {
     progressEl.max = 100;
     progressEl.value = Math.max(progressEl.value || 0, lastProgress);
   }
+
+  updateProcessingMetrics({ progressValue: lastProgress });
 
   pollStatus();
   POLL_INTERVAL = setInterval(pollStatus, 3000);
@@ -181,10 +214,12 @@ function updateProcessingUI(data) {
   }
 
   const raw = Number(data.progress);
+  let effectiveProgress = lastProgress;
   if (progressEl && Number.isFinite(raw)) {
     const target = Math.max(0, Math.min(100, raw));
     lastProgress = Math.max(lastProgress, target);
     progressEl.value = lastProgress;
+    effectiveProgress = lastProgress;
 
     const header = document.querySelector(".processing-panel h2");
 
@@ -209,6 +244,8 @@ function updateProcessingUI(data) {
     stageEl.textContent = humanizeStage(data.stage);
     stageEl.classList.toggle("error", data.status === "FAILED");
   }
+
+  updateProcessingMetrics({ progressValue: effectiveProgress });
 }
 
 function completeAndResetUI() {
@@ -230,12 +267,20 @@ function completeAndResetUI() {
   if (cancelBtn) cancelBtn.disabled = true;
 
   JOB_ID = null;
+  window.ACTIVE_JOB_TYPE = null;
   localStorage.removeItem("active_job_id");
+  CANCEL_REQUESTED = false;
 
   if (typeof setUIBusy === "function") setUIBusy(false);
+  if (typeof clearUploadInputState === "function") clearUploadInputState("unifiedFile");
 }
 
 function handleJobCompleted(data) {
+  if (CANCEL_REQUESTED) {
+    completeAndResetUI();
+    return;
+  }
+
   completeAndResetUI();
 
   if (typeof showCompletion === "function") {
@@ -286,6 +331,7 @@ function handleJobFailed(data) {
 }
 
 function handleJobCancelled(data) {
+  CANCEL_REQUESTED = false;
   completeAndResetUI();
   toast(data?.stage || "Job cancelled", "info");
 }

@@ -3,6 +3,7 @@
 <div class="history-top-bar">
   <h2>Generated Files History</h2>
   <div class="history-top-controls">
+    <span id="historyLastRefreshed" class="history-last-refreshed">Last refreshed: --</span>
     <button
       id="refreshJobsBtn"
       class="history-refresh-btn"
@@ -19,26 +20,26 @@
   <div class="history-filters-row">
   <div class="history-kind-tabs" role="tablist" aria-label="History type filters">
     <button
-      id="historyKindTranscription"
-      class="history-kind-tab active"
+      id="historyKindOcr"
+      class="history-kind-tab history-kind-tab-ocr active"
       type="button"
       role="tab"
       aria-selected="true"
-      onclick="setJobsTypeFilter('TRANSCRIPTION')"
-    >
-      Video / Audio to Hindi Text
-      <span id="historyKindCountTranscription" class="history-kind-count" style="display:none;"></span>
-    </button>
-    <button
-      id="historyKindOcr"
-      class="history-kind-tab"
-      type="button"
-      role="tab"
-      aria-selected="false"
       onclick="setJobsTypeFilter('OCR')"
     >
       PDF / Image to Hindi Text
       <span id="historyKindCountOcr" class="history-kind-count" style="display:none;"></span>
+    </button>
+    <button
+      id="historyKindTranscription"
+      class="history-kind-tab history-kind-tab-transcription"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      onclick="setJobsTypeFilter('TRANSCRIPTION')"
+    >
+      Video / Audio to Hindi Text
+      <span id="historyKindCountTranscription" class="history-kind-count" style="display:none;"></span>
     </button>
   </div>
   <div id="historyStatusControl" class="history-status-control" style="display:none;">

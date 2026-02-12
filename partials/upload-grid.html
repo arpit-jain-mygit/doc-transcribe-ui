@@ -2,67 +2,45 @@
   ⏳ Your account is pending approval. Uploads are disabled.
 </div>
 
-<div class="upload-grid">
-
-  <!-- OCR -->
-  <div class="card">
-    <h2>PDF / Image to Hindi Text (OCR)</h2>
+<div class="upload-grid upload-grid-single">
+  <div id="unifiedUploadCard" class="card upload-card upload-card-unified" data-upload-mode="OCR">
+    <div class="upload-jain-note">
+      जैन वाङ्मय की शुद्धता और सम्मान के साथ रूपांतरण।
+    </div>
 
     <div class="upload-row">
-      <div class="drop-zone" id="ocrDrop">
+      <div class="drop-zone" id="unifiedDrop">
         <input
           type="file"
-          id="ocrFile"
-          accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff"
+          id="unifiedFile"
+          accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff,.mp3,.wav,.m4a,.mp4,.mov,.webm"
           data-auto-upload-type="OCR"
           hidden
         />
-        <span class="label">Drag PDF / image or click</span>
-        <span class="filename" id="ocrFilename"></span>
+        <span class="label" id="unifiedDropLabel">Files start processing automatically after selection.</span>
+        <span class="filename" id="unifiedFilename"></span>
       </div>
-
-      <button
-        class="btn-primary"
-        onclick="uploadFrom('OCR','ocrFile')"
-      >
-        Convert now
-      </button>
     </div>
 
-    <div class="hint">
-      Supported: PDF, PNG, JPG, JPEG, WEBP, TIF, TIFF. Upload starts automatically after file selection.
+    <div class="format-groups" aria-label="Supported formats">
+      <div id="formatRowOCR" class="format-row" aria-label="OCR supported formats">
+        <span class="format-label">OCR</span>
+        <span class="format-chip">PDF</span>
+        <span class="format-chip">PNG</span>
+        <span class="format-chip">JPG</span>
+        <span class="format-chip">WEBP</span>
+        <span class="format-chip">TIFF</span>
+      </div>
+      <span class="format-sep" aria-hidden="true">|</span>
+      <div id="formatRowAV" class="format-row" aria-label="Transcription supported formats">
+        <span class="format-label">A/V</span>
+        <span class="format-chip">MP3</span>
+        <span class="format-chip">WAV</span>
+        <span class="format-chip">M4A</span>
+        <span class="format-chip">MP4</span>
+        <span class="format-chip">MOV</span>
+        <span class="format-chip">WEBM</span>
+      </div>
     </div>
   </div>
-
-  <!-- TRANSCRIPTION -->
-  <div class="card">
-    <h2>Video / Audio to Hindi Text</h2>
-
-    <!-- File upload -->
-    <div class="upload-row">
-      <div class="drop-zone" id="transcribeDrop">
-        <input
-          type="file"
-          id="transcribeFile"
-          accept=".mp3,.wav,.m4a,.mp4,.mov,.webm"
-          data-auto-upload-type="TRANSCRIPTION"
-          hidden
-        />
-        <span class="label">Drag audio / video or click</span>
-        <span class="filename" id="transcribeFilename"></span>
-      </div>
-
-      <button
-        class="btn-primary"
-        onclick="uploadFrom('TRANSCRIPTION','transcribeFile')"
-      >
-        Convert now
-      </button>
-    </div>
-
-    <div class="hint">
-      Supported: MP3, WAV, M4A, MP4, MOV, WEBM. Upload starts automatically after file selection.
-    </div>
-  </div>
-
 </div>

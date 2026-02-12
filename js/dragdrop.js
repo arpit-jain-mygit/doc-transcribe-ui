@@ -16,6 +16,10 @@ function attachDragDrop(zoneId, inputId, nameId) {
       name.textContent = picked.name;
     }
 
+    if (picked && typeof autoselectUploadModeForFile === "function") {
+      autoselectUploadModeForFile(picked);
+    }
+
     const autoType = input.dataset.autoUploadType;
     if (!picked || !autoType) return;
 
