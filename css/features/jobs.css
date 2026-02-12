@@ -51,6 +51,18 @@
   text-decoration: underline;
 }
 
+.history-cancel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2626;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.history-cancel:hover {
+  text-decoration: underline;
+}
+
 /* Pending state */
 .job-pending {
   font-size: 12px;

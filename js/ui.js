@@ -95,9 +95,9 @@ function showCompletion(job) {
   const uploadedFileEl = document.getElementById("uploadedFile");
   if (uploadedFileEl) {
     uploadedFileEl.textContent =
-      job.source === "youtube" && job.url
-        ? job.url
-        : job.input_file || "";
+      job.source === "youtube" && (job.url || job.video_url)
+        ? (job.url || job.video_url)
+        : (job.input_filename || job.input_file || LAST_UPLOADED_FILENAME || "-");
   }
 
   const downloadLink = document.getElementById("downloadLink");

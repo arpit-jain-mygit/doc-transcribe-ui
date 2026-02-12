@@ -4,7 +4,54 @@
 
 <div class="upload-grid">
 
-  
+  <!-- OCR -->
+  <div class="card">
+    <h2>PDF / Image to Hindi Text (OCR)</h2>
+
+    <!-- URL input -->
+    <div class="url-line">
+      <div class="url-input">
+        <span class="url-icon">🔗</span>
+        <input
+          type="url"
+          id="ocrUrl"
+          placeholder="Paste YouTube URL (optional)"
+        />
+      </div>
+
+      <button class="btn-primary url-btn" onclick="submitUrl('OCR')">
+        Convert
+      </button>
+    </div>
+
+    <div class="or-separator">
+      <span>OR</span>
+    </div>
+
+    <div class="upload-row">
+      <div class="drop-zone" id="ocrDrop">
+        <input
+          type="file"
+          id="ocrFile"
+          accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff"
+          hidden
+        />
+        <span class="label">Drag PDF / image or click</span>
+        <span class="filename" id="ocrFilename"></span>
+      </div>
+
+      <button
+        class="btn-primary"
+        onclick="uploadFrom('OCR','ocrFile')"
+      >
+        Convert
+      </button>
+    </div>
+
+    <div class="hint">
+      Supported: PDF, PNG, JPG, JPEG, WEBP, TIF, TIFF
+    </div>
+  </div>
 
   <!-- TRANSCRIPTION -->
   <div class="card">

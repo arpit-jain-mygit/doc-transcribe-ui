@@ -30,7 +30,12 @@ async function loadJobs() {
         ? `<a href="#" class="history-download" data-url="${j.output_path}">
              ⬇ Download
            </a>`
-        : `<span class="job-pending">Processing…</span>`
+        : (j.status === "CANCELLED" || j.status === "FAILED")
+          ? `<span class="job-pending">${formatStatus(j.status)}</span>`
+          : `<span class="job-pending">Processing…</span>
+             <a href="#" class="history-cancel" data-job-id="${j.job_id}">
+               Cancel
+             </a>`
       }
   </div>
 `;
@@ -43,7 +48,16 @@ async function loadJobs() {
     if (downloadLink) {
       downloadLink.onclick = (e) => {
         e.preventDefault();
-        forceDownload(j.output_path, "transcript.txt");
+        forceDownload(j.output_path, j.output_filename || "transcript.txt");
+      };
+    }
+
+    const cancelLink = div.querySelector(".history-cancel");
+    if (cancelLink) {
+      cancelLink.onclick = async (e) => {
+        e.preventDefault();
+        if (typeof cancelJobById !== "function") return;
+        await cancelJobById(j.job_id);
       };
     }
 
@@ -86,4 +100,3 @@ function renderJob(job) {
 
   return row;
 }
-

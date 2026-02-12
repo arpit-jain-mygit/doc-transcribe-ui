@@ -64,6 +64,31 @@
   cursor: not-allowed;
 }
 
+.processing-cancel {
+  position: absolute;
+  top: 16px;
+  right: 64px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.processing-cancel:hover {
+  background: #fee2e2;
+}
+
+.processing-cancel:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* -------------------------------
    STATUS ROWS — SINGLE BASELINE
 -------------------------------- */

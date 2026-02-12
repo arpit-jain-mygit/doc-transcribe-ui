@@ -138,8 +138,21 @@ function forceDownload(url, filename) {
   }
 
   try {
-    fetch(url)
-      .then(res => res.blob())
+    const resolved = new URL(url, window.location.href);
+    const isSameOrigin = resolved.origin === window.location.origin;
+
+    if (!isSameOrigin) {
+      // Cross-origin signed URLs cannot be fetched due to CORS.
+      // Navigate directly; API will set attachment headers.
+      window.location.assign(resolved.href);
+      return;
+    }
+
+    fetch(resolved.href)
+      .then(res => {
+        if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+        return res.blob();
+      })
       .then(blob => {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
@@ -147,6 +160,11 @@ function forceDownload(url, filename) {
         document.body.appendChild(a);
         a.click();
         a.remove();
+        URL.revokeObjectURL(a.href);
+      })
+      .catch(e => {
+        console.error("forceDownload failed", e);
+        window.open(resolved.href, "_blank", "noopener,noreferrer");
       });
   } catch (e) {
     console.error("forceDownload failed", e);

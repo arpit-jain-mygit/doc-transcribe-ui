@@ -16,13 +16,16 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
   if (statusBox) statusBox.style.display = "block";
   document.body.classList.add("processing-active");
 
-  // 🧘 Start Jain thoughts as soon as processing begins
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (cancelBtn) cancelBtn.disabled = false;
+
+  // Start Jain thoughts as soon as processing begins
   if (typeof startThoughts === "function") startThoughts();
 
   if (progressEl) {
     progressEl.max = 100;
     progressEl.value = value;
-    lastProgress = value; // prevent backward jump
+    lastProgress = value;
   }
 
   if (stageEl) {
@@ -31,8 +34,57 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
   }
 }
 
-// expose for upload.js
 window.bootstrapProgress = bootstrapProgress;
+
+async function cancelJobById(jobId, { silent = false } = {}) {
+  if (!jobId || !ID_TOKEN) return false;
+
+  try {
+    const res = await fetch(`${API}/jobs/${jobId}/cancel`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + ID_TOKEN },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return false;
+    }
+
+    if (!res.ok) {
+      if (!silent) toast("Unable to cancel job", "error");
+      return false;
+    }
+
+    if (!silent) toast("Cancellation requested", "info");
+
+    if (jobId === JOB_ID) {
+      handleJobCancelled({ stage: "Cancelled by user" });
+    }
+
+    if (typeof loadJobs === "function") {
+      loadJobs();
+    }
+
+    return true;
+  } catch {
+    if (!silent) toast("Network error while cancelling", "error");
+    return false;
+  }
+}
+
+window.cancelJobById = cancelJobById;
+
+window.cancelCurrentJob = async function cancelCurrentJob() {
+  if (!JOB_ID) {
+    toast("No running job to cancel", "info");
+    return;
+  }
+
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (cancelBtn) cancelBtn.disabled = true;
+
+  await cancelJobById(JOB_ID);
+};
 
 function startPolling() {
   if (!JOB_ID) return;
@@ -43,12 +95,14 @@ function startPolling() {
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.style.display = "block";
 
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (cancelBtn) cancelBtn.disabled = false;
+
   document.body.classList.add("processing-active");
 
   const progressEl = document.getElementById("progress");
   if (progressEl) {
     progressEl.max = 100;
-    // DO NOT reset progress — bootstrap already set it
     progressEl.value = Math.max(progressEl.value || 0, lastProgress);
   }
 
@@ -90,6 +144,8 @@ async function pollStatus() {
     handleJobCompleted(data);
   } else if (data.status === "FAILED") {
     handleJobFailed(data);
+  } else if (data.status === "CANCELLED") {
+    handleJobCancelled(data);
   }
 }
 
@@ -107,25 +163,9 @@ function updateProcessingUI(data) {
     lastProgress = Math.max(lastProgress, target);
     progressEl.value = lastProgress;
 
-    // ----------------------------------------
-    // 🧘 SLOW BREATHING AS WE APPROACH COMPLETION
-    // ----------------------------------------
-    const dot = document.querySelector(".processing-panel h2::before");
-
-    // We cannot query ::before directly,
-    // so apply CSS variable on the parent
     const header = document.querySelector(".processing-panel h2");
 
     if (header) {
-      /*
-        Progress → pulse speed mapping:
-  
-        0%   → 1.6s (active)
-        50%  → 2.2s (calmer)
-        80%  → 3.2s (very calm)
-        100% → 4.5s (almost still)
-      */
-
       let pulseSpeed;
 
       if (target < 50) {
@@ -142,21 +182,17 @@ function updateProcessingUI(data) {
     }
   }
 
-
   if (stageEl && data.stage) {
     stageEl.textContent = data.stage;
-    stageEl.classList.remove("error");
+    stageEl.classList.toggle("error", data.status === "FAILED");
   }
 }
 
-function handleJobCompleted(data) {
+function completeAndResetUI() {
   if (typeof stopThoughts === "function") stopThoughts();
 
   const header = document.querySelector(".processing-panel h2");
-  if (header) {
-    header.style.setProperty("--pulse-speed", "0s");
-  }
-
+  if (header) header.style.setProperty("--pulse-speed", "0s");
 
   stopPolling();
   window.POLLING_ACTIVE = false;
@@ -167,10 +203,17 @@ function handleJobCompleted(data) {
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.style.display = "none";
 
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (cancelBtn) cancelBtn.disabled = true;
+
   JOB_ID = null;
   localStorage.removeItem("active_job_id");
 
   if (typeof setUIBusy === "function") setUIBusy(false);
+}
+
+function handleJobCompleted(data) {
+  completeAndResetUI();
 
   if (typeof showCompletion === "function") {
     showCompletion(data);
@@ -193,7 +236,7 @@ function handleJobCompleted(data) {
 
       forceDownload(
         data.download_url,
-        data.output_file || "transcript.txt"
+        data.output_filename || data.output_file || "transcript.txt"
       );
     };
   }
@@ -206,18 +249,7 @@ function handleJobCompleted(data) {
 }
 
 function handleJobFailed(data) {
-  if (typeof stopThoughts === "function") stopThoughts();
-
-  stopPolling();
-  window.POLLING_ACTIVE = false;
-  window.JOB_COMPLETED = true;
-
-  document.body.classList.remove("processing-active");
-
-  JOB_ID = null;
-  localStorage.removeItem("active_job_id");
-
-  if (typeof setUIBusy === "function") setUIBusy(false);
+  completeAndResetUI();
 
   if (data && data.stage) {
     const stageEl = document.getElementById("stage");
@@ -225,10 +257,20 @@ function handleJobFailed(data) {
       stageEl.textContent = data.stage;
       stageEl.classList.add("error");
     }
+    toast("Processing failed", "error");
     return;
   }
 
   toast("Processing failed. Please try again.", "error");
+}
+
+function handleJobCancelled(data) {
+  completeAndResetUI();
+  toast(data?.stage || "Job cancelled", "info");
+
+  if (typeof loadJobs === "function") {
+    loadJobs();
+  }
 }
 
 document.addEventListener("partials:loaded", () => {
