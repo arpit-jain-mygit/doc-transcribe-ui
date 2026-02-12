@@ -36,7 +36,8 @@ function renderGoogleButton() {
   google.accounts.id.renderButton(btn, {
     theme: "outline",
     size: "large",
-    text: "signin_with"
+    text: "signin_with",
+    width: 320
   });
 
   googleRendered = true;
