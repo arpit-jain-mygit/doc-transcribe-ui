@@ -11,8 +11,21 @@ function attachDragDrop(zoneId, inputId, nameId) {
   };
 
   input.onchange = () => {
-    if (name && input.files[0]) {
-      name.textContent = input.files[0].name;
+    const picked = input.files && input.files[0];
+    if (name && picked) {
+      name.textContent = picked.name;
+    }
+
+    const autoType = input.dataset.autoUploadType;
+    if (!picked || !autoType) return;
+
+    // Avoid duplicate auto-submit for identical file token on repeated change dispatches.
+    const token = `${picked.name}|${picked.size}|${picked.lastModified}`;
+    if (input.dataset.lastAutoUploadToken === token) return;
+    input.dataset.lastAutoUploadToken = token;
+
+    if (typeof uploadFrom === "function") {
+      uploadFrom(autoType, inputId);
     }
   };
 

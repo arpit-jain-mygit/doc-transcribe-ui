@@ -14,6 +14,7 @@
           type="file"
           id="ocrFile"
           accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff"
+          data-auto-upload-type="OCR"
           hidden
         />
         <span class="label">Drag PDF / image or click</span>
@@ -24,12 +25,12 @@
         class="btn-primary"
         onclick="uploadFrom('OCR','ocrFile')"
       >
-        Convert
+        Convert now
       </button>
     </div>
 
     <div class="hint">
-      Supported: PDF, PNG, JPG, JPEG, WEBP, TIF, TIFF
+      Supported: PDF, PNG, JPG, JPEG, WEBP, TIF, TIFF. Upload starts automatically after file selection.
     </div>
   </div>
 
@@ -44,6 +45,7 @@
           type="file"
           id="transcribeFile"
           accept=".mp3,.wav,.m4a,.mp4,.mov,.webm"
+          data-auto-upload-type="TRANSCRIPTION"
           hidden
         />
         <span class="label">Drag audio / video or click</span>
@@ -54,12 +56,12 @@
         class="btn-primary"
         onclick="uploadFrom('TRANSCRIPTION','transcribeFile')"
       >
-        Convert
+        Convert now
       </button>
     </div>
 
     <div class="hint">
-      Supported: MP3, WAV, M4A, MP4, MOV, WEBM
+      Supported: MP3, WAV, M4A, MP4, MOV, WEBM. Upload starts automatically after file selection.
     </div>
   </div>
 

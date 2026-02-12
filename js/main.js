@@ -36,6 +36,21 @@ window.addEventListener("beforeunload", (e) => {
   }
 });
 
+window.addEventListener("keydown", (e) => {
+  const isUploadShortcut = (e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === "u";
+  if (!isUploadShortcut) return;
+
+  const tag = (document.activeElement?.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+
+  e.preventDefault();
+
+  // Ctrl/Cmd+U => transcription picker, Ctrl/Cmd+Shift+U => OCR picker.
+  const pickerId = e.shiftKey ? "ocrFile" : "transcribeFile";
+  const picker = document.getElementById(pickerId);
+  if (picker) picker.click();
+});
+
 // =====================================================
 // HIDE PROCESSING PANEL (CLOSE BUTTON)
 // =====================================================

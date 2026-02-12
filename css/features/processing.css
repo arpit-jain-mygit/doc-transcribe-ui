@@ -18,6 +18,12 @@
   position: relative;
 }
 
+#statusBox.processing-panel {
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+}
+
 /* -------------------------------
    VERTICAL RHYTHM
 -------------------------------- */

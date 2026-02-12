@@ -87,6 +87,13 @@ function hideCompletion() {
 
 window.hideCompletion = hideCompletion;
 
+window.scrollToHistory = function scrollToHistory(e) {
+  if (e) e.preventDefault();
+  const target = document.getElementById("historySection");
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
 // COMPLETION RENDER
 function formatCompletionMediaDuration(secondsRaw) {
   const total = Number(secondsRaw);

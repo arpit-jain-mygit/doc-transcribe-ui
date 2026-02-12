@@ -334,7 +334,22 @@
 
 /* Right: CTA */
 .completion-row-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   white-space: nowrap;
+}
+
+.completion-secondary-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-decoration: none;
+}
+
+.completion-secondary-link:hover {
+  color: #1e293b;
+  text-decoration: underline;
 }
 
 .completion-download {
