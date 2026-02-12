@@ -5,6 +5,26 @@
 let POLL_INTERVAL = null;
 let lastProgress = 0;
 
+function humanizeStage(stage) {
+  if (!stage) return "";
+
+  const chunkMatch = /^Transcribing chunk (\d+)\/(\d+)$/i.exec(stage.trim());
+  if (chunkMatch) {
+    const current = chunkMatch[1];
+    const total = chunkMatch[2];
+    return `Transcribing your audio: part ${current} of ${total}`;
+  }
+
+  const ocrMatch = /^OCR page (\d+)\/(\d+)$/i.exec(stage.trim());
+  if (ocrMatch) {
+    const current = ocrMatch[1];
+    const total = ocrMatch[2];
+    return `Reading your document: page ${current} of ${total}`;
+  }
+
+  return stage;
+}
+
 /* ---------------------------------------------------------
    IMMEDIATE PROGRESS BOOTSTRAP (UI ONLY)
    --------------------------------------------------------- */
@@ -183,7 +203,7 @@ function updateProcessingUI(data) {
   }
 
   if (stageEl && data.stage) {
-    stageEl.textContent = data.stage;
+    stageEl.textContent = humanizeStage(data.stage);
     stageEl.classList.toggle("error", data.status === "FAILED");
   }
 }

@@ -1,3 +1,35 @@
+function formatJobDuration(secondsRaw) {
+  const seconds = Number(secondsRaw);
+  if (!Number.isFinite(seconds) || seconds < 0) return "";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return `${mins}m ${secs}s`;
+}
+
+function buildJobDetails(job) {
+  const details = [];
+  const type = String(job.job_type || "").toUpperCase();
+
+  if (type === "TRANSCRIPTION") {
+    const bytes = Number(job.input_size_bytes);
+    if (Number.isFinite(bytes) && bytes > 0) {
+      details.push(`${(bytes / (1024 * 1024)).toFixed(2)} MB`);
+    }
+  }
+
+  if (type === "OCR") {
+    const pages = Number(job.total_pages);
+    if (Number.isFinite(pages) && pages > 0) {
+      details.push(`${pages} page${pages === 1 ? "" : "s"}`);
+    }
+  }
+
+  const duration = formatJobDuration(job.duration_sec);
+  if (duration) details.push(duration);
+
+  return details.join(" • ");
+}
+
 async function loadJobs() {
   if (!ID_TOKEN) return;
 
@@ -14,6 +46,7 @@ async function loadJobs() {
   jobs.forEach(j => {
     const div = document.createElement("div");
     div.className = "job";
+    const details = buildJobDetails(j);
 
     div.innerHTML = `
   <div class="job-row-inline">
@@ -22,8 +55,11 @@ async function loadJobs() {
       <span class="job-status">— ${formatStatus(j.status)}</span>
     </div>
 
-    <div class="job-time">
-      ${formatRelativeTime(j.updated_at)}
+    <div class="job-time-wrap">
+      <div class="job-time">
+        ${formatRelativeTime(j.updated_at)}
+      </div>
+      ${details ? `<div class="job-details">${details}</div>` : ""}
     </div>
 
     ${j.output_path

@@ -2,7 +2,7 @@ function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
   document
-    .querySelectorAll("button:not(.logout-link), input[type='file'], a.history-download")
+    .querySelectorAll("button:not(.logout-link):not(#cancelJobBtn), input[type='file'], a.history-download")
     .forEach(el => {
       el.disabled = isBusy;
       el.style.pointerEvents = isBusy ? "none" : "auto";
@@ -98,6 +98,38 @@ function showCompletion(job) {
       job.source === "youtube" && (job.url || job.video_url)
         ? (job.url || job.video_url)
         : (job.input_filename || job.input_file || LAST_UPLOADED_FILENAME || "-");
+  }
+
+  const completionMetaEl = document.getElementById("completionMeta");
+  if (completionMetaEl) {
+    const details = [];
+
+    const isTranscription = String(job.job_type || "").toUpperCase() === "TRANSCRIPTION";
+    const isOcr = String(job.job_type || "").toUpperCase() === "OCR";
+
+    if (isTranscription) {
+      const bytes = Number(job.input_size_bytes);
+      if (Number.isFinite(bytes) && bytes > 0) {
+        details.push(`${(bytes / (1024 * 1024)).toFixed(2)} MB`);
+      }
+    }
+
+    if (isOcr) {
+      const pages = Number(job.total_pages);
+      if (Number.isFinite(pages) && pages > 0) {
+        details.push(`${pages} page${pages === 1 ? "" : "s"}`);
+      }
+    }
+
+    const durationSec = Number(job.duration_sec);
+    if (Number.isFinite(durationSec) && durationSec >= 0) {
+      const mins = Math.floor(durationSec / 60);
+      const secs = Math.round(durationSec % 60);
+      details.push(`${mins}m ${secs}s`);
+    }
+
+    completionMetaEl.textContent = details.join(" • ");
+    completionMetaEl.style.display = details.length ? "block" : "none";
   }
 
   const downloadLink = document.getElementById("downloadLink");
