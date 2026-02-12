@@ -55,81 +55,22 @@ async function upload(type, file) {
   }
 
   if (!res.ok) {
-    toast("Upload failed", "error");
+    const payload = await safeJson(res);
+    toast(responseErrorMessage(res, payload, "Upload failed"), "error");
     setUIBusy(false);
     return;
   }
 
-  const data = await res.json();
+  const data = await safeJson(res);
+  if (!data || data._nonJson || !data.job_id) {
+    toast("Upload failed: invalid server response", "error");
+    setUIBusy(false);
+    return;
+  }
   JOB_ID = data.job_id;
   localStorage.setItem("active_job_id", JOB_ID);
 
   startPolling();
-}
-
-// -----------------------------
-// YOUTUBE URL
-// -----------------------------
-async function submitUrl(mode) {
-  const input =
-    mode === "OCR"
-      ? document.getElementById("ocrUrl")
-      : document.getElementById("transcribeUrl");
-
-  const url = input.value.trim();
-
-  if (!url) {
-    toast("Please enter a YouTube URL", "error");
-    return;
-  }
-
-  if (!ID_TOKEN) {
-    toast("Please sign in first", "error");
-    return;
-  }
-
-  try {
-    window.JOB_COMPLETED = false;
-    JOB_ID = null;
-
-    setUIBusy(true);
-    document.body.classList.add("processing-active");
-
-    if (typeof bootstrapProgress === "function") {
-      bootstrapProgress("Queuing YouTube job…", 3);
-    }
-
-    const header = document.getElementById("processingHeader");
-    if (header) header.textContent = "PROCESSING YouTube URL";
-
-    const res = await fetch(`${API}/youtube`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + ID_TOKEN,
-      },
-      body: JSON.stringify({
-        url,
-        type: mode === "OCR" ? "OCR" : "TRANSCRIPTION",
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`YouTube submit failed: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    JOB_ID = data.job_id;
-    localStorage.setItem("active_job_id", JOB_ID);
-
-    startPolling();
-
-  } catch (err) {
-    console.error(err);
-    toast("Failed to submit YouTube URL", "error");
-    setUIBusy(false);
-  }
 }
 
 function forceDownload(url, filename) {

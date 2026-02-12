@@ -1,15 +1,28 @@
 :root {
-  --bg: #f9fafb;
+  --font-sans: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+
+  --lh-tight: 1.2;
+  --lh-base: 1.45;
+
+  --bg: #f8fafc;
   --card: #ffffff;
-  --text: #111827;
-  --muted: #6b7280;
-  --border: #e5e7eb;
+  --text: #0f172a;
+  --text-body: #334155;
+  --muted: #64748b;
+  --muted-soft: #94a3b8;
+  --border: #e2e8f0;
 
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
 
   --success: #16a34a;
   --error: #dc2626;
+  --warning: #d97706;
   --info: #0284c7;
 
   --warning-bg: #fffbeb;

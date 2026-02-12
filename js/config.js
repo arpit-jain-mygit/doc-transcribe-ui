@@ -1,6 +1,6 @@
 const API_ENDPOINTS = {
   render: "https://doc-transcribe-api.onrender.com",
-  local: "http://127.0.0.1:8080",
+  local: "/api",
 };
 
 const API_MODE_STORAGE_KEY = "doc_api_mode";

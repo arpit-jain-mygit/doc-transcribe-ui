@@ -80,7 +80,51 @@ window.toggleAuthOnly = function (isLoggedIn) {
   authOnly.style.display = isLoggedIn ? "block" : "none";
 };
 
-// COMPLETION RENDER (FILE + YOUTUBE READY)
+function hideCompletion() {
+  const wrapper = document.querySelector(".completion-wrapper");
+  if (wrapper) wrapper.style.display = "none";
+}
+
+window.hideCompletion = hideCompletion;
+
+// COMPLETION RENDER
+function formatCompletionMediaDuration(secondsRaw) {
+  const total = Number(secondsRaw);
+  if (!Number.isFinite(total) || total < 0) return "";
+
+  const rounded = Math.round(total);
+  const hours = Math.floor(rounded / 3600);
+  const mins = Math.floor((rounded % 3600) / 60);
+  const secs = rounded % 60;
+
+  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+  if (mins > 0) return `${mins}m ${secs}s`;
+  return `${secs}s`;
+}
+
+function getCompletionTranscriptionMediaDuration(job) {
+  const candidates = [
+    job.media_duration_sec,
+    job.input_duration_sec,
+    job.audio_duration_sec,
+    job.video_duration_sec,
+    job.source_duration_sec,
+    job.duration_sec,
+  ];
+  for (const candidate of candidates) {
+    const text = formatCompletionMediaDuration(candidate);
+    if (text) return text;
+  }
+  return "";
+}
+
+function formatCompletionJobTypeLabel(job) {
+  const jobType = String(job?.job_type || "").toUpperCase();
+  if (jobType === "OCR") return "PDF / Image to Hindi Text";
+  if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
+  return job?.job_type || "";
+}
+
 function showCompletion(job) {
   const wrapper = document.querySelector(".completion-wrapper");
   if (wrapper) {
@@ -94,10 +138,13 @@ function showCompletion(job) {
 
   const uploadedFileEl = document.getElementById("uploadedFile");
   if (uploadedFileEl) {
-    uploadedFileEl.textContent =
-      job.source === "youtube" && (job.url || job.video_url)
-        ? (job.url || job.video_url)
-        : (job.input_filename || job.input_file || LAST_UPLOADED_FILENAME || "-");
+    uploadedFileEl.textContent = (job.input_filename || job.input_file || LAST_UPLOADED_FILENAME || "-");
+  }
+
+  const completionJobTypeEl = document.getElementById("completionJobType");
+  if (completionJobTypeEl) {
+    completionJobTypeEl.textContent = formatCompletionJobTypeLabel(job);
+    completionJobTypeEl.style.display = completionJobTypeEl.textContent ? "inline-flex" : "none";
   }
 
   const completionMetaEl = document.getElementById("completionMeta");
@@ -107,29 +154,69 @@ function showCompletion(job) {
     const isTranscription = String(job.job_type || "").toUpperCase() === "TRANSCRIPTION";
     const isOcr = String(job.job_type || "").toUpperCase() === "OCR";
 
-    if (isTranscription) {
-      const bytes = Number(job.input_size_bytes);
-      if (Number.isFinite(bytes) && bytes > 0) {
-        details.push(`${(bytes / (1024 * 1024)).toFixed(2)} MB`);
-      }
-    }
+    const bytes = Number(job.input_size_bytes);
+    const hasSize = Number.isFinite(bytes) && bytes > 0;
+    details.push({
+      key: "Size",
+      value: hasSize ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : "--",
+      placeholder: !hasSize,
+    });
 
     if (isOcr) {
       const pages = Number(job.total_pages);
       if (Number.isFinite(pages) && pages > 0) {
-        details.push(`${pages} page${pages === 1 ? "" : "s"}`);
+        details.push({
+          key: "Pages",
+          value: `${pages}`,
+        });
       }
     }
 
     const durationSec = Number(job.duration_sec);
     if (Number.isFinite(durationSec) && durationSec >= 0) {
-      const mins = Math.floor(durationSec / 60);
-      const secs = Math.round(durationSec % 60);
-      details.push(`${mins}m ${secs}s`);
+      const rounded = Math.round(durationSec);
+      const hrs = Math.floor(rounded / 3600);
+      const mins = Math.floor((rounded % 3600) / 60);
+      const secs = rounded % 60;
+      details.push({
+        key: "Time",
+        value: hrs > 0 ? `${hrs}h ${mins}m ${secs}s` : (mins > 0 ? `${mins}m ${secs}s` : `${secs}s`),
+      });
     }
 
-    completionMetaEl.textContent = details.join(" • ");
-    completionMetaEl.style.display = details.length ? "block" : "none";
+    completionMetaEl.innerHTML = "";
+    details.forEach((item, index) => {
+      if (index > 0) {
+        const sep = document.createElement("span");
+        sep.className = "completion-meta-sep";
+        sep.textContent = "|";
+        completionMetaEl.appendChild(sep);
+      }
+
+      const detail = document.createElement("span");
+      detail.className = `completion-meta-item item-key-${String(item.key).toLowerCase()}${item.placeholder ? " is-placeholder" : ""}`;
+
+      const keyEl = document.createElement("span");
+      keyEl.className = `completion-meta-key completion-meta-key-${String(item.key).toLowerCase()}`;
+      keyEl.textContent = `${item.key}:`;
+
+      const valueEl = document.createElement("span");
+      valueEl.className = "completion-meta-value";
+      valueEl.textContent = item.value;
+
+      detail.appendChild(keyEl);
+      detail.appendChild(valueEl);
+      completionMetaEl.appendChild(detail);
+    });
+
+    if (details.length > 0) {
+      const firstSep = document.createElement("span");
+      firstSep.className = "completion-meta-sep";
+      firstSep.textContent = "|";
+      completionMetaEl.prepend(firstSep);
+    }
+
+    completionMetaEl.style.display = details.length ? "inline-flex" : "none";
   }
 
   const downloadLink = document.getElementById("downloadLink");
@@ -144,9 +231,7 @@ function updateProcessingHeader(job) {
   const header = document.getElementById("processingHeader");
   if (!header || !job) return;
 
-  if (job.source === "youtube") {
-    header.textContent = "PROCESSING YouTube URL";
-  } else if (job.input_file) {
+  if (job.input_file) {
     header.textContent = `PROCESSING ${job.input_file}`;
   }
 }

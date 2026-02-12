@@ -1,10 +1,76 @@
 <section class="old-history-section card">
 
-<div class="top-bar" style="margin-bottom:12px;">
+<div class="history-top-bar">
   <h2>Generated Files History</h2>
+  <div class="history-top-controls">
+    <button
+      id="refreshJobsBtn"
+      class="history-refresh-btn"
+      type="button"
+      onclick="refreshJobs()"
+      aria-label="Refresh history"
+      title="Refresh generated files history"
+    >
+      <span class="history-refresh-icon" aria-hidden="true">↻</span>
+    </button>
+  </div>
 </div>
 
+  <div class="history-filters-row">
+  <div class="history-kind-tabs" role="tablist" aria-label="History type filters">
+    <button
+      id="historyKindTranscription"
+      class="history-kind-tab active"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      onclick="setJobsTypeFilter('TRANSCRIPTION')"
+    >
+      Video / Audio to Hindi Text
+      <span id="historyKindCountTranscription" class="history-kind-count" style="display:none;"></span>
+    </button>
+    <button
+      id="historyKindOcr"
+      class="history-kind-tab"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      onclick="setJobsTypeFilter('OCR')"
+    >
+      PDF / Image to Hindi Text
+      <span id="historyKindCountOcr" class="history-kind-count" style="display:none;"></span>
+    </button>
+  </div>
+  <div id="historyStatusControl" class="history-status-control" style="display:none;">
+    <label for="historyStatusSelect" class="history-status-label">Status</label>
+    <select
+      id="historyStatusSelect"
+      class="history-status-select"
+      onchange="setJobsFilter(this.value)"
+    >
+      <option id="historyStatusOptionCompleted" value="COMPLETED">Completed</option>
+      <option id="historyStatusOptionFailed" value="FAILED">Failed</option>
+      <option id="historyStatusOptionCancelled" value="CANCELLED">Cancelled</option>
+    </select>
+  </div>
+  </div>
+
+  <div id="jobsLoading" class="history-loading" style="display:none;">
+    <div class="history-loading-dots" aria-label="Loading"></div>
+  </div>
 
   <div id="jobs" class="jobs-list"></div>
+
+  <div id="historyPagination" class="history-pagination" style="display:none;">
+    <button
+      id="historyLoadMoreBtn"
+      class="history-load-more-btn"
+      type="button"
+      onclick="loadMoreJobs()"
+    >
+      <span class="history-load-more-label">Load more</span>
+      <span class="history-load-more-dots" aria-hidden="true"></span>
+    </button>
+  </div>
 
 </section>

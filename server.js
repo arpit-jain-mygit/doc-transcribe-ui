@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = Number(process.env.PORT || 4200);
-const API_ORIGIN = 'https://doc-transcribe-api.onrender.com';
+const API_ORIGIN = process.env.API_ORIGIN || 'http://127.0.0.1:8080';
 const ROOT = __dirname;
 
 const MIME_TYPES = {
@@ -22,6 +22,9 @@ const MIME_TYPES = {
 };
 
 function send(res, statusCode, body, headers = {}) {
+  if (!headers["Cache-Control"]) {
+    headers["Cache-Control"] = "no-store";
+  }
   res.writeHead(statusCode, headers);
   res.end(body);
 }
@@ -125,5 +128,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   // eslint-disable-next-line no-console
-  console.log(`Server running at http://127.0.0.1:${PORT}`);
+  console.log(`Server running at http://127.0.0.1:${PORT} -> API_ORIGIN=${API_ORIGIN}`);
 });

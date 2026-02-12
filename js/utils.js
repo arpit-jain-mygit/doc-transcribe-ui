@@ -42,3 +42,23 @@ function formatStatus(status) {
     .replace(/\b\w/g, l => l.toUpperCase())
     .replace(" — ", " ");
 }
+
+async function safeJson(res) {
+  const raw = await res.text();
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { _nonJson: true, _raw: raw };
+  }
+}
+
+function responseErrorMessage(res, payload, fallback) {
+  if (payload && typeof payload === "object" && !payload._nonJson) {
+    return payload.detail || payload.error || payload.message || fallback;
+  }
+  if (payload && payload._nonJson) {
+    return `${fallback}: server returned non-JSON response (${res.status})`;
+  }
+  return fallback;
+}

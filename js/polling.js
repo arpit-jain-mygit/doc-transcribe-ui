@@ -33,6 +33,8 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
   const progressEl = document.getElementById("progress");
   const stageEl = document.getElementById("stage");
 
+  if (typeof hideCompletion === "function") hideCompletion();
+
   if (statusBox) statusBox.style.display = "block";
   document.body.classList.add("processing-active");
 
@@ -156,7 +158,8 @@ async function pollStatus() {
 
   if (!res.ok) return;
 
-  const data = await res.json();
+  const data = await safeJson(res);
+  if (!data || data._nonJson) return;
 
   updateProcessingUI(data);
 
@@ -262,10 +265,6 @@ function handleJobCompleted(data) {
   }
 
   toast("Processing completed", "success");
-
-  if (typeof loadJobs === "function") {
-    loadJobs();
-  }
 }
 
 function handleJobFailed(data) {
@@ -289,10 +288,6 @@ function handleJobFailed(data) {
 function handleJobCancelled(data) {
   completeAndResetUI();
   toast(data?.stage || "Job cancelled", "info");
-
-  if (typeof loadJobs === "function") {
-    loadJobs();
-  }
 }
 
 document.addEventListener("partials:loaded", () => {

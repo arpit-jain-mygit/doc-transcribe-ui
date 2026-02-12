@@ -6,7 +6,7 @@ async function includeHTML() {
     console.log("Loading partial:", file);
 
     try {
-      const res = await fetch(file);
+      const res = await fetch(file, { cache: "no-store" });
       console.log(file, "→", res.status);
 
       el.innerHTML = await res.text();

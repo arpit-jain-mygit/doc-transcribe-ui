@@ -6,7 +6,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-API_ORIGIN = "https://doc-transcribe-api.onrender.com"
+API_ORIGIN = os.environ.get("API_ORIGIN", "http://127.0.0.1:8080")
 PORT = int(os.environ.get("PORT", "4200"))
 
 
@@ -101,7 +101,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 def main():
     server = ThreadingHTTPServer(("127.0.0.1", PORT), AppHandler)
-    print(f"Server running at http://127.0.0.1:{PORT}")
+    print(f"Server running at http://127.0.0.1:{PORT} -> API_ORIGIN={API_ORIGIN}")
     server.serve_forever()
 
 

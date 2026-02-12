@@ -5,3 +5,10 @@
 body {
   margin: 0;
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
