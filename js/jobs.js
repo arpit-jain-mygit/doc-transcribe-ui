@@ -2,12 +2,20 @@ function formatJobDuration(secondsRaw) {
   const seconds = Number(secondsRaw);
   if (!Number.isFinite(seconds) || seconds < 0) return "";
   const rounded = Math.round(seconds);
+  return formatCompactDuration(rounded);
+}
+
+function formatCompactDuration(totalSeconds) {
+  const rounded = Math.max(0, Math.round(Number(totalSeconds) || 0));
   const hrs = Math.floor(rounded / 3600);
   const mins = Math.floor((rounded % 3600) / 60);
   const secs = rounded % 60;
-  if (hrs > 0) return `${hrs}h ${mins}m ${secs}s`;
-  if (mins > 0) return `${mins}m ${secs}s`;
-  return `${secs}s`;
+
+  const parts = [];
+  if (hrs > 0) parts.push(`${hrs}h`);
+  if (mins > 0) parts.push(`${mins}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  return parts.join(" ");
 }
 
 let JOBS_LOADING = false;
@@ -23,17 +31,41 @@ const JOBS_STATUS_COUNTS_BY_TYPE = {
 };
 const JOBS_TAB_STATE = {};
 
-function formatMediaDuration(secondsRaw) {
-  const total = Number(secondsRaw);
-  if (!Number.isFinite(total) || total < 0) return "";
+function parseDurationSeconds(raw) {
+  if (raw === null || raw === undefined || raw === "") return NaN;
+  if (typeof raw === "number") return raw;
 
-  const rounded = Math.round(total);
-  const hours = Math.floor(rounded / 3600);
+  const text = String(raw).trim();
+  if (!text) return NaN;
+
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) return numeric;
+
+  const clock = text.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+  if (clock) {
+    const a = Number(clock[1]);
+    const b = Number(clock[2]);
+    const c = Number(clock[3] || 0);
+    if (text.split(":").length === 3) return a * 3600 + b * 60 + c;
+    return a * 60 + b;
+  }
+
+  const suffix = text.match(/^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds)$/i);
+  if (suffix) return Number(suffix[1]);
+
+  return NaN;
+}
+
+function formatMediaDuration(secondsRaw) {
+  const total = parseDurationSeconds(secondsRaw);
+  if (!Number.isFinite(total) || total < 0) return "";
+  const rounded = Math.max(0, Math.round(total));
+  const hrs = Math.floor(rounded / 3600);
   const mins = Math.floor((rounded % 3600) / 60);
   const secs = rounded % 60;
 
-  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
-  if (mins > 0) return `${mins}m ${secs}s`;
+  if (hrs > 0) return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+  if (mins > 0) return `${mins}m`;
   return `${secs}s`;
 }
 
@@ -44,6 +76,12 @@ function getTranscriptionMediaDuration(job) {
     job.audio_duration_sec,
     job.video_duration_sec,
     job.source_duration_sec,
+    job.media_duration,
+    job.input_duration,
+    job.audio_duration,
+    job.video_duration,
+    job.source_duration,
+    job.duration,
     job.duration_sec,
   ];
   for (const candidate of candidates) {
@@ -100,6 +138,14 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function detailClassToken(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function normalizeJobStatus(statusRaw) {
@@ -316,7 +362,7 @@ function renderJobsList(jobs) {
 
     let actionHtml = "";
     if (j.output_path) {
-      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(j.output_path)}">⬇ Download output</a>`;
+      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(j.output_path)}">⤓ Download output</a>`;
     } else if (j.status === "FAILED") {
       actionHtml = `<a href="#" class="history-retry" data-job-id="${escapeHtml(j.job_id)}">↻ Retry</a>`;
     } else if (j.status === "CANCELLED") {
@@ -346,7 +392,7 @@ function renderJobsList(jobs) {
           <span class="history-meta-key">When:</span>
           <span class="job-time">${formatRelativeTime(j.updated_at)}</span>
         </span>
-        ${actionHtml}
+        <span class="job-actions">${actionHtml}</span>
       </div>
     </div>
   `;
@@ -410,9 +456,14 @@ function buildJobDetailItems(job) {
   const bytes = Number(job.input_size_bytes);
   const hasSize = Number.isFinite(bytes) && bytes > 0;
   details.push({
-    key: "Size",
+    key: "File Size",
     value: hasSize ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : "--",
-    placeholder: !hasSize,
+  });
+
+  const duration = formatJobDuration(job.duration_sec);
+  details.push({
+    key: "Processing Time",
+    value: duration || "--",
   });
 
   if (type === "OCR") {
@@ -422,14 +473,17 @@ function buildJobDetailItems(job) {
         key: "Pages",
         value: `${pages} page${pages === 1 ? "" : "s"}`,
       });
+    } else {
+      details.push({
+        key: "Pages",
+        value: "--",
+      });
     }
-  }
-
-  const duration = formatJobDuration(job.duration_sec);
-  if (duration) {
+  } else if (type === "TRANSCRIPTION") {
+    const mediaDuration = getTranscriptionMediaDuration(job);
     details.push({
-      key: "Time",
-      value: duration,
+      key: "Duration",
+      value: mediaDuration || "--",
     });
   }
 
@@ -446,7 +500,7 @@ function buildJobDetailsHtml(job) {
       parts.push(`<span class="history-meta-sep">|</span>`);
     }
     parts.push(
-      `<span class="history-meta-item item-key-${String(item.key).toLowerCase()}${item.placeholder ? " is-placeholder" : ""}">` +
+      `<span class="history-meta-item item-key-${detailClassToken(item.key)}${item.placeholder ? " is-placeholder" : ""}">` +
         `<span class="history-meta-key">${escapeHtml(item.key)}:</span>` +
         `<span class="history-meta-value">${escapeHtml(item.value)}</span>` +
       `</span>`
@@ -665,7 +719,7 @@ function renderJob(job) {
     <div class="job-actions">
       ${job.output_file
       ? `<a href="${job.download_url}" class="history-download">
-               ⬇ Download output
+               ⤓ Download output
              </a>`
       : `<span class="job-pending">Processing…</span>`
     }

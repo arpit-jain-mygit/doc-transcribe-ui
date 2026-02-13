@@ -267,6 +267,8 @@
 
 /* Middle: file info */
 .completion-row-middle {
+  --completion-meta-key-size: 12px;
+  --completion-meta-value-size: 12px;
   flex: 1;
   display: flex;
   align-items: center;
@@ -290,6 +292,9 @@
 }
 
 .completion-filename {
+  flex: 0 1 220px;
+  min-width: 120px;
+  max-width: 240px;
   font-weight: 600;
   color: #111827;
   overflow: hidden;
@@ -315,12 +320,12 @@
   gap: 6px;
 }
 
-.completion-meta-item.item-key-size {
+.completion-meta-item.item-key-file-size {
   min-width: 115px;
 }
 
 .completion-meta-item.is-placeholder {
-  visibility: hidden;
+  display: none;
 }
 
 .completion-meta-key {
@@ -330,12 +335,13 @@
   line-height: 1.3;
   border: 0;
   color: #475569;
+  font-size: var(--completion-meta-key-size);
   background: transparent;
 }
 
 .completion-meta-value {
   color: #0f172a;
-  font-size: 12px;
+  font-size: var(--completion-meta-value-size);
   font-weight: 600;
 }
 

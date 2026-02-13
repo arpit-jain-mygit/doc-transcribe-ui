@@ -245,17 +245,54 @@ window.toggleFormatChips = function toggleFormatChips(button) {
 };
 
 // COMPLETION RENDER
-function formatCompletionMediaDuration(secondsRaw) {
-  const total = Number(secondsRaw);
-  if (!Number.isFinite(total) || total < 0) return "";
+function parseCompletionDurationSeconds(raw) {
+  if (raw === null || raw === undefined || raw === "") return NaN;
+  if (typeof raw === "number") return raw;
 
-  const rounded = Math.round(total);
-  const hours = Math.floor(rounded / 3600);
+  const text = String(raw).trim();
+  if (!text) return NaN;
+
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) return numeric;
+
+  const clock = text.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+  if (clock) {
+    const a = Number(clock[1]);
+    const b = Number(clock[2]);
+    const c = Number(clock[3] || 0);
+    if (text.split(":").length === 3) return a * 3600 + b * 60 + c;
+    return a * 60 + b;
+  }
+
+  const suffix = text.match(/^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds)$/i);
+  if (suffix) return Number(suffix[1]);
+
+  return NaN;
+}
+
+function formatCompletionCompactDuration(totalSeconds) {
+  const rounded = Math.max(0, Math.round(Number(totalSeconds) || 0));
+  const hrs = Math.floor(rounded / 3600);
   const mins = Math.floor((rounded % 3600) / 60);
   const secs = rounded % 60;
 
-  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
-  if (mins > 0) return `${mins}m ${secs}s`;
+  const parts = [];
+  if (hrs > 0) parts.push(`${hrs}h`);
+  if (mins > 0) parts.push(`${mins}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  return parts.join(" ");
+}
+
+function formatCompletionMediaDuration(secondsRaw) {
+  const total = parseCompletionDurationSeconds(secondsRaw);
+  if (!Number.isFinite(total) || total < 0) return "";
+  const rounded = Math.max(0, Math.round(total));
+  const hrs = Math.floor(rounded / 3600);
+  const mins = Math.floor((rounded % 3600) / 60);
+  const secs = rounded % 60;
+
+  if (hrs > 0) return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+  if (mins > 0) return `${mins}m`;
   return `${secs}s`;
 }
 
@@ -266,6 +303,12 @@ function getCompletionTranscriptionMediaDuration(job) {
     job.audio_duration_sec,
     job.video_duration_sec,
     job.source_duration_sec,
+    job.media_duration,
+    job.input_duration,
+    job.audio_duration,
+    job.video_duration,
+    job.source_duration,
+    job.duration,
     job.duration_sec,
   ];
   for (const candidate of candidates) {
@@ -280,6 +323,14 @@ function formatCompletionJobTypeLabel(job) {
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
   if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
   return job?.job_type || "";
+}
+
+function completionDetailClassToken(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function getCompletionJobTypeThemeClass(job) {
@@ -327,7 +378,7 @@ function showCompletion(job) {
     const bytes = Number(job.input_size_bytes);
     const hasSize = Number.isFinite(bytes) && bytes > 0;
     details.push({
-      key: "Size",
+      key: "File Size",
       value: hasSize ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : "--",
       placeholder: !hasSize,
     });
@@ -340,19 +391,21 @@ function showCompletion(job) {
           value: `${pages}`,
         });
       }
+    } else if (isTranscription) {
+      const mediaDuration = getCompletionTranscriptionMediaDuration(job);
+      details.push({
+        key: "Duration",
+        value: mediaDuration || "--",
+      });
     }
 
     const durationSec = Number(job.duration_sec);
-    if (Number.isFinite(durationSec) && durationSec >= 0) {
-      const rounded = Math.round(durationSec);
-      const hrs = Math.floor(rounded / 3600);
-      const mins = Math.floor((rounded % 3600) / 60);
-      const secs = rounded % 60;
-      details.push({
-        key: "Time",
-        value: hrs > 0 ? `${hrs}h ${mins}m ${secs}s` : (mins > 0 ? `${mins}m ${secs}s` : `${secs}s`),
-      });
-    }
+    details.push({
+      key: "Processing Time",
+      value: Number.isFinite(durationSec) && durationSec >= 0
+        ? formatCompletionCompactDuration(durationSec)
+        : "--",
+    });
 
     completionMetaEl.innerHTML = "";
     details.forEach((item, index) => {
@@ -364,10 +417,11 @@ function showCompletion(job) {
       }
 
       const detail = document.createElement("span");
-      detail.className = `completion-meta-item item-key-${String(item.key).toLowerCase()}${item.placeholder ? " is-placeholder" : ""}`;
+      const keyToken = completionDetailClassToken(item.key);
+      detail.className = `completion-meta-item item-key-${keyToken}${item.placeholder ? " is-placeholder" : ""}`;
 
       const keyEl = document.createElement("span");
-      keyEl.className = `completion-meta-key completion-meta-key-${String(item.key).toLowerCase()}`;
+      keyEl.className = `completion-meta-key completion-meta-key-${keyToken}`;
       keyEl.textContent = `${item.key}:`;
 
       const valueEl = document.createElement("span");
