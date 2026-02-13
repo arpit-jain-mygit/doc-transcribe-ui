@@ -16,6 +16,7 @@ const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff
 const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
 const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
 let UPLOAD_MODE = "OCR";
+const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ ड्रॉप करें। 20 मिनट की ऑडियो/वीडियो फ़ाइल को प्रोसेस होने में लगभग 2-3 मिनट लग सकते हैं। PDF (एक या अधिक पेज) / Image के लिए समय पेजों की संख्या और गुणवत्ता पर निर्भर करता है।";
 
 function detectModeForFile(file) {
   const name = String(file?.name || "").toLowerCase();
@@ -35,7 +36,7 @@ function applyUploadMode(mode) {
     input.dataset.autoUploadType = next;
     input.accept = ALL_EXTENSIONS;
   }
-  if (label) label.textContent = "Files start processing automatically after selection.";
+  if (label) label.textContent = DROPZONE_HINT_HI;
 }
 
 function clearUploadInputState(inputId = "unifiedFile") {
