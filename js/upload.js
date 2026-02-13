@@ -104,13 +104,23 @@ async function upload(type, file) {
     const inLocalMode = typeof getApiMode === "function" && getApiMode() === "local";
     const sizeMb = (file?.size || 0) / (1024 * 1024);
     const errMsg = String(err?.message || "").toLowerCase();
+    let apiReachable = false;
+
+    try {
+      const healthRes = await fetch(`${API}/health`, { method: "GET" });
+      apiReachable = healthRes.ok;
+    } catch {
+      apiReachable = false;
+    }
 
     if (isHostedUi && inLocalMode) {
       toast("Upload failed: hosted UI cannot use local API mode. Switch to render mode.", "error");
+    } else if (apiReachable) {
+      toast("Upload failed: API is reachable, but upload request was blocked (auth/CORS/browser policy). Please re-login and retry.", "error");
     } else if (sizeMb > 80) {
       toast(`Upload failed on network. File is ${sizeMb.toFixed(1)} MB; try a smaller file or more stable network.`, "error");
     } else if (errMsg.includes("failed to fetch")) {
-      toast("Upload failed: unable to reach API from mobile network. Retry on stable internet.", "error");
+      toast("Upload failed: unable to reach API endpoint from this browser/session. Please retry and check API status.", "error");
     } else {
       toast("Network error during upload", "error");
     }
