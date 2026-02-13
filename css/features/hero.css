@@ -4,23 +4,23 @@
 
 .hero {
   text-align: center;
-  padding: 24px 16px 14px;
+  padding: 18px 18px 12px;
   max-width: 860px;
   margin: 0 auto;
 }
 
 .hero-title {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .hero-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #4b5563;
-  line-height: 1.45;
-  margin-bottom: 12px;
+  line-height: 1.4;
+  margin-bottom: 0;
 }
 
 .hero-values {
@@ -49,15 +49,27 @@
 
 .how-it-works {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
   max-width: 900px;
-  margin: 24px auto;
-  padding: 0 16px;
+  margin: 0 auto;
+  padding: 14px 16px;
 }
 
 .how-step {
   text-align: center;
+  position: relative;
+}
+
+.how-step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -12px;
+  top: 40%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #9aa8be;
 }
 
 .step-icon {
@@ -109,12 +121,21 @@
 /* ========================= */
 
 .trust-note {
-  text-align: center;
-  font-size: 12px;
-  color: #6b7280;
-  margin: 14px auto 24px;
-  max-width: 720px;
-  padding: 0 16px;
+  margin: 0 auto 16px;
+  max-width: 900px;
+  display: flex;
+  justify-content: center;
+  padding: 8px 14px;
+}
+
+.trust-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid #dbe3ee;
+  background:
+    linear-gradient(90deg, rgba(245, 158, 11, 0.28) 0%, rgba(245, 158, 11, 0.08) 34%, rgba(37, 99, 235, 0.08) 66%, rgba(37, 99, 235, 0.28) 100%),
+    #ffffff;
 }
 
 /* When results are visible, tighten hero spacing */
@@ -128,6 +149,36 @@
 body:not(.logged-in) #appContent {
   display: flex;
   flex-direction: column;
+}
+
+body:not(.logged-in) .landing-block {
+  width: min(100%, 900px);
+  margin: 16px auto 0;
+  border: 1px solid #d6deec;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 10% -10%, rgba(245, 158, 11, 0.07) 0%, transparent 34%),
+    radial-gradient(circle at 96% -8%, rgba(37, 99, 235, 0.08) 0%, transparent 36%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+body:not(.logged-in) .hero.landing-block {
+  max-width: 900px;
+}
+
+@media (max-width: 900px) {
+  .how-it-works {
+    grid-template-columns: 1fr;
+  }
+
+  .how-step:not(:last-child)::after {
+    content: "";
+  }
+}
+
+body:not(.logged-in) #appContent > [data-include="/partials/hero.html"] .landing-block {
+  margin-top: 8px;
 }
 
 body:not(.logged-in) #appContent > [data-include="/partials/hero.html"] {

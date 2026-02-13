@@ -54,8 +54,17 @@ async function safeJson(res) {
 }
 
 function responseErrorMessage(res, payload, fallback) {
+  const normalizeAuthError = (msg) => {
+    const text = String(msg || "").toLowerCase();
+    if (text.includes("invalid google token") || text.includes("invalid token")) {
+      return "Session expired. Please sign in again.";
+    }
+    return msg;
+  };
+
   if (payload && typeof payload === "object" && !payload._nonJson) {
-    return payload.detail || payload.error || payload.message || fallback;
+    const message = payload.detail || payload.error || payload.message || fallback;
+    return normalizeAuthError(message) || fallback;
   }
   if (payload && payload._nonJson) {
     return `${fallback}: server returned non-JSON response (${res.status})`;
