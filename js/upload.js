@@ -70,7 +70,7 @@ function uploadViaXhr(url, token, formData) {
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Authorization", "Bearer " + token);
     xhr.responseType = "text";
-    xhr.timeout = 120000;
+    xhr.timeout = 240000;
 
     xhr.onload = () => {
       let data = null;
@@ -94,6 +94,16 @@ function uploadViaXhr(url, token, formData) {
 
     xhr.send(formData);
   });
+}
+
+function isLikelyInAppBrowser() {
+  const ua = String(navigator.userAgent || "");
+  return /FBAN|FBAV|Instagram|Line|LinkedInApp|Snapchat|Twitter|wv\)|; wv\)/i.test(ua);
+}
+
+function isMobileBrowser() {
+  const ua = String(navigator.userAgent || "");
+  return /Android|iPhone|iPad|iPod/i.test(ua);
 }
 
 async function upload(type, file) {
@@ -128,13 +138,35 @@ async function upload(type, file) {
   if (header) header.textContent = `PROCESSING ${file.name}`;
 
   let res;
+  const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();
   try {
-    const fd = createUploadFormData(file, type);
-    res = await fetch(`${API}/upload`, {
-      method: "POST",
-      headers: { Authorization: "Bearer " + ID_TOKEN },
-      body: fd
-    });
+    if (preferXhrPrimary) {
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(file, type));
+      if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
+        JOB_ID = xhrRes.data.job_id;
+        localStorage.setItem("active_job_id", JOB_ID);
+        startPolling();
+        return;
+      }
+      if (xhrRes.ok) {
+        toast("Upload failed: invalid server response", "error");
+        setUIBusy(false);
+        return;
+      }
+      res = {
+        ok: false,
+        status: xhrRes.status,
+        _fromXhr: true,
+        _payload: xhrRes.data || null,
+      };
+    } else {
+      const fd = createUploadFormData(file, type);
+      res = await fetch(`${API}/upload`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + ID_TOKEN },
+        body: fd
+      });
+    }
   } catch (err) {
     try {
       const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(file, type));
@@ -213,6 +245,10 @@ async function upload(type, file) {
         toast("Upload failed: request body too large for current network/API limits.", "error");
       } else if (uploadProbeStatus >= 500) {
         toast("Upload failed: upload route is reachable but server returned an internal error.", "error");
+      } else if (isLikelyInAppBrowser()) {
+        toast("Upload failed in in-app browser. Please open this link in Safari/Chrome and retry.", "error");
+      } else if (isMobileBrowser()) {
+        toast("Upload failed on mobile during file transfer. Please retry once; if it repeats, switch network (Wi-Fi/mobile data).", "error");
       } else {
         toast("Upload failed: upload route is reachable. Likely file body transfer/network interruption on this device.", "error");
       }
@@ -230,7 +266,7 @@ async function upload(type, file) {
   }
 
   if (!res.ok) {
-    const payload = await safeJson(res);
+    const payload = res._fromXhr ? (res._payload || null) : await safeJson(res);
     toast(responseErrorMessage(res, payload, "Upload failed"), "error");
     setUIBusy(false);
     return;
