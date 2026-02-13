@@ -187,7 +187,8 @@ function toast(message, type = "info") {
   div.appendChild(text);
   box.appendChild(div);
 
-  setTimeout(() => div.remove(), 4300);
+  const durationMs = type === "error" ? 7000 : 4300;
+  setTimeout(() => div.remove(), durationMs);
 }
 
 function showPending() {

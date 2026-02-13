@@ -109,6 +109,36 @@ function isMobileBrowser() {
   return /Android|iPhone|iPad|iPod/i.test(ua);
 }
 
+function resetAfterUploadError() {
+  if (typeof stopPolling === "function") stopPolling();
+  if (typeof stopThoughts === "function") stopThoughts();
+
+  window.POLLING_ACTIVE = false;
+  window.JOB_COMPLETED = false;
+  JOB_ID = null;
+  window.ACTIVE_JOB_TYPE = null;
+  localStorage.removeItem("active_job_id");
+
+  document.body.classList.remove("processing-active");
+
+  const statusBox = document.getElementById("statusBox");
+  if (statusBox) statusBox.style.display = "none";
+
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (cancelBtn) cancelBtn.disabled = true;
+
+  const progress = document.getElementById("progress");
+  if (progress) progress.value = 0;
+
+  const stage = document.getElementById("stage");
+  if (stage) {
+    stage.textContent = "";
+    stage.classList.remove("error");
+  }
+
+  if (typeof setUIBusy === "function") setUIBusy(false);
+}
+
 async function upload(type, file) {
   if (JOB_ID && !window.JOB_COMPLETED) {
     toast("A job is already running", "info");
@@ -153,7 +183,7 @@ async function upload(type, file) {
       }
       if (xhrRes.ok) {
         toast("Upload failed: invalid server response", "error");
-        setUIBusy(false);
+        resetAfterUploadError();
         return;
       }
       res = {
@@ -184,7 +214,7 @@ async function upload(type, file) {
           responseErrorMessage({ status: xhrRes.status }, xhrRes.data, "Upload failed"),
           "error"
         );
-        setUIBusy(false);
+        resetAfterUploadError();
         return;
       }
     } catch {
@@ -264,21 +294,21 @@ async function upload(type, file) {
     } else {
       toast("Network error during upload", "error");
     }
-    setUIBusy(false);
+    resetAfterUploadError();
     return;
   }
 
   if (!res.ok) {
     const payload = res._fromXhr ? (res._payload || null) : await safeJson(res);
     toast(responseErrorMessage(res, payload, "Upload failed"), "error");
-    setUIBusy(false);
+    resetAfterUploadError();
     return;
   }
 
   const data = await safeJson(res);
   if (!data || data._nonJson || !data.job_id) {
     toast("Upload failed: invalid server response", "error");
-    setUIBusy(false);
+    resetAfterUploadError();
     return;
   }
   JOB_ID = data.job_id;
