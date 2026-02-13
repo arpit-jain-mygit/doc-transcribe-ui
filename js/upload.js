@@ -67,6 +67,19 @@ function createUploadFormData(file, type) {
   return fd;
 }
 
+async function normalizeUploadFile(file) {
+  if (!file) return file;
+  try {
+    const bytes = await file.arrayBuffer();
+    return new File([bytes], file.name || "upload.bin", {
+      type: file.type || "application/octet-stream",
+      lastModified: file.lastModified || Date.now(),
+    });
+  } catch {
+    return file;
+  }
+}
+
 function uploadViaXhr(url, token, formData) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -158,7 +171,8 @@ async function upload(type, file) {
   window.JOB_COMPLETED = false;
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = String(type || "").toUpperCase();
-  LAST_UPLOADED_FILENAME = file.name;
+  const uploadFile = await normalizeUploadFile(file);
+  LAST_UPLOADED_FILENAME = uploadFile.name;
 
   setUIBusy(true);
   document.body.classList.add("processing-active");
@@ -174,7 +188,7 @@ async function upload(type, file) {
   const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();
   try {
     if (preferXhrPrimary) {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(file, type));
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type));
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         localStorage.setItem("active_job_id", JOB_ID);
@@ -193,7 +207,7 @@ async function upload(type, file) {
         _payload: xhrRes.data || null,
       };
     } else {
-      const fd = createUploadFormData(file, type);
+      const fd = createUploadFormData(uploadFile, type);
       res = await fetch(`${API}/upload`, {
         method: "POST",
         headers: { Authorization: "Bearer " + ID_TOKEN },
@@ -202,7 +216,7 @@ async function upload(type, file) {
     }
   } catch (err) {
     try {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(file, type));
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type));
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         localStorage.setItem("active_job_id", JOB_ID);
