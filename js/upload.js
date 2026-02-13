@@ -1,12 +1,15 @@
-function uploadFrom(type, inputId) {
+async function uploadFrom(type, inputId) {
   const input = document.getElementById(inputId);
   if (!input || !input.files.length) {
     toast("Please select a file", "error");
     return;
   }
   const picked = input.files[0];
-  upload(type, picked);
-  clearUploadInputState(inputId);
+  try {
+    await upload(type, picked);
+  } finally {
+    clearUploadInputState(inputId);
+  }
 }
 
 const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"];
