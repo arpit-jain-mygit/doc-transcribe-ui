@@ -73,7 +73,7 @@ function buildStatusBadgeHtml(statusRaw) {
 
   let icon = "";
   if (status === "COMPLETED") icon = "✓";
-  else if (status === "FAILED") icon = "✖";
+  else if (status === "FAILED") icon = "×";
   else if (status === "CANCELLED") icon = "⦸";
   else icon = "…";
 
@@ -88,7 +88,7 @@ function buildStatusBadgeHtml(statusRaw) {
 function getStatusDotSymbol(statusRaw) {
   const status = String(statusRaw || "").toUpperCase();
   if (status === "COMPLETED") return "✓";
-  if (status === "FAILED") return "✖";
+  if (status === "FAILED") return "×";
   if (status === "CANCELLED") return "⦸";
   return "…";
 }

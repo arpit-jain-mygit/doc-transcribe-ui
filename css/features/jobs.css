@@ -321,6 +321,12 @@
   background: #ef4444;
 }
 
+.job-left-FAILED .job-status-dot {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .job-left-PROCESSING,
 .job-left-PENDING {
   color: #334155;
