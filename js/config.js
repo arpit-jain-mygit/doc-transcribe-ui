@@ -5,12 +5,17 @@ const API_ENDPOINTS = {
 
 const API_MODE_STORAGE_KEY = "doc_api_mode";
 const urlApiMode = new URLSearchParams(window.location.search).get("api");
+const isHostedUi = /\.vercel\.app$/i.test(window.location.hostname);
 
 if (urlApiMode === "local" || urlApiMode === "render") {
   localStorage.setItem(API_MODE_STORAGE_KEY, urlApiMode);
 }
 
-const API_MODE = localStorage.getItem(API_MODE_STORAGE_KEY) || "render";
+let API_MODE = localStorage.getItem(API_MODE_STORAGE_KEY) || "render";
+if (isHostedUi && API_MODE === "local") {
+  API_MODE = "render";
+  localStorage.setItem(API_MODE_STORAGE_KEY, "render");
+}
 const API = API_MODE === "local" ? API_ENDPOINTS.local : API_ENDPOINTS.render;
 
 window.setApiMode = function setApiMode(mode) {

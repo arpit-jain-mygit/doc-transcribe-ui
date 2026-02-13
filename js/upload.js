@@ -99,8 +99,21 @@ async function upload(type, file) {
       headers: { Authorization: "Bearer " + ID_TOKEN },
       body: fd
     });
-  } catch {
-    toast("Network error during upload", "error");
+  } catch (err) {
+    const isHostedUi = /\.vercel\.app$/i.test(window.location.hostname);
+    const inLocalMode = typeof getApiMode === "function" && getApiMode() === "local";
+    const sizeMb = (file?.size || 0) / (1024 * 1024);
+    const errMsg = String(err?.message || "").toLowerCase();
+
+    if (isHostedUi && inLocalMode) {
+      toast("Upload failed: hosted UI cannot use local API mode. Switch to render mode.", "error");
+    } else if (sizeMb > 80) {
+      toast(`Upload failed on network. File is ${sizeMb.toFixed(1)} MB; try a smaller file or more stable network.`, "error");
+    } else if (errMsg.includes("failed to fetch")) {
+      toast("Upload failed: unable to reach API from mobile network. Retry on stable internet.", "error");
+    } else {
+      toast("Network error during upload", "error");
+    }
     setUIBusy(false);
     return;
   }
