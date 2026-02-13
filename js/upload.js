@@ -107,6 +107,8 @@ async function upload(type, file) {
     let apiReachable = false;
     let authReachable = false;
     let authUnauthorized = false;
+    let uploadProbeReachable = false;
+    let uploadProbeStatus = 0;
 
     try {
       const healthRes = await fetch(`${API}/health`, { method: "GET" });
@@ -128,12 +130,36 @@ async function upload(type, file) {
       }
     }
 
+    if (apiReachable && authReachable && ID_TOKEN) {
+      try {
+        const probeFd = new FormData();
+        probeFd.append("type", "OCR");
+        const probeRes = await fetch(`${API}/upload`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + ID_TOKEN },
+          body: probeFd,
+        });
+        uploadProbeReachable = true;
+        uploadProbeStatus = probeRes.status;
+      } catch {
+        uploadProbeReachable = false;
+      }
+    }
+
     if (isHostedUi && inLocalMode) {
       toast("Upload failed: hosted UI cannot use local API mode. Switch to render mode.", "error");
     } else if (authUnauthorized) {
       toast("Upload failed: session expired. Please sign in again and retry.", "error");
-    } else if (apiReachable && authReachable) {
-      toast("Upload failed: API and auth are reachable. Request likely blocked by browser/CORS policy or file body transfer issue.", "error");
+    } else if (apiReachable && authReachable && !uploadProbeReachable) {
+      toast("Upload failed: POST /upload is blocked before reaching API (browser/CORS/network policy).", "error");
+    } else if (apiReachable && authReachable && uploadProbeReachable) {
+      if (uploadProbeStatus === 413) {
+        toast("Upload failed: request body too large for current network/API limits.", "error");
+      } else if (uploadProbeStatus >= 500) {
+        toast("Upload failed: upload route is reachable but server returned an internal error.", "error");
+      } else {
+        toast("Upload failed: upload route is reachable. Likely file body transfer/network interruption on this device.", "error");
+      }
     } else if (apiReachable) {
       toast("Upload failed: API is reachable but authenticated request failed. Please re-login and retry.", "error");
     } else if (sizeMb > 80) {
