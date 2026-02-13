@@ -57,6 +57,45 @@ window.initUnifiedUpload = function initUnifiedUpload() {
   applyUploadMode(UPLOAD_MODE);
 };
 
+function createUploadFormData(file, type) {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("type", type);
+  return fd;
+}
+
+function uploadViaXhr(url, token, formData) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Authorization", "Bearer " + token);
+    xhr.responseType = "text";
+    xhr.timeout = 120000;
+
+    xhr.onload = () => {
+      let data = null;
+      const raw = xhr.responseText || "";
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          data = { _nonJson: true, _raw: raw };
+        }
+      }
+      resolve({
+        ok: xhr.status >= 200 && xhr.status < 300,
+        status: xhr.status,
+        data,
+      });
+    };
+
+    xhr.onerror = () => reject(new Error("xhr_upload_failed"));
+    xhr.ontimeout = () => reject(new Error("xhr_upload_timeout"));
+
+    xhr.send(formData);
+  });
+}
+
 async function upload(type, file) {
   if (JOB_ID && !window.JOB_COMPLETED) {
     toast("A job is already running", "info");
@@ -88,18 +127,35 @@ async function upload(type, file) {
   const header = document.getElementById("processingHeader");
   if (header) header.textContent = `PROCESSING ${file.name}`;
 
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("type", type);
-
   let res;
   try {
+    const fd = createUploadFormData(file, type);
     res = await fetch(`${API}/upload`, {
       method: "POST",
       headers: { Authorization: "Bearer " + ID_TOKEN },
       body: fd
     });
   } catch (err) {
+    try {
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(file, type));
+      if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
+        JOB_ID = xhrRes.data.job_id;
+        localStorage.setItem("active_job_id", JOB_ID);
+        startPolling();
+        return;
+      }
+      if (!xhrRes.ok) {
+        toast(
+          responseErrorMessage({ status: xhrRes.status }, xhrRes.data, "Upload failed"),
+          "error"
+        );
+        setUIBusy(false);
+        return;
+      }
+    } catch {
+      // Fall through to diagnostics below.
+    }
+
     const isHostedUi = /\.vercel\.app$/i.test(window.location.hostname);
     const inLocalMode = typeof getApiMode === "function" && getApiMode() === "local";
     const sizeMb = (file?.size || 0) / (1024 * 1024);
