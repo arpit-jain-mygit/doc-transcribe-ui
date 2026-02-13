@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 132" fill="none">
+  <g stroke="#111827" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Chandra bindu (kept clearly above swastik top bar) -->
+    <path d="M26 24 C45 40, 75 40, 94 24" />
+
+    <!-- Swastik -->
+    <path d="M32 58 V86 H60" />
+    <path d="M60 58 H88" />
+    <path d="M60 58 V114" />
+    <path d="M60 86 H88 V114" />
+    <path d="M32 114 H60" />
+  </g>
+
+  <g fill="#111827">
+    <!-- Top dot -->
+    <circle cx="60" cy="18" r="3.2" />
+
+    <!-- Three upper dots -->
+    <circle cx="32" cy="50" r="3.0" />
+    <circle cx="60" cy="50" r="3.0" />
+    <circle cx="88" cy="50" r="3.0" />
+
+    <!-- Inner two dots -->
+    <circle cx="48" cy="68" r="3.6" />
+    <circle cx="72" cy="68" r="3.6" />
+
+    <!-- Lower two dots -->
+    <circle cx="48" cy="96" r="3.6" />
+    <circle cx="72" cy="96" r="3.6" />
+  </g>
+</svg>

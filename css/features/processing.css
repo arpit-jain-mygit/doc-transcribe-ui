@@ -7,7 +7,6 @@
 -------------------------------- */
 .processing-panel,
 .completion-panel {
-  background: #f8fafc;            /* inked surface */
   border: 1px solid #e2e8f0;       /* slate-200 */
   border-radius: 12px;
 
@@ -16,6 +15,18 @@
   margin: 16px 0;
 
   position: relative;
+}
+
+.processing-panel {
+  background:
+    radial-gradient(circle at 90% -12%, rgba(251, 191, 36, 0.11) 0%, transparent 34%),
+    radial-gradient(circle at -8% 120%, rgba(37, 99, 235, 0.12) 0%, transparent 38%),
+    linear-gradient(180deg, #f8fafc 0%, #eef3fb 100%);
+  border-color: #dbe4f2;
+}
+
+.completion-panel {
+  background: #ffffff;
 }
 
 #statusBox.processing-panel {
@@ -119,12 +130,13 @@
   width: fit-content;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   min-height: 32px;
   margin: 0;
   padding: 0 120px 0 0;
   border: 0;
   background: transparent;
+  position: relative;
 }
 
 /* -------------------------------
@@ -132,28 +144,49 @@
 -------------------------------- */
 .processing-panel h2::before {
   content: "";
-  width: 10px;
-  height: 10px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: #d32f2f;
   /* Dot-1 + four trailing dots (initially hidden) */
   box-shadow:
-    0 0 0 0 #ffffff,
-    14px 0 0 0 transparent,
-    28px 0 0 0 transparent,
-    42px 0 0 0 transparent,
-    56px 0 0 0 transparent;
+    0 0 0 0 transparent,
+    26px 0 0 0 transparent,
+    52px 0 0 0 transparent,
+    78px 0 0 0 transparent,
+    104px 0 0 0 transparent;
 
   flex-shrink: 0;
   margin-top: 1px;
-  margin-right: 56px; /* reserve space for the 5-dot train */
+  margin-right: 104px; /* reserve space for the 5-dot train */
 
   animation:
     jain-dot-train var(--pulse-speed, 2.6s) steps(1, end) infinite,
-    jain-dot-breathe 1.9s ease-in-out infinite;
+    jain-dot-breathe 1.9s ease-in-out infinite,
+    jain-dot-white-flicker 1.6s ease-in-out infinite;
   will-change: box-shadow, transform, filter;
   transform-origin: left center;
   filter: drop-shadow(0 0 2px rgba(100, 116, 139, 0.22));
+}
+
+.processing-panel h2::after {
+  content: "";
+  position: absolute;
+  left: 59px; /* center aligned with the white (3rd) dot slot */
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-image: url("/assets/icons/jain-trilok-swastik.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 76% 76%;
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.85);
+  opacity: 0;
+  pointer-events: none;
+  animation: jain-swastik-visibility var(--pulse-speed, 2.6s) steps(1, end) infinite;
 }
 
 .processing-head-stack {
@@ -162,6 +195,7 @@
   align-items: flex-start;
   gap: 0;
   min-width: 0;
+  margin-left: 6px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -302,85 +336,108 @@ progress::-moz-progress-bar {
 @keyframes jain-dot-train {
   0%, 12.5% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 transparent,
-      28px 0 0 0 transparent,
-      42px 0 0 0 transparent,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 transparent,
+      52px 0 0 0 transparent,
+      78px 0 0 0 transparent,
+      104px 0 0 0 transparent;
   }
 
   25% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 transparent,
-      42px 0 0 0 transparent,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 transparent,
+      78px 0 0 0 transparent,
+      104px 0 0 0 transparent;
   }
 
   37.5% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 #fbc02d,
-      42px 0 0 0 transparent,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 #ffffff,
+      78px 0 0 0 transparent,
+      104px 0 0 0 transparent;
   }
 
   50% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 #fbc02d,
-      42px 0 0 0 #388e3c,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 #ffffff,
+      78px 0 0 0 #388e3c,
+      104px 0 0 0 transparent;
   }
 
   62.5% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 #fbc02d,
-      42px 0 0 0 #388e3c,
-      56px 0 0 0 #1976d2;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 #ffffff,
+      78px 0 0 0 #388e3c,
+      104px 0 0 0 #1976d2;
   }
 
   75% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 #fbc02d,
-      42px 0 0 0 #388e3c,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 #ffffff,
+      78px 0 0 0 #388e3c,
+      104px 0 0 0 transparent;
   }
 
   87.5% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 #fbc02d,
-      42px 0 0 0 transparent,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 #ffffff,
+      78px 0 0 0 transparent,
+      104px 0 0 0 transparent;
   }
 
   100% {
     box-shadow:
-      0 0 0 0 #ffffff,
-      14px 0 0 0 #d32f2f,
-      28px 0 0 0 transparent,
-      42px 0 0 0 transparent,
-      56px 0 0 0 transparent;
+      0 0 0 0 transparent,
+      26px 0 0 0 #fbc02d,
+      52px 0 0 0 transparent,
+      78px 0 0 0 transparent,
+      104px 0 0 0 transparent;
   }
 }
 
 @keyframes jain-dot-breathe {
   0%, 100% {
     transform: translateY(0) scale(1);
+    opacity: 0.72;
     filter: drop-shadow(0 0 2px rgba(100, 116, 139, 0.22));
   }
   50% {
     transform: translateY(-0.5px) scale(1.05);
+    opacity: 1;
     filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.22));
+  }
+}
+
+@keyframes jain-dot-white-flicker {
+  0%, 100% {
+    background-color: rgba(211, 47, 47, 0.34);
+  }
+  50% {
+    background-color: rgba(211, 47, 47, 1);
+  }
+}
+
+@keyframes jain-swastik-visibility {
+  0%, 37.4% {
+    opacity: 0;
+  }
+  37.5%, 87.5% {
+    opacity: 0.95;
+  }
+  87.6%, 100% {
+    opacity: 0;
   }
 }
 
