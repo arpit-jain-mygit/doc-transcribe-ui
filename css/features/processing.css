@@ -505,6 +505,7 @@ progress::-moz-progress-bar {
   padding: 14px 18px;
   margin-top: 12px;
   box-shadow: 0 4px 12px rgba(120, 90, 40, 0.08);
+  overflow: hidden;
 }
 
 #thoughtText {
@@ -513,4 +514,35 @@ progress::-moz-progress-bar {
   line-height: 1.6;
   text-align: center;
   font-weight: 500;
+  animation: none;
+  transition: opacity 200ms ease, transform 220ms ease, filter 220ms ease;
+  transform: translateY(0);
+  opacity: 1;
+  filter: blur(0);
+}
+
+#thoughtText.is-exiting {
+  opacity: 0;
+  transform: translateY(-8px);
+  filter: blur(1.2px);
+}
+
+#thoughtText.is-entering {
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(1.6px);
+  animation: thought-text-in 320ms ease forwards;
+}
+
+@keyframes thought-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(1.6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }

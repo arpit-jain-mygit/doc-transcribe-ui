@@ -1,4 +1,5 @@
 let THOUGHT_INTERVAL = null;
+let THOUGHT_SWAP_TIMEOUT = null;
 
 const THOUGHTS = [
   "जिनवाणी का संरक्षण केवल तकनीक नहीं, तप है।",
@@ -64,6 +65,32 @@ const THOUGHTS = [
 
 
 
+function applyThought(text, { immediate = false } = {}) {
+  const thoughtText = document.getElementById("thoughtText");
+  if (!thoughtText) return;
+
+  thoughtText.classList.remove("is-entering", "is-exiting");
+
+  if (immediate) {
+    thoughtText.textContent = text;
+    return;
+  }
+
+  thoughtText.classList.add("is-exiting");
+  if (THOUGHT_SWAP_TIMEOUT) clearTimeout(THOUGHT_SWAP_TIMEOUT);
+
+  THOUGHT_SWAP_TIMEOUT = setTimeout(() => {
+    thoughtText.textContent = text;
+    thoughtText.classList.remove("is-exiting");
+    thoughtText.classList.add("is-entering");
+
+    THOUGHT_SWAP_TIMEOUT = setTimeout(() => {
+      thoughtText.classList.remove("is-entering");
+      THOUGHT_SWAP_TIMEOUT = null;
+    }, 320);
+  }, 180);
+}
+
 function startThoughts() {
   const box = document.getElementById("thoughtBox");
   const text = document.getElementById("thoughtText");
@@ -72,18 +99,29 @@ function startThoughts() {
 
   let index = 0;
   box.style.display = "block";
+  applyThought(THOUGHTS[0], { immediate: true });
+  index = 1;
 
   clearInterval(THOUGHT_INTERVAL);
   THOUGHT_INTERVAL = setInterval(() => {
-    text.textContent = THOUGHTS[index % THOUGHTS.length];
+    applyThought(THOUGHTS[index % THOUGHTS.length]);
     index++;
-  }, 2500);
+  }, 3200);
 }
 
 function stopThoughts() {
   clearInterval(THOUGHT_INTERVAL);
   THOUGHT_INTERVAL = null;
+  if (THOUGHT_SWAP_TIMEOUT) {
+    clearTimeout(THOUGHT_SWAP_TIMEOUT);
+    THOUGHT_SWAP_TIMEOUT = null;
+  }
 
   const box = document.getElementById("thoughtBox");
   if (box) box.style.display = "none";
+
+  const thoughtText = document.getElementById("thoughtText");
+  if (thoughtText) {
+    thoughtText.classList.remove("is-entering", "is-exiting");
+  }
 }
