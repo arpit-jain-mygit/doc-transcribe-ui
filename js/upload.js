@@ -105,6 +105,8 @@ async function upload(type, file) {
     const sizeMb = (file?.size || 0) / (1024 * 1024);
     const errMsg = String(err?.message || "").toLowerCase();
     let apiReachable = false;
+    let authReachable = false;
+    let authUnauthorized = false;
 
     try {
       const healthRes = await fetch(`${API}/health`, { method: "GET" });
@@ -113,10 +115,27 @@ async function upload(type, file) {
       apiReachable = false;
     }
 
+    if (apiReachable && ID_TOKEN) {
+      try {
+        const authRes = await fetch(`${API}/jobs?limit=1&offset=0`, {
+          method: "GET",
+          headers: { Authorization: "Bearer " + ID_TOKEN },
+        });
+        authReachable = authRes.ok;
+        authUnauthorized = authRes.status === 401;
+      } catch {
+        authReachable = false;
+      }
+    }
+
     if (isHostedUi && inLocalMode) {
       toast("Upload failed: hosted UI cannot use local API mode. Switch to render mode.", "error");
+    } else if (authUnauthorized) {
+      toast("Upload failed: session expired. Please sign in again and retry.", "error");
+    } else if (apiReachable && authReachable) {
+      toast("Upload failed: API and auth are reachable. Request likely blocked by browser/CORS policy or file body transfer issue.", "error");
     } else if (apiReachable) {
-      toast("Upload failed: API is reachable, but upload request was blocked (auth/CORS/browser policy). Please re-login and retry.", "error");
+      toast("Upload failed: API is reachable but authenticated request failed. Please re-login and retry.", "error");
     } else if (sizeMb > 80) {
       toast(`Upload failed on network. File is ${sizeMb.toFixed(1)} MB; try a smaller file or more stable network.`, "error");
     } else if (errMsg.includes("failed to fetch")) {
