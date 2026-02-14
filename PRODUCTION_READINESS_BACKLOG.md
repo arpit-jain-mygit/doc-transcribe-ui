@@ -12,12 +12,14 @@ Status values:
 - Keep repo scope explicit: `UI`, `API`, `Worker`, or `All`.
 - Cross-reference current implementation and gaps here:
   - [Current State and Gap Analysis](./CURRENT_STATE_AND_GAP_ANALYSIS.md)
+- Mandatory policy for all backlog items: every fix must include required logging updates for new/changed execution paths.
+- Mandatory policy for all backlog items: execute the required set from [Functional Regression Test Suite](./FUNCTIONAL_REGRESSION_TESTS.md).
 
 ## Backlog
 
 | ID | Phase | Task | Repo | Functional Requirement Served | User Benefit | Status | Test |
 |---|---|---|---|---|---|---|---|
-| PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Planned | Not Tested |
+| PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Code) | Pending Validation |
 | PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Planned | Not Tested |
 | PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Planned | Not Tested |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested |
@@ -96,6 +98,7 @@ Status values:
 
 ## Update log
 - 2026-02-14: Backlog initialized.
+- 2026-02-14: PRS-001 implemented at code/documentation level across UI/API/Worker; validation pending.
 
 ## Detailed Item Specifications
 

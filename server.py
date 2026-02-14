@@ -8,6 +8,7 @@ from urllib.request import Request, urlopen
 
 API_ORIGIN = os.environ.get("API_ORIGIN", "http://127.0.0.1:8080")
 PORT = int(os.environ.get("PORT", "4200"))
+HOST = os.environ.get("HOST", "0.0.0.0")
 
 
 class AppHandler(SimpleHTTPRequestHandler):
@@ -100,8 +101,8 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 
 def main():
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), AppHandler)
-    print(f"Server running at http://127.0.0.1:{PORT} -> API_ORIGIN={API_ORIGIN}")
+    server = ThreadingHTTPServer((HOST, PORT), AppHandler)
+    print(f"Server running at http://{HOST}:{PORT} -> API_ORIGIN={API_ORIGIN}")
     server.serve_forever()
 
 
