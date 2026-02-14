@@ -58,3 +58,106 @@ Status values:
 
 ## Update log
 - 2026-02-14: Backlog initialized.
+
+## Detailed Item Specifications
+
+### Table of contents
+- [PRS-001 - Define architecture boundaries and coding standards](#prs-001---define-architecture-boundaries-and-coding-standards)
+
+### PRS-001 - Define architecture boundaries and coding standards
+
+**Purpose**
+- Establish a clear, uniform project structure across UI, API, and Worker so a new engineer can quickly understand where code belongs and how dependencies should flow.
+- Prevent future ad-hoc code placement that makes debugging and refactoring expensive.
+
+**Why this is in Phase 0**
+- This is a foundation item. Every later backlog task (logging, retries, security, performance, scalability) becomes easier and safer when architecture boundaries are defined first.
+- If skipped, later changes will be inconsistent and technical debt will increase.
+
+**Repo touchpoints: why and how each repo is changed**
+- `doc-transcribe-ui` (why): current JS logic is spread across multiple feature files, so we need documented boundaries for UI view logic vs API interaction vs utilities.
+  - Module plan:
+    - `js/views/` for DOM rendering and UX state transitions.
+    - `js/services/` for API calls and polling orchestration.
+    - `js/core/` for shared constants, formatters, validators.
+  - Files to add/update:
+    - `/Users/arpitjain/VSProjects/doc-transcribe-ui/ARCHITECTURE.md` (new)
+    - `/Users/arpitjain/VSProjects/doc-transcribe-ui/CONTRIBUTING.md` (new/update)
+    - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/README.md` (new; module map)
+
+- `doc-transcribe-api` (why): route files currently hold mixed responsibilities (validation, orchestration, persistence), which should be layered.
+  - Module plan:
+    - `routes/` for HTTP request/response only.
+    - `services/` for business logic.
+    - `repositories/` for Redis/storage access.
+    - `schemas/` for request/response contracts.
+  - Files to add/update:
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/ARCHITECTURE.md` (new)
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/CONTRIBUTING.md` (new/update)
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py` (update import/layer notes if needed)
+
+- `doc-transcribe-worker` (why): worker loop, dispatch, OCR/transcription logic, and infra access need strict boundaries for maintainability and safer retries.
+  - Module plan:
+    - `worker/orchestrator/` for queue consumption and lifecycle state transitions.
+    - `worker/executors/` for OCR/transcription execution logic.
+    - `worker/adapters/` for Redis, GCS, model/provider integrations.
+    - `worker/domain/` for typed errors and shared job models.
+  - Files to add/update:
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/ARCHITECTURE.md` (new)
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/CONTRIBUTING.md` (new/update)
+    - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/README.md` (new; module map)
+
+**Functional requirement served**
+- Maintainability and onboarding: engineers can safely extend upload, processing, status, cancellation, and history features without breaking architecture consistency.
+
+**User benefit**
+- Faster bug fixes and feature delivery because developers spend less time understanding code organization.
+- Reduced regressions from cleaner ownership and dependency direction.
+
+**Detailed implementation steps**
+1. Create architecture docs in all 3 repos with:
+- Layer definitions.
+- Allowed dependency direction.
+- “Do/Don’t” examples.
+
+2. Define module ownership by feature:
+- Upload flow ownership.
+- Polling/status ownership.
+- Queue and status transition ownership.
+
+3. Add coding standards:
+- File naming.
+- Function size and complexity limits.
+- Logging and exception handling minimum requirements.
+
+4. Add PR checklist section:
+- “Is new code in correct layer?”
+- “Any cross-layer direct call added?”
+- “Any contract change documented?”
+
+5. Add migration notes:
+- Which existing files are temporary mixed modules.
+- Refactor order for later phases (`PRS-028`, `PRS-029`, `PRS-030`).
+
+**Detailed test plan (for documentation quality and adoption)**
+1. New joiner dry-run test:
+- Ask a teammate unfamiliar with project to locate where to add:
+  - a new API endpoint,
+  - a new worker retry rule,
+  - a new UI history rendering change.
+- Pass criteria: they can identify correct module and target file within 10 minutes using docs only.
+
+2. PR checklist compliance test:
+- Open one sample PR in each repo and verify checklist items are filled.
+- Pass criteria: no cross-layer violations introduced.
+
+3. Dependency direction test:
+- Spot-check imports:
+  - UI view files should not directly call low-level fetch wrappers outside service layer.
+  - API routes should not directly perform Redis calls if repository layer exists.
+  - Worker executors should not own queue polling logic.
+- Pass criteria: architecture rules are respected for modified files.
+
+**Exit criteria for marking status**
+- `Completed (Code)` when all docs and checklists are added in all 3 repos.
+- `Completed (Tested)` when dry-run onboarding and PR checklist compliance tests pass.
