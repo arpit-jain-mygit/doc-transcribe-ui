@@ -10,6 +10,8 @@ Status values:
 - Update `Status` when implementation starts/completes.
 - Update `Test` only after local + integration verification.
 - Keep repo scope explicit: `UI`, `API`, `Worker`, or `All`.
+- Cross-reference current implementation and gaps here:
+  - [Current State and Gap Analysis](./CURRENT_STATE_AND_GAP_ANALYSIS.md)
 
 ## Backlog
 
@@ -48,6 +50,42 @@ Status values:
 | PRS-031 | 9 | Add unit tests for core logic and formatters | All | Quality | Prevents regressions | Planned | Not Tested |
 | PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Planned | Not Tested |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Planned | Not Tested |
+
+## Backlog Item Anchors
+
+- <a id="prs-001"></a>`PRS-001`
+- <a id="prs-002"></a>`PRS-002`
+- <a id="prs-003"></a>`PRS-003`
+- <a id="prs-004"></a>`PRS-004`
+- <a id="prs-005"></a>`PRS-005`
+- <a id="prs-006"></a>`PRS-006`
+- <a id="prs-007"></a>`PRS-007`
+- <a id="prs-008"></a>`PRS-008`
+- <a id="prs-009"></a>`PRS-009`
+- <a id="prs-010"></a>`PRS-010`
+- <a id="prs-011"></a>`PRS-011`
+- <a id="prs-012"></a>`PRS-012`
+- <a id="prs-013"></a>`PRS-013`
+- <a id="prs-014"></a>`PRS-014`
+- <a id="prs-015"></a>`PRS-015`
+- <a id="prs-016"></a>`PRS-016`
+- <a id="prs-017"></a>`PRS-017`
+- <a id="prs-018"></a>`PRS-018`
+- <a id="prs-019"></a>`PRS-019`
+- <a id="prs-020"></a>`PRS-020`
+- <a id="prs-021"></a>`PRS-021`
+- <a id="prs-022"></a>`PRS-022`
+- <a id="prs-023"></a>`PRS-023`
+- <a id="prs-024"></a>`PRS-024`
+- <a id="prs-025"></a>`PRS-025`
+- <a id="prs-026"></a>`PRS-026`
+- <a id="prs-027"></a>`PRS-027`
+- <a id="prs-028"></a>`PRS-028`
+- <a id="prs-029"></a>`PRS-029`
+- <a id="prs-030"></a>`PRS-030`
+- <a id="prs-031"></a>`PRS-031`
+- <a id="prs-032"></a>`PRS-032`
+- <a id="prs-033"></a>`PRS-033`
 
 ## Execution order
 1. Phase 1 + Phase 2
