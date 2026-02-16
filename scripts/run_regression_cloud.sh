@@ -368,6 +368,46 @@ api_health() {
   "$CURL_BIN" -fsS "${API_BASE}/health" >/dev/null || fail "API health check failed at ${API_BASE}/health"
 }
 
+check_render_deploy_state() {
+  local tries="${1:-3}"
+  local sleep_sec="${2:-2}"
+  local i body code version
+
+  for i in $(seq 1 "$tries"); do
+    code="$("$CURL_BIN" -sS -o /tmp/render_health_body.$$ -w "%{http_code}" "${API_BASE}/health" 2>/dev/null || echo "000")"
+    rm -f /tmp/render_health_body.$$ >/dev/null 2>&1 || true
+    if [[ "$code" == "200" ]]; then
+      trace "Render readiness check ${i}/${tries}: /health=200 (API reachable)."
+    elif [[ "$code" =~ ^(000|429|500|502|503|504)$ ]]; then
+      trace "Render readiness check ${i}/${tries}: /health=${code} (deployment/cold-start/or transient infra issue likely)."
+      sleep "$sleep_sec"
+      continue
+    else
+      trace "Render readiness check ${i}/${tries}: /health=${code} (unexpected status, continuing checks)."
+    fi
+
+    body="$(safe_get "${API_BASE}/contract/job-status")"
+    if [[ -z "$body" ]]; then
+      trace "Render contract check ${i}/${tries}: no response from /contract/job-status (API may still be warming/deploying)."
+      sleep "$sleep_sec"
+      continue
+    fi
+
+    version="$(echo "$body" | jq -r '.contract_version // empty' 2>/dev/null || true)"
+    if [[ -z "$version" ]]; then
+      trace "Render contract check ${i}/${tries}: non-JSON/invalid response (deployment may be in progress)."
+      sleep "$sleep_sec"
+      continue
+    fi
+
+    trace "Render contract check: ready (contract_version=${version})."
+    return 0
+  done
+
+  trace "Render deploy status: API not fully ready yet (or still warming/deploying). Proceeding with regression may fail transiently."
+  return 0
+}
+
 submit_job() {
   local file_path="$1"
   local job_type="$2"
@@ -524,6 +564,7 @@ main() {
     check_local_worker_for_cloud
   fi
   api_health
+  check_render_deploy_state 4 2
   icon_ok "Pre-checks passed (cloud API + local worker readiness)."
   trace "Precheck complete: cloud API reachable"
   end_step_ok
