@@ -37,6 +37,83 @@ MAX_WAIT_SEC="${MAX_WAIT_SEC:-180}"
 POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-2}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
 TRACE_FLOW="${TRACE_FLOW:-1}"
+RUN_START_EPOCH="$(date +%s)"
+RUN_START_ISO="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
+
+if [[ -t 1 ]]; then
+  C_GREEN=$'\033[32m'
+  C_RED=$'\033[31m'
+  C_BLUE=$'\033[34m'
+  C_RESET=$'\033[0m'
+else
+  C_GREEN=""
+  C_RED=""
+  C_BLUE=""
+  C_RESET=""
+fi
+
+icon_info() { printf "%sℹ%s %s\n" "$C_BLUE" "$C_RESET" "$1"; }
+icon_ok() { printf "%s✔%s %s\n" "$C_GREEN" "$C_RESET" "$1"; }
+icon_fail() { printf "%s✖%s %s\n" "$C_RED" "$C_RESET" "$1" >&2; }
+
+STEP_NAME=""
+STEP_START_EPOCH=0
+STEP_START_ISO=""
+
+begin_step() {
+  STEP_NAME="$1"
+  STEP_START_EPOCH="$(date +%s)"
+  STEP_START_ISO="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
+  icon_info "${STEP_NAME} START_IST=${STEP_START_ISO}"
+}
+
+end_step_ok() {
+  local end_epoch end_iso step_sec
+  end_epoch="$(date +%s)"
+  end_iso="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
+  step_sec=$(( end_epoch - STEP_START_EPOCH ))
+  icon_ok "${STEP_NAME} END_IST=${end_iso} STEP_SEC=${step_sec}"
+  STEP_NAME=""
+  STEP_START_EPOCH=0
+  STEP_START_ISO=""
+}
+
+end_step_fail() {
+  if [[ -z "$STEP_NAME" || "$STEP_START_EPOCH" -eq 0 ]]; then
+    return 0
+  fi
+  local end_epoch end_iso step_sec
+  end_epoch="$(date +%s)"
+  end_iso="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
+  step_sec=$(( end_epoch - STEP_START_EPOCH ))
+  icon_fail "${STEP_NAME} END_IST=${end_iso} STEP_SEC=${step_sec} RESULT=FAIL"
+  STEP_NAME=""
+  STEP_START_EPOCH=0
+  STEP_START_ISO=""
+}
+
+print_run_timing() {
+  if [[ "${TIMING_PRINTED:-0}" == "1" ]]; then
+    return 0
+  fi
+  TIMING_PRINTED=1
+  local end_epoch end_iso total_sec
+  end_epoch="$(date +%s)"
+  end_iso="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
+  total_sec=$(( end_epoch - RUN_START_EPOCH ))
+  echo "== Script timing =="
+  echo "START_IST=${RUN_START_ISO}"
+  echo "END_IST=${end_iso}"
+  echo "TOTAL_SEC=${total_sec}"
+}
+
+handle_interrupt() {
+  print_run_timing
+  exit 130
+}
+
+trap print_run_timing EXIT
+trap handle_interrupt INT TERM
 
 load_auth_token() {
   local from_file=""
@@ -148,8 +225,9 @@ check_local_worker_up() {
 }
 
 fail() {
+  end_step_fail
   maybe_print_diagnostics
-  echo "FAIL: $1" >&2
+  icon_fail "FAIL: $1"
   exit 1
 }
 
@@ -427,7 +505,7 @@ main() {
   if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
     auth_set="yes"
   fi
-  echo "== Local Regression: pre-checks =="
+  begin_step "Local Regression: pre-checks"
   echo "API_BASE=${API_BASE}"
   echo "AUTH_BEARER_TOKEN set=${auth_set}"
   echo "AUTH_TOKEN_SOURCE=${TOKEN_SOURCE}"
@@ -445,25 +523,32 @@ main() {
   fi
   api_health
   redis_health
+  icon_ok "Pre-checks passed (API + Redis + worker)."
   trace "Precheck complete: UI/API/Worker/Redis ready for local regression flow"
+  end_step_ok
 
-  echo "== OCR test (sample.pdf) =="
+  begin_step "OCR test (sample.pdf)"
   local ocr_resp ocr_job
   ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
   trace "OCR flow: UI -> API /upload -> job_id=${ocr_job}"
   poll_job "$ocr_job" "OCR"
+  icon_ok "OCR regression step passed."
+  end_step_ok
 
-  echo "== Transcription test (sample.mp3) =="
+  begin_step "Transcription test (sample.mp3)"
   local tr_resp tr_job
   tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"
   trace "Transcription flow: UI -> API /upload -> job_id=${tr_job}"
   poll_job "$tr_job" "TRANSCRIPTION"
+  icon_ok "Transcription regression step passed."
+  end_step_ok
 
-  echo "PASS: Local bounded regression completed"
+  icon_ok "PASS: Local bounded regression completed"
+  print_run_timing
 }
 
 main "$@"
