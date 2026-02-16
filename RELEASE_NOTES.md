@@ -56,8 +56,9 @@ This file tracks release-level changes with backlog traceability.
 - Validation:
   - API contract endpoint available (`GET /contract/job-status`).
   - UI field reads moved to canonical resolver helper.
-  - Full regression pending.
-- Status: `Completed (Code)`
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (user-run confirmation).
+- Status: `Completed (Tested)`
 
 ### PRS-003
 - Backlog ID: `PRS-003`
@@ -79,5 +80,6 @@ This file tracks release-level changes with backlog traceability.
   - Worker now writes canonical failed/cancelled error fields.
   - API status normalizes missing failure fields.
   - UI and regression scripts show standardized error messages.
-  - Full regression pending.
-- Status: `Completed (Code)`
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (user-run confirmation).
+- Status: `Completed (Tested)`

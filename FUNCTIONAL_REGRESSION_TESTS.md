@@ -264,11 +264,11 @@ Behavior:
   - Local regression: `PASS` (2026-02-16)
   - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
 - `PRS-002`
-  - Local regression: `PENDING`
-  - Cloud regression: `PENDING`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
 - `PRS-003`
-  - Local regression: `PENDING`
-  - Cloud regression: `PENDING`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.
@@ -294,3 +294,23 @@ Behavior:
   - `Transcription` completed (`job_id=07bac199dbfd4d84b84902bdfdd7a43b`)
 - `Fail`: `None`
 - `Notes`:
+
+- `Backlog ID`: `PRS-002`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription lifecycle, contract/status checks`
+- `Pass`:
+  - `Local`: OCR + Transcription completed.
+  - `Cloud`: OCR + Transcription completed.
+- `Fail`: `None`
+- `Notes`: `Canonical contract fields stayed consistent across UI/API/Worker responses.`
+
+- `Backlog ID`: `PRS-003`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription lifecycle with failure/timeout diagnostics`
+- `Pass`:
+  - `Local`: standardized error fields observed and surfaced.
+  - `Cloud`: worker health/queue diagnostics and standardized error payload behavior validated.
+- `Fail`: `None`
+- `Notes`: `Regression scripts now provide explicit worker-up and worker-pickup signals.`

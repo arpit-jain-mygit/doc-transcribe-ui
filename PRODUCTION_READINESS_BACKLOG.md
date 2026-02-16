@@ -21,8 +21,8 @@ Status values:
 | ID | Phase | Task | Repo | Functional Requirement Served | User Benefit | Status | Test | Repo-wise Change Summary |
 |---|---|---|---|---|---|---|---|---|
 | PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local + Cloud Regression) | UI: architecture/backlog/regression docs + stack/regression scripts. API: stage-wise structured logging + logging config. Worker: architecture/contribution/guide docs and module map docs. |
-| PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Code) | Not Tested | UI: added canonical contract resolver module and contract reference doc. API: added source-of-truth contract spec + machine-readable contract endpoint + canonical constants in routes. Worker: added contract constants/reference docs aligned to API source. |
-| PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Completed (Code) | Not Tested | UI: standardized failed-job message rendering + script failure output includes error code/message. API: failed status normalization (`error_code`,`error_message`). Worker: centralized error classification and consistent failed/cancelled fields. |
+| PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Tested) | Completed (Local + Cloud Regression) | UI: canonical contract resolver/doc (`3fe0a4b`). API: source-of-truth contract schema + endpoint (`347e903`). Worker: aligned contract constants/docs (`14bb4d2`). |
+| PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Completed (Tested) | Completed (Local + Cloud Regression) | UI: standardized error handling + regression diagnostics/worker checks (`b2cf954`,`f284da0`,`fd16c2b`,`42414a2`). API: status normalization + structured exception payloads (`bdb1923`,`27f322e`). Worker: centralized error catalog/resilience (`4579341`,`5d91486`). |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested | Pending implementation |
 | PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Planned | Not Tested | Pending implementation |
 | PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Planned | Not Tested | Pending implementation |
@@ -102,8 +102,8 @@ Status values:
 - 2026-02-14: PRS-001 implemented at code/documentation level across UI/API/Worker; validation pending.
 - 2026-02-16: PRS-001 local bounded regression passed (`OCR job_id=e77a176513b545ceadb06bfae7f2f346`, `TRANSCRIPTION job_id=07bac199dbfd4d84b84902bdfdd7a43b`).
 - 2026-02-16: PRS-001 cloud regression confirmed passed by user run.
-- 2026-02-16: PRS-002 implemented at code/documentation level across UI/API/Worker; validation pending.
-- 2026-02-16: PRS-003 implemented at code level across UI/API/Worker/scripts; validation pending.
+- 2026-02-16: PRS-002 completed and regression-validated (local + cloud) across UI/API/Worker.
+- 2026-02-16: PRS-003 completed and regression-validated (local + cloud) across UI/API/Worker/scripts.
 
 ## Detailed Item Specifications
 
