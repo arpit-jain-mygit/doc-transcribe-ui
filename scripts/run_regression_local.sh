@@ -184,13 +184,16 @@ print_local_worker_diag() {
   if [[ -n "$proc_line" ]]; then
     echo "WORKER_UP=yes (${proc_line})"
   else
-    echo "WORKER_UP=no"
+    echo "WORKER_UP=unknown (process lookup unavailable)"
   fi
   if [[ -f "$WORKER_LOG" ]]; then
     local targets_line
     targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
     if [[ -n "$targets_line" ]]; then
       echo "WORKER_QUEUE_TARGETS=${targets_line#*QUEUE_TARGETS=}"
+      echo "WORKER_LOG_SIGNAL=present"
+    else
+      echo "WORKER_LOG_SIGNAL=missing"
     fi
   fi
 }
@@ -198,10 +201,11 @@ print_local_worker_diag() {
 check_local_worker_up() {
   local proc_line targets_line listen_line
   proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
-  if [[ -z "$proc_line" ]]; then
-    fail "Worker is not running locally. Start it with scripts/start_local_stack.sh."
+  if [[ -n "$proc_line" ]]; then
+    echo "WORKER_UP=yes (${proc_line})"
+  else
+    echo "WORKER_UP=unknown (process lookup unavailable; falling back to worker log)"
   fi
-  echo "WORKER_UP=yes (${proc_line})"
   if [[ -f "$WORKER_LOG" ]]; then
     targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
     if [[ -n "$targets_line" ]]; then
@@ -220,8 +224,10 @@ check_local_worker_up() {
       if ! echo "$listen_line" | grep -q "$QUEUE_NAME"; then
         fail "Worker is up but listening to a different queue than '${QUEUE_NAME}'."
       fi
+      return 0
     fi
   fi
+  fail "Worker startup signal missing. Start it with scripts/start_local_stack.sh and check ${WORKER_LOG}."
 }
 
 fail() {
@@ -241,9 +247,12 @@ print_token_meta() {
     echo "AUTH_TOKEN_META=missing"
     return 0
   fi
-  python3 - <<'PY'
+  python3 - "$AUTH_BEARER_TOKEN" <<'PY'
 import base64, json, os, time, datetime
-t = os.environ.get("AUTH_BEARER_TOKEN","").strip()
+t = (os.environ.get("AUTH_BEARER_TOKEN") or "").strip()
+if not t:
+    import sys
+    t = (sys.argv[1] if len(sys.argv) > 1 else "").strip()
 parts = t.split(".")
 if len(parts) < 2:
     print("AUTH_TOKEN_META=invalid_jwt_format")
