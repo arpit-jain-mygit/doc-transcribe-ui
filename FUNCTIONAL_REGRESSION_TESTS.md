@@ -269,6 +269,9 @@ Behavior:
 - `PRS-003`
   - Local regression: `PASS` (2026-02-16)
   - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
+- `PRS-004`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.
@@ -314,3 +317,13 @@ Behavior:
   - `Cloud`: worker health/queue diagnostics and standardized error payload behavior validated.
 - `Fail`: `None`
 - `Notes`: `Regression scripts now provide explicit worker-up and worker-pickup signals.`
+
+- `Backlog ID`: `PRS-004`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription lifecycle after startup env validation changes`
+- `Pass`:
+  - `Local`: OCR (`864b5a7f0b9c40d3bcb784c7417a6546`) + Transcription (`dc8278c647c749b08be7d0775c1636f6`) completed.
+  - `Cloud`: OCR (`219ad17acff6431680e69ea1e1fd0acd`) + Transcription (`0478f93f606b4e62a3dcdf505dc16b34`) completed.
+- `Fail`: `None`
+- `Notes`: `Startup env validators loaded successfully in API/Worker logs; no runtime misconfig breakage during job lifecycle.`

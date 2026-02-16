@@ -23,7 +23,7 @@ Status values:
 | PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local + Cloud Regression) | UI: architecture/backlog/regression docs + stack/regression scripts. API: stage-wise structured logging + logging config. Worker: architecture/contribution/guide docs and module map docs. |
 | PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Tested) | Completed (Local + Cloud Regression) | UI: canonical contract resolver/doc (`3fe0a4b`). API: source-of-truth contract schema + endpoint (`347e903`). Worker: aligned contract constants/docs (`14bb4d2`). |
 | PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Completed (Tested) | Completed (Local + Cloud Regression) | UI: standardized error handling + regression diagnostics/worker checks (`b2cf954`,`f284da0`,`fd16c2b`,`42414a2`). API: status normalization + structured exception payloads (`bdb1923`,`27f322e`). Worker: centralized error catalog/resilience (`4579341`,`5d91486`). |
-| PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested | Pending implementation |
+| PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Completed (Tested) | Completed (Local + Cloud Regression) | UI: regression precheck hardening and worker health fallback (`fc1db9f`). API: fail-fast startup env validator (`2c7134c`). Worker: fail-fast startup env validator (`071f5c0`). |
 | PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Planned | Not Tested | Pending implementation |
 | PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Planned | Not Tested | Pending implementation |
 | PRS-007 | 1 | Add operational metrics (success/fail/retry/latency) | API, Worker | Monitoring | Detect issues before users report | Planned | Not Tested | Pending implementation |
@@ -104,6 +104,7 @@ Status values:
 - 2026-02-16: PRS-001 cloud regression confirmed passed by user run.
 - 2026-02-16: PRS-002 completed and regression-validated (local + cloud) across UI/API/Worker.
 - 2026-02-16: PRS-003 completed and regression-validated (local + cloud) across UI/API/Worker/scripts.
+- 2026-02-16: PRS-004 completed and regression-validated (local + cloud) across API/Worker, with UI regression precheck hardening.
 
 ## Detailed Item Specifications
 

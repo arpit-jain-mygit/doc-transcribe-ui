@@ -83,3 +83,23 @@ This file tracks release-level changes with backlog traceability.
   - Local regression passed (OCR + transcription).
   - Cloud regression passed (user-run confirmation).
 - Status: `Completed (Tested)`
+
+### PRS-004
+- Backlog ID: `PRS-004`
+- Backlog Link: [PRS-004](./PRODUCTION_READINESS_BACKLOG.md#prs-004)
+- Type: `NFR` + `Reliability`
+- Summary: Added fail-fast startup environment validation in API and Worker.
+- Why: Catch missing/invalid configuration at boot instead of failing during live job processing.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/startup_env.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/startup_env.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+- Risk: `Low`
+- Validation:
+  - Local regression passed (OCR + transcription completed).
+  - Cloud regression passed (OCR + transcription completed).
+  - Startup logs confirmed validator success and warning surfaces.
+- Status: `Completed (Tested)`
