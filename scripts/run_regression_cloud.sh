@@ -22,6 +22,7 @@ SAMPLE_MP3="${SAMPLE_MP3:-/Users/arpitjain/Downloads/Demo/sample.mp3}"
 MAX_WAIT_SEC="${MAX_WAIT_SEC:-300}"
 POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-3}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
+TRACE_FLOW="${TRACE_FLOW:-1}"
 
 if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
   AUTH_HEADER_FLAG=(-H "Authorization: Bearer ${AUTH_BEARER_TOKEN}")
@@ -33,6 +34,11 @@ fail() {
   maybe_print_diagnostics
   echo "FAIL: $1" >&2
   exit 1
+}
+
+trace() {
+  [[ "$TRACE_FLOW" == "1" ]] || return 0
+  echo "[TRACE] $1"
 }
 
 safe_get() {
@@ -54,6 +60,30 @@ maybe_print_diagnostics() {
   echo "contract: $(safe_get "${API_BASE}/contract/job-status")"
   if [[ -n "${CURRENT_JOB_ID:-}" ]]; then
     echo "status(${CURRENT_JOB_ID}): $(safe_get "${API_BASE}/status/${CURRENT_JOB_ID}")"
+    print_component_trace_cloud "$CURRENT_JOB_ID"
+  fi
+}
+
+print_component_trace_cloud() {
+  local job_id="$1"
+  echo "== Functional trace (${job_id}) =="
+  trace "1) UI (Vercel) -> API (Render): upload request submitted"
+  trace "2) API -> Redis (Render key-value): metadata + queue push"
+  trace "3) Worker -> queue dequeue -> processing start"
+  local status_payload status stage progress err_code err_msg out_file
+  status_payload="$(safe_get "${API_BASE}/status/${job_id}")"
+  status="$(echo "$status_payload" | jq -r '.status // "-"' 2>/dev/null || echo "-")"
+  stage="$(echo "$status_payload" | jq -r '.stage // "-"' 2>/dev/null || echo "-")"
+  progress="$(echo "$status_payload" | jq -r '.progress // "-"' 2>/dev/null || echo "-")"
+  err_code="$(echo "$status_payload" | jq -r '.error_code // "-"' 2>/dev/null || echo "-")"
+  err_msg="$(echo "$status_payload" | jq -r '.error_message // "-"' 2>/dev/null || echo "-")"
+  out_file="$(echo "$status_payload" | jq -r '.output_filename // "-"' 2>/dev/null || echo "-")"
+  trace "4) API /status snapshot: status=${status} stage=${stage} progress=${progress}"
+  if [[ "$status" == "FAILED" ]]; then
+    trace "5) Failure surfaced: error_code=${err_code} message=${err_msg}"
+  elif [[ "$status" == "COMPLETED" ]]; then
+    trace "5) Completion surfaced: output_filename=${out_file}"
+    trace "6) API signed URL available for download from GCS"
   fi
 }
 
@@ -123,6 +153,9 @@ poll_job() {
   local last_log_at="$started_at"
   local last_status=""
   local last_resp=""
+  local seen_queued="0"
+  local seen_processing="0"
+  local seen_completed="0"
 
   while true; do
     local now
@@ -155,8 +188,24 @@ poll_job() {
       last_status="$status"
     fi
 
+    if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
+      trace "${label}: API accepted and queued job"
+      seen_queued="1"
+    fi
+    if [[ "$status" == "PROCESSING" && "$seen_processing" == "0" ]]; then
+      trace "${label}: Worker picked job and started processing (${stage})"
+      seen_processing="1"
+    fi
+
     if [[ "$status" == "COMPLETED" ]]; then
+      if [[ "$seen_completed" == "0" ]]; then
+        local out_file
+        out_file="$(echo "$resp" | jq -r '.output_filename // "transcript.txt"')"
+        trace "${label}: Processing completed, output file=${out_file}"
+        seen_completed="1"
+      fi
       echo "Job ${job_id} completed"
+      print_component_trace_cloud "$job_id"
       return 0
     fi
     if [[ "$status" == "FAILED" ]]; then
@@ -187,12 +236,14 @@ main() {
     fail "AUTH_BEARER_TOKEN is required for cloud regression. Export token and retry."
   fi
   api_health
+  trace "Precheck complete: cloud API reachable"
 
   echo "== OCR test (sample.pdf) =="
   local ocr_resp ocr_job
   ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
+  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job}"
   poll_job "$ocr_job" "OCR"
 
   echo "== Transcription test (sample.mp3) =="
@@ -200,6 +251,7 @@ main() {
   tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"
+  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job}"
   poll_job "$tr_job" "TRANSCRIPTION"
 
   echo "PASS: Cloud bounded regression completed"

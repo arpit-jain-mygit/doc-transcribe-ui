@@ -30,6 +30,7 @@ SAMPLE_MP3="${SAMPLE_MP3:-/Users/arpitjain/Downloads/Demo/sample.mp3}"
 MAX_WAIT_SEC="${MAX_WAIT_SEC:-180}"
 POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-2}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
+TRACE_FLOW="${TRACE_FLOW:-1}"
 
 if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
   AUTH_HEADER_FLAG=(-H "Authorization: Bearer ${AUTH_BEARER_TOKEN}")
@@ -41,6 +42,11 @@ fail() {
   maybe_print_diagnostics
   echo "FAIL: $1" >&2
   exit 1
+}
+
+trace() {
+  [[ "$TRACE_FLOW" == "1" ]] || return 0
+  echo "[TRACE] $1"
 }
 
 print_log_tail() {
@@ -83,6 +89,29 @@ maybe_print_diagnostics() {
   print_log_tail "API" "$API_LOG" 120
   print_log_tail "Worker" "$WORKER_LOG" 120
   print_log_tail "UI" "$UI_LOG" 60
+  if [[ -n "${CURRENT_JOB_ID:-}" ]]; then
+    print_component_trace_local "$CURRENT_JOB_ID"
+  fi
+}
+
+print_component_trace_local() {
+  local job_id="$1"
+  echo "== Functional trace (${job_id}) =="
+  trace "1) UI -> API: upload request submitted by regression runner"
+  trace "2) API -> Redis: job metadata + queue push expected"
+  if command -v redis-cli >/dev/null 2>&1; then
+    local status stage progress
+    status="$(redis-cli -u "$REDIS_URL" HGET "job_status:${job_id}" status 2>/dev/null || true)"
+    stage="$(redis-cli -u "$REDIS_URL" HGET "job_status:${job_id}" stage 2>/dev/null || true)"
+    progress="$(redis-cli -u "$REDIS_URL" HGET "job_status:${job_id}" progress 2>/dev/null || true)"
+    trace "3) Redis current state: status=${status:-n/a} stage=${stage:-n/a} progress=${progress:-n/a}"
+  fi
+  trace "4) Worker -> Redis: dequeue/process status updates"
+  if [[ -f "$WORKER_LOG" ]]; then
+    grep -n "$job_id" "$WORKER_LOG" | tail -n 12 || true
+  fi
+  trace "5) Worker -> Vertex/GCS: OCR/transcription + output upload"
+  trace "6) API /status -> UI: surfaced status payload to client"
 }
 
 http_call() {
@@ -157,6 +186,9 @@ poll_job() {
   local last_log_at="$started_at"
   local last_status=""
   local last_resp=""
+  local seen_queued="0"
+  local seen_processing="0"
+  local seen_completed="0"
 
   while true; do
     local now
@@ -189,8 +221,26 @@ poll_job() {
       last_status="$status"
     fi
 
+    if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
+      trace "${label}: API accepted upload and queued job in Redis"
+      seen_queued="1"
+    fi
+    if [[ "$status" == "PROCESSING" && "$seen_processing" == "0" ]]; then
+      trace "${label}: Worker picked job and started processing (${stage})"
+      seen_processing="1"
+    fi
+
     if [[ "$status" == "COMPLETED" ]]; then
+      if [[ "$seen_completed" == "0" ]]; then
+        local out_path out_file
+        out_path="$(echo "$resp" | jq -r '.output_path // "-"')"
+        out_file="$(echo "$resp" | jq -r '.output_filename // "transcript.txt"')"
+        trace "${label}: Worker completed, output uploaded to GCS path=${out_path}"
+        trace "${label}: API returned completed status; output file=${out_file}"
+        seen_completed="1"
+      fi
       echo "Job ${job_id} completed"
+      print_component_trace_local "$job_id"
       return 0
     fi
     if [[ "$status" == "FAILED" ]]; then
@@ -222,12 +272,14 @@ main() {
   fi
   api_health
   redis_health
+  trace "Precheck complete: UI/API/Worker/Redis ready for local regression flow"
 
   echo "== OCR test (sample.pdf) =="
   local ocr_resp ocr_job
   ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
+  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job}"
   poll_job "$ocr_job" "OCR"
 
   echo "== Transcription test (sample.mp3) =="
@@ -235,6 +287,7 @@ main() {
   tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"
+  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job}"
   poll_job "$tr_job" "TRANSCRIPTION"
 
   echo "PASS: Local bounded regression completed"
