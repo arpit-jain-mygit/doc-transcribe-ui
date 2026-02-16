@@ -35,6 +35,7 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+scripts/.auth_token.local
 
 # System files
 .DS_Store

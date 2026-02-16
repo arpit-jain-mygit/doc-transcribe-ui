@@ -13,6 +13,9 @@ CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
 # export AUTH_BEARER_TOKEN="..."
 AUTH_BEARER_TOKEN="${AUTH_BEARER_TOKEN:-}"
 REQUIRE_AUTH="${REQUIRE_AUTH:-1}"
+AUTH_TOKEN_FILE="${AUTH_TOKEN_FILE:-/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/.auth_token.local}"
+TOKEN_SOURCE="unset"
+TOKEN_FILE_PRIORITY="${TOKEN_FILE_PRIORITY:-1}"
 
 # File paths (override if needed):
 SAMPLE_PDF="${SAMPLE_PDF:-/Users/arpitjain/Downloads/Demo/sample.pdf}"
@@ -24,11 +27,68 @@ POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-3}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
 TRACE_FLOW="${TRACE_FLOW:-1}"
 
-if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
-  AUTH_HEADER_FLAG=(-H "Authorization: Bearer ${AUTH_BEARER_TOKEN}")
-else
-  AUTH_HEADER_FLAG=("")
-fi
+load_auth_token() {
+  local from_file=""
+  local from_env=""
+
+  if [[ -f "$AUTH_TOKEN_FILE" ]]; then
+    from_file="$(python3 - "$AUTH_TOKEN_FILE" <<'PY'
+import json, sys
+p = sys.argv[1]
+raw = open(p, "r", encoding="utf-8").read().strip()
+if not raw:
+    print("")
+    raise SystemExit(0)
+try:
+    obj = json.loads(raw)
+    token = (obj.get("token") if isinstance(obj, dict) else "") or ""
+    print(str(token).strip())
+except Exception:
+    lines = [ln.strip() for ln in raw.splitlines() if ln.strip() and not ln.strip().startswith("#")]
+    print(lines[0] if lines else "")
+PY
+)"
+  fi
+
+  if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
+    from_env="$(python3 - <<'PY'
+import json, os
+raw = (os.environ.get("AUTH_BEARER_TOKEN") or "").strip()
+if not raw:
+    print("")
+    raise SystemExit(0)
+try:
+    obj = json.loads(raw)
+    token = (obj.get("token") if isinstance(obj, dict) else "") or ""
+    print(str(token).strip())
+except Exception:
+    print(raw)
+PY
+)"
+  fi
+
+  if [[ "$TOKEN_FILE_PRIORITY" == "1" && -n "$from_file" ]]; then
+    AUTH_BEARER_TOKEN="$from_file"
+    TOKEN_SOURCE="file:${AUTH_TOKEN_FILE}"
+  elif [[ -n "$from_env" ]]; then
+    AUTH_BEARER_TOKEN="$from_env"
+    TOKEN_SOURCE="env:AUTH_BEARER_TOKEN"
+  elif [[ -n "$from_file" ]]; then
+    AUTH_BEARER_TOKEN="$from_file"
+    TOKEN_SOURCE="file:${AUTH_TOKEN_FILE}"
+  else
+    AUTH_BEARER_TOKEN=""
+    TOKEN_SOURCE="unset"
+  fi
+}
+
+rebuild_auth_header() {
+  if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
+    AUTH_HEADER_FLAG=(-H "Authorization: Bearer ${AUTH_BEARER_TOKEN}")
+  else
+    AUTH_HEADER_FLAG=("")
+  fi
+}
 
 fail() {
   maybe_print_diagnostics
@@ -39,6 +99,46 @@ fail() {
 trace() {
   [[ "$TRACE_FLOW" == "1" ]] || return 0
   echo "[TRACE] $1"
+}
+
+print_token_meta() {
+  if [[ -z "$AUTH_BEARER_TOKEN" ]]; then
+    echo "AUTH_TOKEN_META=missing"
+    return 0
+  fi
+  python3 - <<'PY'
+import base64, json, os, time, datetime
+t = os.environ.get("AUTH_BEARER_TOKEN","").strip()
+parts = t.split(".")
+if len(parts) < 2:
+    print("AUTH_TOKEN_META=invalid_jwt_format")
+    raise SystemExit(0)
+payload = parts[1] + "=" * (-len(parts[1]) % 4)
+try:
+    claims = json.loads(base64.urlsafe_b64decode(payload))
+except Exception:
+    print("AUTH_TOKEN_META=payload_decode_failed")
+    raise SystemExit(0)
+exp = claims.get("exp")
+aud = claims.get("aud")
+email = claims.get("email")
+if isinstance(exp, (int, float)):
+    now = int(time.time())
+    rem = int(exp - now)
+    exp_iso = datetime.datetime.utcfromtimestamp(exp).isoformat() + "Z"
+    state = "expired" if rem <= 0 else "valid"
+    print(f"AUTH_TOKEN_META=state={state} expires_utc={exp_iso} remaining_sec={rem} aud={aud} email={email}")
+else:
+    print(f"AUTH_TOKEN_META=state=unknown_exp aud={aud} email={email}")
+PY
+}
+
+print_token_refresh_hint() {
+  if [[ "${TOKEN_HINT_PRINTED:-0}" == "1" ]]; then
+    return 0
+  fi
+  TOKEN_HINT_PRINTED=1
+  echo "HINT: Token may be invalid/expired. Update AUTH_TOKEN_FILE=${AUTH_TOKEN_FILE} and retry."
 }
 
 safe_get() {
@@ -128,6 +228,7 @@ submit_job() {
   body="$(echo "$result" | sed -n '2,$p')"
   if [[ ! "$code" =~ ^2 ]]; then
     if [[ "$code" == "401" ]]; then
+      print_token_refresh_hint
       fail "Upload request failed for ${job_type} (HTTP 401). Token likely expired/invalid. Body: ${body}"
     fi
     fail "Upload request failed for ${job_type} (HTTP ${code}): ${body}"
@@ -173,6 +274,7 @@ poll_job() {
     last_resp="$resp"
     if [[ ! "$code" =~ ^2 ]]; then
       if [[ "$code" == "401" ]]; then
+        print_token_refresh_hint
         fail "Status call failed for ${label} job ${job_id} (HTTP 401). Token likely expired/invalid. Body: ${resp}"
       fi
       fail "Status call failed for ${job_id} (HTTP ${code}): ${resp}"
@@ -223,6 +325,9 @@ poll_job() {
 }
 
 main() {
+  load_auth_token
+  rebuild_auth_header
+
   local auth_set="no"
   if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
     auth_set="yes"
@@ -230,10 +335,13 @@ main() {
   echo "== Cloud Regression: pre-checks =="
   echo "API_BASE=${API_BASE}"
   echo "AUTH_BEARER_TOKEN set=${auth_set}"
+  echo "AUTH_TOKEN_SOURCE=${TOKEN_SOURCE}"
+  echo "AUTH_TOKEN_FILE=${AUTH_TOKEN_FILE}"
+  print_token_meta
   require_file "$SAMPLE_PDF"
   require_file "$SAMPLE_MP3"
   if [[ "$REQUIRE_AUTH" == "1" && -z "$AUTH_BEARER_TOKEN" ]]; then
-    fail "AUTH_BEARER_TOKEN is required for cloud regression. Export token and retry."
+    fail "AUTH_BEARER_TOKEN is required. Set env var or paste fresh token in ${AUTH_TOKEN_FILE}."
   fi
   api_health
   trace "Precheck complete: cloud API reachable"
