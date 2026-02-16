@@ -272,6 +272,15 @@ Behavior:
 - `PRS-004`
   - Local regression: `PASS` (2026-02-16)
   - Cloud regression: `PASS` (2026-02-16)
+- `PRS-005`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16)
+- `PRS-006`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16)
+- `PRS-007`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.
@@ -327,3 +336,33 @@ Behavior:
   - `Cloud`: OCR (`219ad17acff6431680e69ea1e1fd0acd`) + Transcription (`0478f93f606b4e62a3dcdf505dc16b34`) completed.
 - `Fail`: `None`
 - `Notes`: `Startup env validators loaded successfully in API/Worker logs; no runtime misconfig breakage during job lifecycle.`
+
+- `Backlog ID`: `PRS-005`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription with request_id contract and trace propagation checks`
+- `Pass`:
+  - `Local`: OCR + Transcription completed with request correlation present.
+  - `Cloud`: OCR + Transcription completed with request correlation present.
+- `Fail`: `None`
+- `Notes`: `Upload/status traces now carry stable request_id for end-to-end debugging.`
+
+- `Backlog ID`: `PRS-006`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription with structured logging checks`
+- `Pass`:
+  - `Local`: OCR + Transcription completed.
+  - `Cloud`: OCR + Transcription completed.
+- `Fail`: `None`
+- `Notes`: `API/Worker logs produce structured JSON events with mandatory keys during lifecycle stages.`
+
+- `Backlog ID`: `PRS-007`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud (Render API with local worker consuming cloud queue)`
+- `Executed tests`: `Bounded OCR + Transcription with metrics emission checks`
+- `Pass`:
+  - `Local`: OCR + Transcription completed.
+  - `Cloud`: OCR + Transcription completed.
+- `Fail`: `None`
+- `Notes`: `API + Worker metrics counters/latencies updated and exposed via health/metrics path where applicable.`

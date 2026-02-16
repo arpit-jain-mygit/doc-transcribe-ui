@@ -24,9 +24,9 @@ Status values:
 | PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Tested) | Completed (Local + Cloud Regression) | UI: canonical contract resolver/doc (`3fe0a4b`). API: source-of-truth contract schema + endpoint (`347e903`). Worker: aligned contract constants/docs (`14bb4d2`). |
 | PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Completed (Tested) | Completed (Local + Cloud Regression) | UI: standardized error handling + regression diagnostics/worker checks (`b2cf954`,`f284da0`,`fd16c2b`,`42414a2`). API: status normalization + structured exception payloads (`bdb1923`,`27f322e`). Worker: centralized error catalog/resilience (`4579341`,`5d91486`). |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Completed (Tested) | Completed (Local + Cloud Regression) | UI: regression precheck hardening and worker health fallback (`fc1db9f`). API: fail-fast startup env validator (`2c7134c`). Worker: fail-fast startup env validator (`071f5c0`). |
-| PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Planned | Not Tested | Pending implementation |
-| PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Planned | Not Tested | Pending implementation |
-| PRS-007 | 1 | Add operational metrics (success/fail/retry/latency) | API, Worker | Monitoring | Detect issues before users report | Planned | Not Tested | Pending implementation |
+| PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Completed (Tested) | Completed (Local + Cloud Regression) | UI: request-id propagation in UI + regression diagnostics (`59e8699`, `771d4d8`). API: request-id middleware + contract/status propagation (`4d259f9`). Worker: request-id in processing/status/log flow (`c60e875`). |
+| PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Completed (Tested) | Completed (Local + Cloud Regression) | API: structured JSON formatter + mandatory stage payload fields (`5cdae48`). Worker: structured JSON logs + stage event payload normalization (`a119f7a`). |
+| PRS-007 | 1 | Add operational metrics (success/fail/retry/latency) | API, Worker | Monitoring | Detect issues before users report | Completed (Tested) | Completed (Local + Cloud Regression) | API: request counters/latency metrics + `/metrics` endpoint (`87e8a45`). Worker: dispatch/GCS retry/latency metrics (`bdbf74f`) and GCS error-path hardening (`41223a3`). |
 | PRS-008 | 2 | Enforce job status transition state machine | API, Worker | Reliability | Predictable job lifecycle behavior | Planned | Not Tested | Pending implementation |
 | PRS-009 | 2 | Add idempotent upload key and duplicate job reuse | API, UI | Reliability | No duplicate jobs on retry/network glitches | Planned | Not Tested | Pending implementation |
 | PRS-010 | 2 | Typed retry policy with backoff + jitter | Worker | Reliability | Better success under transient failures | Planned | Not Tested | Pending implementation |
@@ -1392,4 +1392,3 @@ Status values:
 **Exit criteria for marking status**
 - `Completed (Code)`: code and docs updated in scoped repos.
 - `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
-

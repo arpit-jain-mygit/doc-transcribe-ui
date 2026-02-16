@@ -103,3 +103,60 @@ This file tracks release-level changes with backlog traceability.
   - Cloud regression passed (OCR + transcription completed).
   - Startup logs confirmed validator success and warning surfaces.
 - Status: `Completed (Tested)`
+
+### PRS-005
+- Backlog ID: `PRS-005`
+- Backlog Link: [PRS-005](./PRODUCTION_READINESS_BACKLOG.md#prs-005)
+- Type: `NFR` + `Observability`
+- Summary: Added end-to-end correlation ID (`request_id`) propagation across UI/API/Worker.
+- Why: Enable single-request traceability across upload, queueing, processing, and status polling.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/api.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+- Risk: `Low`
+- Validation:
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (OCR + transcription).
+  - Upload and status payloads include matching `request_id`.
+- Status: `Completed (Tested)`
+
+### PRS-006
+- Backlog ID: `PRS-006`
+- Backlog Link: [PRS-006](./PRODUCTION_READINESS_BACKLOG.md#prs-006)
+- Type: `NFR` + `Observability`
+- Summary: Enforced structured JSON logging with mandatory fields for API and Worker.
+- Why: Improve production troubleshooting with machine-parseable logs and consistent event keys.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/logging_config.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/status.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+- Risk: `Low`
+- Validation:
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (OCR + transcription).
+  - Structured logs verified for stage START/COMPLETED/FAILED events.
+- Status: `Completed (Tested)`
+
+### PRS-007
+- Backlog ID: `PRS-007`
+- Backlog Link: [PRS-007](./PRODUCTION_READINESS_BACKLOG.md#prs-007)
+- Type: `NFR` + `Monitoring`
+- Summary: Added operational metrics for API/Worker (success/fail/retry/latency).
+- Why: Improve proactive detection of degraded behavior and failure hotspots.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/utils/metrics.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/health.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/metrics.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/utils/gcs.py`
+- Risk: `Low`
+- Validation:
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (OCR + transcription).
+  - Metrics counters/latency recorded for API request path and worker dispatch/GCS operations.
+- Status: `Completed (Tested)`
