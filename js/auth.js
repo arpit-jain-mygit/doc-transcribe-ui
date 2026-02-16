@@ -11,6 +11,55 @@
 // =====================================================
 
 let googleRendered = false;
+let tokenExpiryTimer = null;
+
+function parseJwtPayload(token) {
+  try {
+    const parts = String(token || "").split(".");
+    if (parts.length < 2) return null;
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+    return JSON.parse(atob(padded));
+  } catch {
+    return null;
+  }
+}
+
+function tokenRemainingMs(token) {
+  const payload = parseJwtPayload(token);
+  const expSec = Number(payload && payload.exp);
+  if (!Number.isFinite(expSec) || expSec <= 0) return null;
+  return expSec * 1000 - Date.now();
+}
+
+function clearTokenExpiryTimer() {
+  if (tokenExpiryTimer) {
+    clearTimeout(tokenExpiryTimer);
+    tokenExpiryTimer = null;
+  }
+}
+
+function scheduleTokenExpiryLogout(token) {
+  clearTokenExpiryTimer();
+  const remainingMs = tokenRemainingMs(token);
+  if (remainingMs == null) return;
+
+  if (remainingMs <= 0) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem("active_job_id");
+    toggleAuthOnly(false);
+    if (typeof bootstrapLoggedOutUI === "function") {
+      bootstrapLoggedOutUI();
+    }
+    toast("Session expired. Please sign in again.", "error");
+    return;
+  }
+
+  tokenExpiryTimer = setTimeout(() => {
+    logout({ silent: true });
+    toast("Session expired. Please sign in again.", "error");
+  }, remainingMs + 500);
+}
 
 function renderGoogleButton() {
   if (googleRendered) return;
@@ -52,10 +101,7 @@ function renderGoogleButton() {
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
 
-  let payload = {};
-  try {
-    payload = JSON.parse(atob(resp.credential.split(".")[1]));
-  } catch { }
+  const payload = parseJwtPayload(resp.credential) || {};
 
   USER_EMAIL = payload.email || "";
   USER_PICTURE = payload.picture || "";
@@ -76,6 +122,7 @@ function onGoogleSignIn(resp) {
   showLoggedInUI();
   toggleAuthOnly(true);
   hidePending();
+  scheduleTokenExpiryLogout(ID_TOKEN);
 
   toast("Signed in successfully", "success");
 }
@@ -84,7 +131,8 @@ function onGoogleSignIn(resp) {
 // LOGOUT
 // =====================================================
 
-function logout() {
+function logout(options = {}) {
+  const silent = Boolean(options && options.silent);
   if (typeof stopPolling === "function") {
     stopPolling();
   }
@@ -101,13 +149,16 @@ function logout() {
   toggleAuthOnly(false);
 
   SESSION_RESTORED = false;
+  clearTokenExpiryTimer();
 
   // 🔑 Re-bootstrap logged-out UI safely
   if (typeof bootstrapLoggedOutUI === "function") {
     bootstrapLoggedOutUI();
   }
 
-  toast("Logged out", "info");
+  if (!silent) {
+    toast("Logged out", "info");
+  }
 
 }
 
@@ -128,6 +179,17 @@ function restoreSession() {
       toggleAuthOnly(false);
       return false;
     }
+    const remainingMs = tokenRemainingMs(token);
+    if (remainingMs != null && remainingMs <= 0) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem("active_job_id");
+      toggleAuthOnly(false);
+      if (typeof bootstrapLoggedOutUI === "function") {
+        bootstrapLoggedOutUI();
+      }
+      toast("Session expired. Please sign in again.", "error");
+      return false;
+    }
 
     ID_TOKEN = token;
     USER_EMAIL = email;
@@ -140,6 +202,7 @@ function restoreSession() {
 
     showLoggedInUI();
     toggleAuthOnly(true);
+    scheduleTokenExpiryLogout(ID_TOKEN);
 
     const job = localStorage.getItem("active_job_id");
     if (job) {
