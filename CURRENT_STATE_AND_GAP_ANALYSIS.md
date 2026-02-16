@@ -74,7 +74,7 @@ Legend:
 ### G-01: No formal architecture boundary docs across all repos
 - Severity: High
 - Impact: New engineer onboarding is slow; code placement becomes inconsistent.
-- Status: Closed (Code), validation pending.
+- Status: Closed (Tested).
 - Implemented artifacts:
   - UI: `ARCHITECTURE.md`, `CONTRIBUTING.md`, `js/README.md`
   - API: `ARCHITECTURE.md`, `CONTRIBUTING.md`

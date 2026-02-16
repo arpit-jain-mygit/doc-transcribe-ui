@@ -14,9 +14,18 @@ Run this suite after every backlog item fix to prevent breakages.
 
 ## Local-first quick runner (recommended)
 
-Use this bounded runner first for every backlog item:
+Use this bounded local runner first for every backlog item:
 
-`/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_local_regression.sh`
+`/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+
+Cloud API runner:
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+
+Stack lifecycle helpers:
+- Start local UI+API+worker:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/start_local_stack.sh`
+- Stop local UI+API+worker:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/stop_local_stack.sh`
 
 Default sample file paths expected by runner:
 - PDF: `/Users/arpitjain/Downloads/Demo/sample.pdf`
@@ -28,15 +37,19 @@ Override examples:
 SAMPLE_PDF="/absolute/path/sample.pdf" \
 SAMPLE_MP3="/absolute/path/sample.mp3" \
 MAX_WAIT_SEC=90 \
-/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_local_regression.sh
+/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh
 ```
 
 If API requires auth token:
 
 ```bash
 AUTH_BEARER_TOKEN="<token>" \
-/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_local_regression.sh
+/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh
 ```
+
+Note:
+- Current local/cloud API setup expects auth token by default for upload/status routes.
+- If token is missing/invalid, runner now prints HTTP status + response body for easier debugging.
 
 Behavior:
 - Hard bounded polling (no indefinite waits).
@@ -258,4 +271,15 @@ Behavior:
 - `Executed tests`:
 - `Pass`:
 - `Fail`:
+
+## Latest execution log
+
+- `Backlog ID`: `PRS-001`
+- `Date`: `2026-02-16`
+- `Environment`: `Local API (127.0.0.1:8090) + local Redis + local worker`
+- `Executed tests`: `Local bounded runner (OCR + Transcription success paths)`
+- `Pass`:
+  - `OCR` completed (`job_id=e77a176513b545ceadb06bfae7f2f346`)
+  - `Transcription` completed (`job_id=07bac199dbfd4d84b84902bdfdd7a43b`)
+- `Fail`: `None`
 - `Notes`:
