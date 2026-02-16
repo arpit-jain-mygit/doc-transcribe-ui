@@ -109,9 +109,40 @@ Status values:
 ## Detailed Item Specifications
 
 ### Table of contents
-- [PRS-001 - Define architecture boundaries and coding standards](#prs-001---define-architecture-boundaries-and-coding-standards)
-- [PRS-002 - Define canonical job/status field contract](#prs-002---define-canonical-jobstatus-field-contract)
-- [PRS-003 - Define error-code catalog](#prs-003---define-error-code-catalog)
+- [PRS-001 - Define architecture boundaries and coding standards](#prs-001--define-architecture-boundaries-and-coding-standards)
+- [PRS-002 - Define canonical job/status field contract](#prs-002--define-canonical-jobstatus-field-contract)
+- [PRS-003 - Define error-code catalog](#prs-003--define-error-code-catalog)
+- [PRS-004 - Add startup env validation](#prs-004--add-startup-env-validation)
+- [PRS-005 - Correlation ID propagation (`request_id`)](#prs-005--correlation-id-propagation-requestid)
+- [PRS-006 - Structured JSON logging with mandatory fields](#prs-006--structured-json-logging-with-mandatory-fields)
+- [PRS-007 - Add operational metrics (success/fail/retry/latency)](#prs-007--add-operational-metrics-successfailretrylatency)
+- [PRS-008 - Enforce job status transition state machine](#prs-008--enforce-job-status-transition-state-machine)
+- [PRS-009 - Add idempotent upload key and duplicate job reuse](#prs-009--add-idempotent-upload-key-and-duplicate-job-reuse)
+- [PRS-010 - Typed retry policy with backoff + jitter](#prs-010--typed-retry-policy-with-backoff-jitter)
+- [PRS-011 - DLQ enrichment (`error_code`, `attempts`, stage)](#prs-011--dlq-enrichment-errorcode-attempts-stage)
+- [PRS-012 - Global exception mapping to stable API payloads](#prs-012--global-exception-mapping-to-stable-api-payloads)
+- [PRS-013 - Tighten token validation (`iss`, `aud`, expiry)](#prs-013--tighten-token-validation-iss-aud-expiry)
+- [PRS-014 - Environment-based strict CORS allowlist](#prs-014--environment-based-strict-cors-allowlist)
+- [PRS-015 - Server-side MIME/extension/size validation](#prs-015--server-side-mimeextensionsize-validation)
+- [PRS-016 - Optimize `/jobs` pagination and counts path](#prs-016--optimize-jobs-pagination-and-counts-path)
+- [PRS-017 - Reduce polling overhead and duplicate pollers](#prs-017--reduce-polling-overhead-and-duplicate-pollers)
+- [PRS-018 - Make worker chunk/page strategy configurable](#prs-018--make-worker-chunkpage-strategy-configurable)
+- [PRS-019 - Queue partitioning by workload (OCR vs A/V)](#prs-019--queue-partitioning-by-workload-ocr-vs-av)
+- [PRS-020 - Worker concurrency controls by queue/type](#prs-020--worker-concurrency-controls-by-queuetype)
+- [PRS-021 - Load test baseline (5/10 concurrent users)](#prs-021--load-test-baseline-510-concurrent-users)
+- [PRS-022 - Add readiness checks for dependencies](#prs-022--add-readiness-checks-for-dependencies)
+- [PRS-023 - Add runbooks for top failure scenarios](#prs-023--add-runbooks-for-top-failure-scenarios)
+- [PRS-024 - Add feature flags for risky changes](#prs-024--add-feature-flags-for-risky-changes)
+- [PRS-025 - Enforce limits/quotas (size/pages/duration/user)](#prs-025--enforce-limitsquotas-sizepagesdurationuser)
+- [PRS-026 - Retry/cost budgets by error type](#prs-026--retrycost-budgets-by-error-type)
+- [PRS-027 - User-facing cost/effort hints for large jobs](#prs-027--user-facing-costeffort-hints-for-large-jobs)
+- [PRS-028 - Refactor API into layered modules](#prs-028--refactor-api-into-layered-modules)
+- [PRS-029 - Refactor Worker into orchestrator/adapters/executors](#prs-029--refactor-worker-into-orchestratoradaptersexecutors)
+- [PRS-030 - Refactor UI into api-client/controllers/views/formatters](#prs-030--refactor-ui-into-api-clientcontrollersviewsformatters)
+- [PRS-031 - Add unit tests for core logic and formatters](#prs-031--add-unit-tests-for-core-logic-and-formatters)
+- [PRS-032 - Add integration tests for e2e job lifecycle](#prs-032--add-integration-tests-for-e2e-job-lifecycle)
+- [PRS-033 - Add CI gates (`lint`, tests, contract checks)](#prs-033--add-ci-gates-lint-tests-contract-checks)
+
 
 ### PRS-001 - Define architecture boundaries and coding standards
 
@@ -312,3 +343,1053 @@ Status values:
 **Exit criteria for marking status**
 - `Completed (Code)` when worker/API/UI/scripts emit and consume standardized error fields.
 - `Completed (Tested)` after local + cloud regression includes at least one forced failure scenario.
+
+### PRS-004 - Add startup env validation
+
+**Purpose**
+- Add startup env validation to strengthen runtime stability.
+
+**Why this is in Phase 0**
+- Sequenced in Phase 0 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Runtime stability
+
+**User benefit**
+- Fewer production misconfig failures
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-005 - Correlation ID propagation (`request_id`)
+
+**Purpose**
+- Correlation ID propagation (`request_id`) to strengthen traceability.
+
+**Why this is in Phase 1**
+- Sequenced in Phase 1 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `UI, API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Traceability
+
+**User benefit**
+- Faster support/debug turnaround
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-006 - Structured JSON logging with mandatory fields
+
+**Purpose**
+- Structured JSON logging with mandatory fields to strengthen observability.
+
+**Why this is in Phase 1**
+- Sequenced in Phase 1 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Observability
+
+**User benefit**
+- Easier root-cause analysis
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-007 - Add operational metrics (success/fail/retry/latency)
+
+**Purpose**
+- Add operational metrics (success/fail/retry/latency) to strengthen monitoring.
+
+**Why this is in Phase 1**
+- Sequenced in Phase 1 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Monitoring
+
+**User benefit**
+- Detect issues before users report
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-008 - Enforce job status transition state machine
+
+**Purpose**
+- Enforce job status transition state machine to strengthen reliability.
+
+**Why this is in Phase 2**
+- Sequenced in Phase 2 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Reliability
+
+**User benefit**
+- Predictable job lifecycle behavior
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-009 - Add idempotent upload key and duplicate job reuse
+
+**Purpose**
+- Add idempotent upload key and duplicate job reuse to strengthen reliability.
+
+**Why this is in Phase 2**
+- Sequenced in Phase 2 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, UI`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Reliability
+
+**User benefit**
+- No duplicate jobs on retry/network glitches
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-010 - Typed retry policy with backoff + jitter
+
+**Purpose**
+- Typed retry policy with backoff + jitter to strengthen reliability.
+
+**Why this is in Phase 2**
+- Sequenced in Phase 2 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Reliability
+
+**User benefit**
+- Better success under transient failures
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-011 - DLQ enrichment (`error_code`, `attempts`, stage)
+
+**Purpose**
+- DLQ enrichment (`error_code`, `attempts`, stage) to strengthen recoverability.
+
+**Why this is in Phase 2**
+- Sequenced in Phase 2 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Recoverability
+
+**User benefit**
+- Easier failed-job replay and diagnosis
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-012 - Global exception mapping to stable API payloads
+
+**Purpose**
+- Global exception mapping to stable API payloads to strengthen error consistency.
+
+**Why this is in Phase 2**
+- Sequenced in Phase 2 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Error consistency
+
+**User benefit**
+- Less confusing UI errors
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-013 - Tighten token validation (`iss`, `aud`, expiry)
+
+**Purpose**
+- Tighten token validation (`iss`, `aud`, expiry) to strengthen security.
+
+**Why this is in Phase 3**
+- Sequenced in Phase 3 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Security
+
+**User benefit**
+- Stronger auth correctness
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-014 - Environment-based strict CORS allowlist
+
+**Purpose**
+- Environment-based strict CORS allowlist to strengthen security.
+
+**Why this is in Phase 3**
+- Sequenced in Phase 3 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Security
+
+**User benefit**
+- Fewer CORS/auth surprises
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-015 - Server-side MIME/extension/size validation
+
+**Purpose**
+- Server-side MIME/extension/size validation to strengthen security and validation.
+
+**Why this is in Phase 3**
+- Sequenced in Phase 3 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Security and validation
+
+**User benefit**
+- Clear rejection of unsupported files
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-016 - Optimize `/jobs` pagination and counts path
+
+**Purpose**
+- Optimize `/jobs` pagination and counts path to strengthen performance.
+
+**Why this is in Phase 4**
+- Sequenced in Phase 4 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Performance
+
+**User benefit**
+- Faster history loading
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-017 - Reduce polling overhead and duplicate pollers
+
+**Purpose**
+- Reduce polling overhead and duplicate pollers to strengthen performance.
+
+**Why this is in Phase 4**
+- Sequenced in Phase 4 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `UI`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Performance
+
+**User benefit**
+- Smoother app under load
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-018 - Make worker chunk/page strategy configurable
+
+**Purpose**
+- Make worker chunk/page strategy configurable to strengthen performance.
+
+**Why this is in Phase 4**
+- Sequenced in Phase 4 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Performance
+
+**User benefit**
+- Better throughput and tuning flexibility
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-019 - Queue partitioning by workload (OCR vs A/V)
+
+**Purpose**
+- Queue partitioning by workload (OCR vs A/V) to strengthen scalability.
+
+**Why this is in Phase 5**
+- Sequenced in Phase 5 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Scalability
+
+**User benefit**
+- Reduced queue contention
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-020 - Worker concurrency controls by queue/type
+
+**Purpose**
+- Worker concurrency controls by queue/type to strengthen scalability.
+
+**Why this is in Phase 5**
+- Sequenced in Phase 5 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Scalability
+
+**User benefit**
+- Better concurrent user support
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-021 - Load test baseline (5/10 concurrent users)
+
+**Purpose**
+- Load test baseline (5/10 concurrent users) to strengthen capacity planning.
+
+**Why this is in Phase 5**
+- Sequenced in Phase 5 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `All`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Capacity planning
+
+**User benefit**
+- Predictable performance expectations
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-022 - Add readiness checks for dependencies
+
+**Purpose**
+- Add readiness checks for dependencies to strengthen operability.
+
+**Why this is in Phase 6**
+- Sequenced in Phase 6 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Operability
+
+**User benefit**
+- Safer deploys and faster fail detection
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-023 - Add runbooks for top failure scenarios
+
+**Purpose**
+- Add runbooks for top failure scenarios to strengthen operability.
+
+**Why this is in Phase 6**
+- Sequenced in Phase 6 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `All`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Operability
+
+**User benefit**
+- Faster incident resolution
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-024 - Add feature flags for risky changes
+
+**Purpose**
+- Add feature flags for risky changes to strengthen operability.
+
+**Why this is in Phase 6**
+- Sequenced in Phase 6 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API, Worker, UI`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Operability
+
+**User benefit**
+- Safe rollout and rollback
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-025 - Enforce limits/quotas (size/pages/duration/user)
+
+**Purpose**
+- Enforce limits/quotas (size/pages/duration/user) to strengthen cost control.
+
+**Why this is in Phase 7**
+- Sequenced in Phase 7 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Cost control
+
+**User benefit**
+- Stable service under abuse/spikes
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-026 - Retry/cost budgets by error type
+
+**Purpose**
+- Retry/cost budgets by error type to strengthen cost control.
+
+**Why this is in Phase 7**
+- Sequenced in Phase 7 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Cost control
+
+**User benefit**
+- Prevent expensive retry loops
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-027 - User-facing cost/effort hints for large jobs
+
+**Purpose**
+- User-facing cost/effort hints for large jobs to strengthen cost transparency.
+
+**Why this is in Phase 7**
+- Sequenced in Phase 7 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `UI`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Cost transparency
+
+**User benefit**
+- Better user expectations pre-upload
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-028 - Refactor API into layered modules
+
+**Purpose**
+- Refactor API into layered modules to strengthen maintainability.
+
+**Why this is in Phase 8**
+- Sequenced in Phase 8 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `API`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Maintainability
+
+**User benefit**
+- Easier long-term feature development
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-029 - Refactor Worker into orchestrator/adapters/executors
+
+**Purpose**
+- Refactor Worker into orchestrator/adapters/executors to strengthen maintainability.
+
+**Why this is in Phase 8**
+- Sequenced in Phase 8 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `Worker`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Maintainability
+
+**User benefit**
+- Clearer ownership and easier debugging
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-030 - Refactor UI into api-client/controllers/views/formatters
+
+**Purpose**
+- Refactor UI into api-client/controllers/views/formatters to strengthen maintainability.
+
+**Why this is in Phase 8**
+- Sequenced in Phase 8 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `UI`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Maintainability
+
+**User benefit**
+- Faster UI iteration with fewer regressions
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-031 - Add unit tests for core logic and formatters
+
+**Purpose**
+- Add unit tests for core logic and formatters to strengthen quality.
+
+**Why this is in Phase 9**
+- Sequenced in Phase 9 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `All`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Quality
+
+**User benefit**
+- Prevents regressions
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-032 - Add integration tests for e2e job lifecycle
+
+**Purpose**
+- Add integration tests for e2e job lifecycle to strengthen quality.
+
+**Why this is in Phase 9**
+- Sequenced in Phase 9 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `All`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Quality
+
+**User benefit**
+- Confidence before deploy
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+
+### PRS-033 - Add CI gates (`lint`, tests, contract checks)
+
+**Purpose**
+- Add CI gates (`lint`, tests, contract checks) to strengthen quality governance.
+
+**Why this is in Phase 9**
+- Sequenced in Phase 9 per dependency and rollout risk in the backlog.
+
+**Repo touchpoints**
+- Scope: `All`.
+- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+
+**Functional requirement served**
+- Quality governance
+
+**User benefit**
+- Stable releases
+
+**Implementation outline**
+1. Add/adjust modules in listed repos for this capability.
+2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
+3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
+4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+
+**Detailed test plan**
+1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
+2. Run local bounded regression (OCR + Transcription).
+3. Run cloud bounded regression with the same commit.
+4. Validate logs contain expected identifiers and stage transitions for this item.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: code and docs updated in scoped repos.
+- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
