@@ -36,3 +36,25 @@ This file tracks release-level changes with backlog traceability.
   - Local regression passed (OCR + transcription).
   - Cloud regression passed (user-run confirmation).
 - Status: `Completed (Tested)`
+
+### PRS-002
+- Backlog ID: `PRS-002`
+- Backlog Link: [PRS-002](./PRODUCTION_READINESS_BACKLOG.md#prs-002)
+- Gap Link: [G-02](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-02)
+- Type: `NFR` + `Docs`
+- Summary: Added canonical job/status field contract across UI/API/Worker with API as source of truth.
+- Why: Remove field-name drift risk and stabilize lifecycle metadata usage.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/JOB_STATUS_CONTRACT.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/job-contract.js`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/JOB_STATUS_CONTRACT.md`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/JOB_STATUS_CONTRACT.md`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/contract.py`
+- Risk: `Low`
+- Validation:
+  - API contract endpoint available (`GET /contract/job-status`).
+  - UI field reads moved to canonical resolver helper.
+  - Full regression pending.
+- Status: `Completed (Code)`

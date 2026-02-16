@@ -15,6 +15,7 @@ Disallowed direction:
 - rendering files making raw network calls (should go through service functions)
 
 ## Current modules (as-is)
+- Canonical data contract reference: `JOB_STATUS_CONTRACT.md`
 - `js/upload.js`: upload orchestration
 - `js/polling.js`: status polling and completion/failure handlers
 - `js/jobs.js`: history list loading/filtering/pagination/render

@@ -296,6 +296,10 @@ function formatCompletionMediaDuration(secondsRaw) {
   return `${secs}s`;
 }
 
+function jobContract() {
+  return window.JOB_CONTRACT || {};
+}
+
 function getCompletionTranscriptionMediaDuration(job) {
   const candidates = [
     job.media_duration_sec,
@@ -319,7 +323,7 @@ function getCompletionTranscriptionMediaDuration(job) {
 }
 
 function formatCompletionJobTypeLabel(job) {
-  const jobType = String(job?.job_type || "").toUpperCase();
+  const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
   if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
   return job?.job_type || "";
@@ -334,7 +338,7 @@ function completionDetailClassToken(value) {
 }
 
 function getCompletionJobTypeThemeClass(job) {
-  const jobType = String(job?.job_type || "").toUpperCase();
+  const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
   if (jobType === "OCR") return "completion-job-type-ocr";
   if (jobType === "TRANSCRIPTION") return "completion-job-type-transcription";
   return "completion-job-type-neutral";
@@ -353,7 +357,8 @@ function showCompletion(job) {
 
   const uploadedFileEl = document.getElementById("uploadedFile");
   if (uploadedFileEl) {
-    uploadedFileEl.textContent = (job.input_filename || job.input_file || LAST_UPLOADED_FILENAME || "-");
+    const uploaded = jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : (job.input_filename || job.input_file || "");
+    uploadedFileEl.textContent = uploaded || LAST_UPLOADED_FILENAME || "-";
   }
 
   const completionJobTypeEl = document.getElementById("completionJobType");
@@ -372,10 +377,11 @@ function showCompletion(job) {
   if (completionMetaEl) {
     const details = [];
 
-    const isTranscription = String(job.job_type || "").toUpperCase() === "TRANSCRIPTION";
-    const isOcr = String(job.job_type || "").toUpperCase() === "OCR";
+    const resolvedType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job.job_type || "").toUpperCase();
+    const isTranscription = resolvedType === "TRANSCRIPTION";
+    const isOcr = resolvedType === "OCR";
 
-    const bytes = Number(job.input_size_bytes);
+    const bytes = jobContract().resolveInputSizeBytes ? jobContract().resolveInputSizeBytes(job) : Number(job.input_size_bytes);
     const hasSize = Number.isFinite(bytes) && bytes > 0;
     details.push({
       key: "File Size",
@@ -384,7 +390,7 @@ function showCompletion(job) {
     });
 
     if (isOcr) {
-      const pages = Number(job.total_pages);
+      const pages = jobContract().resolveTotalPages ? jobContract().resolveTotalPages(job) : Number(job.total_pages);
       if (Number.isFinite(pages) && pages > 0) {
         details.push({
           key: "Pages",
@@ -399,7 +405,7 @@ function showCompletion(job) {
       });
     }
 
-    const durationSec = Number(job.duration_sec);
+    const durationSec = jobContract().resolveDurationSec ? jobContract().resolveDurationSec(job) : Number(job.duration_sec);
     details.push({
       key: "Processing Time",
       value: Number.isFinite(durationSec) && durationSec >= 0
@@ -445,7 +451,8 @@ function showCompletion(job) {
 
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
-    downloadLink.href = job.download_url || "#";
+    const outUrl = jobContract().resolveDownloadUrl ? jobContract().resolveDownloadUrl(job) : job.download_url;
+    downloadLink.href = outUrl || "#";
   }
 }
 
@@ -456,6 +463,7 @@ function updateProcessingHeader(job) {
   if (!header || !job) return;
 
   const fileName =
+    (jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : "") ||
     job.input_filename ||
     job.input_file ||
     job.filename ||

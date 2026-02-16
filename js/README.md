@@ -6,6 +6,7 @@ Current structure:
 - `polling.js`: job status polling and job lifecycle transitions
 - `jobs.js`: history fetch, filter, pagination, row rendering
 - `ui.js`: global UI helpers, toasts, workspace switch, completion card
+- `job-contract.js`: canonical job/status contract constants and field resolvers
 - `utils.js`: shared helpers (status formatting, error message parsing)
 - `config.js`, `state.js`, `main.js`: app config/state bootstrapping
 

@@ -5,6 +5,10 @@ function formatJobDuration(secondsRaw) {
   return formatCompactDuration(rounded);
 }
 
+function contract() {
+  return window.JOB_CONTRACT || {};
+}
+
 function formatCompactDuration(totalSeconds) {
   const rounded = Math.max(0, Math.round(Number(totalSeconds) || 0));
   const hrs = Math.floor(rounded / 3600);
@@ -92,14 +96,14 @@ function getTranscriptionMediaDuration(job) {
 }
 
 function formatJobTypeLabel(job) {
-  const jobType = String(job?.job_type || job?.mode || "").toUpperCase();
+  const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
   if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
   return job?.job_type || job?.mode || "Processing";
 }
 
 function getJobTypeThemeClass(job) {
-  const jobType = String(job?.job_type || job?.mode || "").toUpperCase();
+  const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
   if (jobType === "OCR") return "job-type-label-ocr";
   if (jobType === "TRANSCRIPTION") return "job-type-label-transcription";
   return "job-type-label-neutral";
@@ -149,10 +153,12 @@ function detailClassToken(value) {
 }
 
 function normalizeJobStatus(statusRaw) {
+  if (contract().normalizeJobStatus) return contract().normalizeJobStatus(statusRaw);
   return String(statusRaw || "").toUpperCase();
 }
 
 function normalizeJobType(typeRaw) {
+  if (contract().normalizeJobType) return contract().normalizeJobType(typeRaw);
   return String(typeRaw || "").toUpperCase();
 }
 
@@ -244,7 +250,7 @@ function updateHistoryTypeCounts(source) {
 
   if (Array.isArray(source)) {
     source.forEach((job) => {
-      const t = normalizeJobType(job.job_type || job.type);
+      const t = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job.job_type || job.type);
       if (counts[t] !== undefined) counts[t] += 1;
     });
   } else if (source && typeof source === "object") {
@@ -353,7 +359,7 @@ function renderJobsList(jobs) {
     const div = document.createElement("div");
     div.className = "job";
     const detailsHtml = buildJobDetailsHtml(j);
-    const uploadedFile = (j.input_filename || j.input_file || "-");
+    const uploadedFile = (contract().resolveUploadedFilename ? contract().resolveUploadedFilename(j) : (j.input_filename || j.input_file || "") ) || "-";
     const status = formatStatus(j.status);
     const statusDotSymbol = getStatusDotSymbol(j.status);
     const typeLabel = formatJobTypeLabel(j);
@@ -361,8 +367,9 @@ function renderJobsList(jobs) {
     const rowStatusClass = String(j.status || "").toUpperCase();
 
     let actionHtml = "";
-    if (j.output_path) {
-      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(j.output_path)}">⤓ Download output</a>`;
+    const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
+    if (downloadUrl) {
+      actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(downloadUrl)}">⤓ Download output</a>`;
     } else if (j.status === "FAILED") {
       actionHtml = `<a href="#" class="history-retry" data-job-id="${escapeHtml(j.job_id)}">↻ Retry</a>`;
     } else if (j.status === "CANCELLED") {
@@ -402,7 +409,9 @@ function renderJobsList(jobs) {
     if (downloadLink) {
       downloadLink.onclick = (e) => {
         e.preventDefault();
-        forceDownload(j.output_path, j.output_filename || "transcript.txt");
+        const outUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : j.output_path;
+        const outName = contract().resolveOutputFilename ? contract().resolveOutputFilename(j) : (j.output_filename || "transcript.txt");
+        forceDownload(outUrl, outName);
       };
     }
 
@@ -451,23 +460,24 @@ function updatePaginationUi() {
 
 function buildJobDetailItems(job) {
   const details = [];
-  const type = String(job.job_type || "").toUpperCase();
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : String(job.job_type || "").toUpperCase();
 
-  const bytes = Number(job.input_size_bytes);
+  const bytes = contract().resolveInputSizeBytes ? contract().resolveInputSizeBytes(job) : Number(job.input_size_bytes);
   const hasSize = Number.isFinite(bytes) && bytes > 0;
   details.push({
     key: "File Size",
     value: hasSize ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : "--",
   });
 
-  const duration = formatJobDuration(job.duration_sec);
+  const durationValue = contract().resolveDurationSec ? contract().resolveDurationSec(job) : Number(job.duration_sec);
+  const duration = formatJobDuration(durationValue);
   details.push({
     key: "Processing Time",
     value: duration || "--",
   });
 
   if (type === "OCR") {
-    const pages = Number(job.total_pages);
+    const pages = contract().resolveTotalPages ? contract().resolveTotalPages(job) : Number(job.total_pages);
     if (Number.isFinite(pages) && pages > 0) {
       details.push({
         key: "Pages",
@@ -575,11 +585,11 @@ async function loadJobs({ reset = false, append = false } = {}) {
     if (Array.isArray(payload)) {
       // Backward-compatible fallback if API pagination is not available.
       const typed = payload.filter(
-        (j) => normalizeJobType(j.job_type || j.type) === JOBS_TYPE_FILTER
+        (j) => normalizeJobType(contract().resolveJobType ? contract().resolveJobType(j) : (j.job_type || j.type)) === JOBS_TYPE_FILTER
       );
       const filtered = payload.filter(
         (j) =>
-          normalizeJobType(j.job_type || j.type) === JOBS_TYPE_FILTER &&
+          normalizeJobType(contract().resolveJobType ? contract().resolveJobType(j) : (j.job_type || j.type)) === JOBS_TYPE_FILTER &&
           normalizeJobStatus(j.status) === JOBS_FILTER
       );
       const nextEnd = append ? (offset + JOBS_PAGE_SIZE) : JOBS_PAGE_SIZE;

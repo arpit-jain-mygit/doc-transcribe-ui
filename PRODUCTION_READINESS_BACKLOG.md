@@ -21,7 +21,7 @@ Status values:
 | ID | Phase | Task | Repo | Functional Requirement Served | User Benefit | Status | Test | Repo-wise Change Summary |
 |---|---|---|---|---|---|---|---|---|
 | PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local + Cloud Regression) | UI: architecture/backlog/regression docs + stack/regression scripts. API: stage-wise structured logging + logging config. Worker: architecture/contribution/guide docs and module map docs. |
-| PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Planned | Not Tested | Pending implementation |
+| PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Code) | Not Tested | UI: added canonical contract resolver module and contract reference doc. API: added source-of-truth contract spec + machine-readable contract endpoint + canonical constants in routes. Worker: added contract constants/reference docs aligned to API source. |
 | PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Planned | Not Tested | Pending implementation |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested | Pending implementation |
 | PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Planned | Not Tested | Pending implementation |
@@ -102,11 +102,13 @@ Status values:
 - 2026-02-14: PRS-001 implemented at code/documentation level across UI/API/Worker; validation pending.
 - 2026-02-16: PRS-001 local bounded regression passed (`OCR job_id=e77a176513b545ceadb06bfae7f2f346`, `TRANSCRIPTION job_id=07bac199dbfd4d84b84902bdfdd7a43b`).
 - 2026-02-16: PRS-001 cloud regression confirmed passed by user run.
+- 2026-02-16: PRS-002 implemented at code/documentation level across UI/API/Worker; validation pending.
 
 ## Detailed Item Specifications
 
 ### Table of contents
 - [PRS-001 - Define architecture boundaries and coding standards](#prs-001---define-architecture-boundaries-and-coding-standards)
+- [PRS-002 - Define canonical job/status field contract](#prs-002---define-canonical-jobstatus-field-contract)
 
 ### PRS-001 - Define architecture boundaries and coding standards
 
@@ -205,3 +207,56 @@ Status values:
 **Exit criteria for marking status**
 - `Completed (Code)` when all docs and checklists are added in all 3 repos.
 - `Completed (Tested)` when dry-run onboarding and PR checklist compliance tests pass.
+
+### PRS-002 - Define canonical job/status field contract
+
+**Purpose**
+- Prevent field drift between UI/API/Worker by defining one authoritative job/status schema and enums.
+- Ensure all three repos use the same canonical names for job type, status, lifecycle fields, and output metadata.
+
+**Why this is in Phase 0**
+- This is a foundational contract item. Later reliability/performance/security work depends on stable data semantics.
+- Without this, each repo may keep adding aliases and inconsistent names.
+
+**Repo touchpoints: why and how each repo is changed**
+- `doc-transcribe-ui`
+  - Added compatibility layer: `js/job-contract.js` for canonical field resolution with controlled alias fallback.
+  - Added contract reference: `JOB_STATUS_CONTRACT.md`.
+  - Wired contract module in `index.html`, and switched key reads in `js/jobs.js` and `js/ui.js` to contract resolvers.
+
+- `doc-transcribe-api`
+  - Added canonical source document: `JOB_STATUS_CONTRACT.md`.
+  - Added machine-readable endpoint: `GET /contract/job-status`.
+  - Added canonical constants in `schemas/job_contract.py`.
+  - Updated upload/jobs route logic to consume constants and persist `contract_version`.
+
+- `doc-transcribe-worker`
+  - Added contract reference doc: `JOB_STATUS_CONTRACT.md`.
+  - Added worker-local contract constants module: `worker/contract.py`.
+  - Added contract references in worker docs to keep future changes aligned with API source.
+
+**Functional requirement served**
+- Data consistency across all layers for job lifecycle and metadata.
+
+**User benefit**
+- Fewer “UI shows blank/mismatched field” issues.
+- More predictable history/status behavior and easier debugging.
+
+**Detailed implementation steps**
+1. Define canonical enums and fields in API source contract.
+2. Expose machine-readable contract endpoint from API.
+3. Use canonical constants in API upload/jobs flows.
+4. Add UI contract resolver module and route all field reads through it.
+5. Add worker contract references/constants and align docs.
+
+**Detailed test plan**
+1. Contract endpoint validation:
+   - Call `GET /contract/job-status` and verify expected version/enums/fields.
+2. UI compatibility validation:
+   - Run OCR + Transcription happy paths and verify history/completion cards show canonical fields correctly.
+3. Lifecycle field validation:
+   - Verify Redis `job_status:<job_id>` contains `contract_version`, `job_type`, `status`, `stage`, `progress`, `updated_at`.
+
+**Exit criteria for marking status**
+- `Completed (Code)` when contract doc/endpoint/constants/resolvers exist across all repos.
+- `Completed (Tested)` after local + cloud regression pass including OCR and transcription.

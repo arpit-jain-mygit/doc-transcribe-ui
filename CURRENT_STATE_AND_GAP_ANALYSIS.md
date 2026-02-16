@@ -86,6 +86,11 @@ Legend:
 ### G-02: Canonical field contract not documented as single source of truth
 - Severity: High
 - Impact: UI/API/worker field drift risk (`duration`, `duration_sec`, etc.).
+- Status: Closed (Code).
+- Implemented artifacts:
+  - UI: `JOB_STATUS_CONTRACT.md`, `js/job-contract.js`
+  - API: `JOB_STATUS_CONTRACT.md`, `schemas/job_contract.py`, `routes/contract.py` (`GET /contract/job-status`)
+  - Worker: `JOB_STATUS_CONTRACT.md`, `worker/contract.py`
 - Fix backlog:
   - [PRS-002](./PRODUCTION_READINESS_BACKLOG.md#prs-002)
 
