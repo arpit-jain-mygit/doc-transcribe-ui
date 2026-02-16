@@ -16,6 +16,9 @@ UI_LOG="${UI_LOG:-${LOG_DIR}/ui.log}"
 REDIS_URL="${REDIS_URL:-redis://localhost:6379/0}"
 QUEUE_NAME="${QUEUE_NAME:-doc_jobs_local}"
 DLQ_NAME="${DLQ_NAME:-doc_jobs_dead}"
+CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
+REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
+EXPECT_WORKER_BOTH_QUEUES="${EXPECT_WORKER_BOTH_QUEUES:-1}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -98,6 +101,52 @@ rebuild_auth_header() {
   fi
 }
 
+print_local_worker_diag() {
+  local proc_line
+  proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
+  if [[ -n "$proc_line" ]]; then
+    echo "WORKER_UP=yes (${proc_line})"
+  else
+    echo "WORKER_UP=no"
+  fi
+  if [[ -f "$WORKER_LOG" ]]; then
+    local targets_line
+    targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+    if [[ -n "$targets_line" ]]; then
+      echo "WORKER_QUEUE_TARGETS=${targets_line#*QUEUE_TARGETS=}"
+    fi
+  fi
+}
+
+check_local_worker_up() {
+  local proc_line targets_line listen_line
+  proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
+  if [[ -z "$proc_line" ]]; then
+    fail "Worker is not running locally. Start it with scripts/start_local_stack.sh."
+  fi
+  echo "WORKER_UP=yes (${proc_line})"
+  if [[ -f "$WORKER_LOG" ]]; then
+    targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+    if [[ -n "$targets_line" ]]; then
+      echo "WORKER_QUEUE_TARGETS=${targets_line#*QUEUE_TARGETS=}"
+      if ! echo "$targets_line" | grep -q "$QUEUE_NAME"; then
+        fail "Worker is up but not listening to local queue '${QUEUE_NAME}'."
+      fi
+      if [[ "$EXPECT_WORKER_BOTH_QUEUES" == "1" ]] && ! echo "$targets_line" | grep -q "$CLOUD_QUEUE_NAME"; then
+        fail "Worker is up but not listening to cloud queue '${CLOUD_QUEUE_NAME}'. Start worker in QUEUE_MODE=both."
+      fi
+      return 0
+    fi
+    listen_line="$(grep -m1 'Listening on Redis queue:' "$WORKER_LOG" || true)"
+    if [[ -n "$listen_line" ]]; then
+      echo "WORKER_LISTEN=${listen_line#*Listening on Redis queue: }"
+      if ! echo "$listen_line" | grep -q "$QUEUE_NAME"; then
+        fail "Worker is up but listening to a different queue than '${QUEUE_NAME}'."
+      fi
+    fi
+  fi
+}
+
 fail() {
   maybe_print_diagnostics
   echo "FAIL: $1" >&2
@@ -173,6 +222,7 @@ print_redis_diag() {
   dlq_depth="$(redis-cli -u "$REDIS_URL" LLEN "$DLQ_NAME" 2>/dev/null || echo "n/a")"
   echo "queue=${QUEUE_NAME} depth=${q_depth}"
   echo "dlq=${DLQ_NAME} depth=${dlq_depth}"
+  print_local_worker_diag
 }
 
 maybe_print_diagnostics() {
@@ -290,6 +340,7 @@ poll_job() {
   local seen_queued="0"
   local seen_processing="0"
   local seen_completed="0"
+  local queued_warned="0"
 
   while true; do
     local now
@@ -326,6 +377,15 @@ poll_job() {
     if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
       trace "${label}: API accepted upload and queued job in Redis"
       seen_queued="1"
+    fi
+    if [[ "$status" == "QUEUED" && "$elapsed" -ge 30 && "$queued_warned" == "0" ]]; then
+      trace "${label}: still QUEUED after ${elapsed}s; worker may not be consuming queue=${QUEUE_NAME}"
+      if command -v redis-cli >/dev/null 2>&1; then
+        local q_depth_now
+        q_depth_now="$(redis-cli -u "$REDIS_URL" LLEN "$QUEUE_NAME" 2>/dev/null || echo "n/a")"
+        trace "${label}: queue depth snapshot queue=${QUEUE_NAME} depth=${q_depth_now}"
+      fi
+      queued_warned="1"
     fi
     if [[ "$status" == "PROCESSING" && "$seen_processing" == "0" ]]; then
       trace "${label}: Worker picked job and started processing (${stage})"
@@ -375,6 +435,11 @@ main() {
   print_token_meta
   require_file "$SAMPLE_PDF"
   require_file "$SAMPLE_MP3"
+  if [[ "$REQUIRE_LOCAL_WORKER" == "1" ]]; then
+    check_local_worker_up
+  else
+    print_local_worker_diag
+  fi
   if [[ "$REQUIRE_AUTH" == "1" && -z "$AUTH_BEARER_TOKEN" ]]; then
     fail "AUTH_BEARER_TOKEN is required. Set env var or paste fresh token in ${AUTH_TOKEN_FILE}."
   fi

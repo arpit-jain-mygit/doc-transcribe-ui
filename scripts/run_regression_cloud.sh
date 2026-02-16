@@ -8,6 +8,9 @@ set -euo pipefail
 
 API_BASE="${API_BASE:-https://doc-transcribe-api.onrender.com}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
+WORKER_LOG="${WORKER_LOG:-/tmp/doc_transcribe_logs/worker.log}"
+CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
+REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -101,6 +104,52 @@ trace() {
   echo "[TRACE] $1"
 }
 
+print_local_worker_diag() {
+  local proc_line targets_line
+  proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
+  if [[ -n "$proc_line" ]]; then
+    echo "LOCAL_WORKER_UP=yes (${proc_line})"
+  else
+    echo "LOCAL_WORKER_UP=no"
+  fi
+  if [[ -f "$WORKER_LOG" ]]; then
+    targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+    if [[ -n "$targets_line" ]]; then
+      echo "LOCAL_WORKER_QUEUE_TARGETS=${targets_line#*QUEUE_TARGETS=}"
+    fi
+  fi
+}
+
+check_local_worker_for_cloud() {
+  local proc_line targets_line listen_line
+  proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
+  if [[ -z "$proc_line" ]]; then
+    fail "Local worker is not running. Start with scripts/start_local_stack.sh before cloud regression."
+  fi
+  echo "LOCAL_WORKER_UP=yes (${proc_line})"
+
+  if [[ -f "$WORKER_LOG" ]]; then
+    targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+    if [[ -n "$targets_line" ]]; then
+      echo "LOCAL_WORKER_QUEUE_TARGETS=${targets_line#*QUEUE_TARGETS=}"
+      if ! echo "$targets_line" | grep -q "$CLOUD_QUEUE_NAME"; then
+        fail "Local worker is up but not listening to cloud queue '${CLOUD_QUEUE_NAME}'. Update worker queue config."
+      fi
+      return 0
+    fi
+
+    listen_line="$(grep -m1 'Listening on Redis queue:' "$WORKER_LOG" || true)"
+    if [[ -n "$listen_line" ]]; then
+      echo "LOCAL_WORKER_LISTEN=${listen_line#*Listening on Redis queue: }"
+      if ! echo "$listen_line" | grep -q "$CLOUD_QUEUE_NAME"; then
+        fail "Local worker is up but listening to a different queue than '${CLOUD_QUEUE_NAME}'."
+      fi
+    fi
+  else
+    trace "Worker log not found at ${WORKER_LOG}; queue target check skipped."
+  fi
+}
+
 print_token_meta() {
   if [[ -z "$AUTH_BEARER_TOKEN" ]]; then
     echo "AUTH_TOKEN_META=missing"
@@ -141,6 +190,24 @@ print_token_refresh_hint() {
   echo "HINT: Token may be invalid/expired. Update AUTH_TOKEN_FILE=${AUTH_TOKEN_FILE} and retry."
 }
 
+print_cloud_worker_pickup_diagnosis() {
+  local job_id="$1"
+  local elapsed="$2"
+  local status_payload="$3"
+  local status stage progress created updated
+  status="$(echo "$status_payload" | jq -r '.status // "-"' 2>/dev/null || echo "-")"
+  stage="$(echo "$status_payload" | jq -r '.stage // "-"' 2>/dev/null || echo "-")"
+  progress="$(echo "$status_payload" | jq -r '.progress // "-"' 2>/dev/null || echo "-")"
+  created="$(echo "$status_payload" | jq -r '.created_at // "-"' 2>/dev/null || echo "-")"
+  updated="$(echo "$status_payload" | jq -r '.updated_at // "-"' 2>/dev/null || echo "-")"
+  if [[ "$status" == "QUEUED" && "$progress" == "0" && "$created" != "-" && "$created" == "$updated" ]]; then
+    trace "Worker pickup signal: NO (job ${job_id} stayed QUEUED ${elapsed}s; created_at == updated_at)."
+    trace "Likely cause: cloud worker down, wrong Redis, or QUEUE_NAME mismatch."
+  else
+    trace "Worker pickup signal: YES/UNKNOWN (status=${status} stage=${stage} progress=${progress})."
+  fi
+}
+
 safe_get() {
   local url="$1"
   if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
@@ -158,8 +225,12 @@ maybe_print_diagnostics() {
   echo "== Failure diagnostics =="
   echo "health: $(safe_get "${API_BASE}/health")"
   echo "contract: $(safe_get "${API_BASE}/contract/job-status")"
+  print_local_worker_diag
   if [[ -n "${CURRENT_JOB_ID:-}" ]]; then
-    echo "status(${CURRENT_JOB_ID}): $(safe_get "${API_BASE}/status/${CURRENT_JOB_ID}")"
+    local status_payload
+    status_payload="$(safe_get "${API_BASE}/status/${CURRENT_JOB_ID}")"
+    echo "status(${CURRENT_JOB_ID}): ${status_payload}"
+    print_cloud_worker_pickup_diagnosis "${CURRENT_JOB_ID}" "timeout" "${status_payload}"
     print_component_trace_cloud "$CURRENT_JOB_ID"
   fi
 }
@@ -257,6 +328,7 @@ poll_job() {
   local seen_queued="0"
   local seen_processing="0"
   local seen_completed="0"
+  local queued_warned="0"
 
   while true; do
     local now
@@ -293,6 +365,10 @@ poll_job() {
     if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
       trace "${label}: API accepted and queued job"
       seen_queued="1"
+    fi
+    if [[ "$status" == "QUEUED" && "$elapsed" -ge 30 && "$queued_warned" == "0" ]]; then
+      print_cloud_worker_pickup_diagnosis "$job_id" "$elapsed" "$resp"
+      queued_warned="1"
     fi
     if [[ "$status" == "PROCESSING" && "$seen_processing" == "0" ]]; then
       trace "${label}: Worker picked job and started processing (${stage})"
@@ -342,6 +418,9 @@ main() {
   require_file "$SAMPLE_MP3"
   if [[ "$REQUIRE_AUTH" == "1" && -z "$AUTH_BEARER_TOKEN" ]]; then
     fail "AUTH_BEARER_TOKEN is required. Set env var or paste fresh token in ${AUTH_TOKEN_FILE}."
+  fi
+  if [[ "$REQUIRE_LOCAL_WORKER" == "1" ]]; then
+    check_local_worker_for_cloud
   fi
   api_health
   trace "Precheck complete: cloud API reachable"

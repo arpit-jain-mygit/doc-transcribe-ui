@@ -5,7 +5,7 @@ set -euo pipefail
 # Defaults:
 # - API:    http://127.0.0.1:8090
 # - UI:     http://127.0.0.1:4200
-# - Worker: listens on doc_jobs_local
+# - Worker: listens on both local and cloud queues
 
 UI_REPO="${UI_REPO:-/Users/arpitjain/VSProjects/doc-transcribe-ui}"
 API_REPO="${API_REPO:-/Users/arpitjain/PycharmProjects/doc-transcribe-api}"
@@ -19,6 +19,10 @@ UI_HOST="${UI_HOST:-127.0.0.1}"
 UI_PORT="${UI_PORT:-4200}"
 QUEUE_NAME="${QUEUE_NAME:-doc_jobs_local}"
 DLQ_NAME="${DLQ_NAME:-doc_jobs_dead}"
+CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
+LOCAL_QUEUE_NAME="${LOCAL_QUEUE_NAME:-doc_jobs_local}"
+CLOUD_DLQ_NAME="${CLOUD_DLQ_NAME:-doc_jobs_dead}"
+LOCAL_DLQ_NAME="${LOCAL_DLQ_NAME:-doc_jobs_dead_local}"
 FORCE_RESTART="${FORCE_RESTART:-1}"
 
 LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
@@ -63,12 +67,41 @@ stop_pid_list() {
   kill $pids || true
 }
 
+print_worker_runtime() {
+  local proc_line targets_line
+  proc_line="$(pgrep -af 'worker.worker_loop' | head -n 1 || true)"
+  if [[ -n "$proc_line" ]]; then
+    echo "Worker process: ${proc_line}"
+  else
+    echo "Worker process: not found"
+  fi
+  if [[ -f "$WORKER_LOG" ]]; then
+    targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+    if [[ -n "$targets_line" ]]; then
+      echo "Worker queues: ${targets_line#*QUEUE_TARGETS=}"
+    fi
+  fi
+}
+
+worker_targets_from_log() {
+  if [[ ! -f "$WORKER_LOG" ]]; then
+    return 1
+  fi
+  local targets_line
+  targets_line="$(grep -m1 'QUEUE_TARGETS=' "$WORKER_LOG" || true)"
+  if [[ -z "$targets_line" ]]; then
+    return 1
+  fi
+  echo "${targets_line#*QUEUE_TARGETS=}"
+  return 0
+}
+
 if [[ "$FORCE_RESTART" == "1" ]]; then
   echo "== Cleaning old instances =="
   stop_pid_list "API($API_PORT)" "$(lsof -tiTCP:"$API_PORT" -sTCP:LISTEN || true)"
   stop_pid_list "API($API_LEGACY_PORT)" "$(lsof -tiTCP:"$API_LEGACY_PORT" -sTCP:LISTEN || true)"
   stop_pid_list "UI($UI_PORT)" "$(lsof -tiTCP:"$UI_PORT" -sTCP:LISTEN || true)"
-  stop_pid_list "Worker" "$(pgrep -f '/Users/arpitjain/PycharmProjects/doc-transcribe-worker/.venv/bin/python -m worker.worker_loop' || true)"
+  stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
   sleep 1
 fi
 
@@ -92,14 +125,27 @@ else
   wait_for_http "http://${API_HOST}:${API_PORT}/health" "API" "$API_LOG"
 fi
 
-echo "== Starting Worker (queue=${QUEUE_NAME}) =="
+echo "== Starting Worker (mode=both local=${LOCAL_QUEUE_NAME} cloud=${CLOUD_QUEUE_NAME}) =="
 if pgrep -af 'worker.worker_loop' >/dev/null 2>&1; then
   echo "Worker already running"
-else
+  print_worker_runtime
+  existing_targets="$(worker_targets_from_log || true)"
+  if [[ -n "$existing_targets" ]] && { ! echo "$existing_targets" | grep -q "$LOCAL_QUEUE_NAME" || ! echo "$existing_targets" | grep -q "$CLOUD_QUEUE_NAME"; }; then
+    echo "Worker queue targets are not in both mode; restarting worker..."
+    stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
+    sleep 1
+  fi
+fi
+
+if ! pgrep -af 'worker.worker_loop' >/dev/null 2>&1; then
   : >"$WORKER_LOG"
   nohup sh -c "cd \"$WORKER_REPO\" && \
     REDIS_URL=\"$REDIS_URL\" \
-    QUEUE_MODE=single \
+    QUEUE_MODE=both \
+    LOCAL_QUEUE_NAME=\"$LOCAL_QUEUE_NAME\" \
+    CLOUD_QUEUE_NAME=\"$CLOUD_QUEUE_NAME\" \
+    LOCAL_DLQ_NAME=\"$LOCAL_DLQ_NAME\" \
+    CLOUD_DLQ_NAME=\"$CLOUD_DLQ_NAME\" \
     QUEUE_NAME=\"$QUEUE_NAME\" \
     DLQ_NAME=\"$DLQ_NAME\" \
     \"$WORKER_REPO/.venv/bin/python\" -m worker.worker_loop" \
@@ -111,6 +157,10 @@ else
     exit 1
   fi
   echo "Worker started"
+  print_worker_runtime
+else
+  # Re-print after possible validation path above.
+  print_worker_runtime
 fi
 
 echo "== Starting UI (${UI_HOST}:${UI_PORT}) =="
