@@ -281,6 +281,9 @@ Behavior:
 - `PRS-007`
   - Local regression: `PASS` (2026-02-16)
   - Cloud regression: `PASS` (2026-02-16)
+- `PRS-008`
+  - Local regression: `PASS` (2026-02-16, user-run confirmation)
+  - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.
@@ -366,3 +369,13 @@ Behavior:
   - `Cloud`: OCR + Transcription completed.
 - `Fail`: `None`
 - `Notes`: `API + Worker metrics counters/latencies updated and exposed via health/metrics path where applicable.`
+
+- `Backlog ID`: `PRS-008`
+- `Date`: `2026-02-16`
+- `Environment`: `Local + Cloud`
+- `Executed tests`: `Bounded OCR + Transcription lifecycle after state-machine transition enforcement`
+- `Pass`:
+  - `Local`: PASS (user-run confirmation)
+  - `Cloud`: PASS (user-run confirmation)
+- `Fail`: `None`
+- `Notes`: `Status transition guards validated for API upload/cancel and worker lifecycle writes.`

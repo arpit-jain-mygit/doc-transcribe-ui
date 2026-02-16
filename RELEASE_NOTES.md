@@ -160,3 +160,28 @@ This file tracks release-level changes with backlog traceability.
   - Cloud regression passed (OCR + transcription).
   - Metrics counters/latency recorded for API request path and worker dispatch/GCS operations.
 - Status: `Completed (Tested)`
+
+### PRS-008
+- Backlog ID: `PRS-008`
+- Backlog Link: [PRS-008](./PRODUCTION_READINESS_BACKLOG.md#prs-008)
+- Type: `NFR` + `Reliability`
+- Summary: Enforced job status transition state machine in API and Worker.
+- Why: Prevent invalid lifecycle transitions and improve consistency across queued/processing/terminal states.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/utils/status_machine.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/jobs.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/status_machine.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/dispatcher.py`
+- Risk: `Medium`
+- Validation:
+  - Syntax/compile checks passed for touched Python modules.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+- Commits:
+  - API: `d2f8afb`
+  - Worker: `021542f`
+- Status: `Completed (Tested)`
