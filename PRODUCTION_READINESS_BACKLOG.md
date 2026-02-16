@@ -19,7 +19,7 @@ Status values:
 
 | ID | Phase | Task | Repo | Functional Requirement Served | User Benefit | Status | Test |
 |---|---|---|---|---|---|---|---|
-| PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local Regression) |
+| PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local + Cloud Regression) |
 | PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Planned | Not Tested |
 | PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Planned | Not Tested |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested |
@@ -100,6 +100,7 @@ Status values:
 - 2026-02-14: Backlog initialized.
 - 2026-02-14: PRS-001 implemented at code/documentation level across UI/API/Worker; validation pending.
 - 2026-02-16: PRS-001 local bounded regression passed (`OCR job_id=e77a176513b545ceadb06bfae7f2f346`, `TRANSCRIPTION job_id=07bac199dbfd4d84b84902bdfdd7a43b`).
+- 2026-02-16: PRS-001 cloud regression confirmed passed by user run.
 
 ## Detailed Item Specifications
 

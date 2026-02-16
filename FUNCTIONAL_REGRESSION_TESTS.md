@@ -258,6 +258,11 @@ Behavior:
 - `PRS-005..012`: run all smoke + `FT-RG-02`, `FT-RG-07..09`.
 - `PRS-013..015`: run all smoke + `FT-RG-01`, `FT-RG-02`, `FT-RG-10`.
 - `PRS-016..018`: run all smoke + `FT-RG-03`, `FT-RG-04`, `FT-RG-09`.
+
+## Latest verification status
+- `PRS-001`
+  - Local regression: `PASS` (2026-02-16)
+  - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.

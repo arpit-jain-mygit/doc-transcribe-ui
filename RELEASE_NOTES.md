@@ -33,4 +33,6 @@ This file tracks release-level changes with backlog traceability.
 - Validation:
   - Document structure and links verified.
   - Backlog and gap status alignment updated (`PRS-001`, `G-01`).
-- Status: `Completed (Code)`
+  - Local regression passed (OCR + transcription).
+  - Cloud regression passed (user-run confirmation).
+- Status: `Completed (Tested)`
