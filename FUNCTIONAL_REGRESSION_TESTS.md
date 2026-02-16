@@ -266,6 +266,9 @@ Behavior:
 - `PRS-002`
   - Local regression: `PENDING`
   - Cloud regression: `PENDING`
+- `PRS-003`
+  - Local regression: `PENDING`
+  - Cloud regression: `PENDING`
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.

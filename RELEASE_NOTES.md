@@ -58,3 +58,26 @@ This file tracks release-level changes with backlog traceability.
   - UI field reads moved to canonical resolver helper.
   - Full regression pending.
 - Status: `Completed (Code)`
+
+### PRS-003
+- Backlog ID: `PRS-003`
+- Backlog Link: [PRS-003](./PRODUCTION_READINESS_BACKLOG.md#prs-003)
+- Gap Link: [G-03](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-03)
+- Type: `NFR` + `Fix`
+- Summary: Standardized error codes/messages to remove ambiguity in failed jobs.
+- Why: Reduce confusion from raw/unstable exception text and make failures actionable.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/utils.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/polling.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/status.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/error_catalog.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+- Risk: `Low`
+- Validation:
+  - Worker now writes canonical failed/cancelled error fields.
+  - API status normalizes missing failure fields.
+  - UI and regression scripts show standardized error messages.
+  - Full regression pending.
+- Status: `Completed (Code)`

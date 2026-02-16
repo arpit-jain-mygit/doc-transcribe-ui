@@ -98,6 +98,11 @@ Legend:
 ### G-03: Error code standard is missing
 - Severity: High
 - Impact: Different layers emit inconsistent error semantics; hard to troubleshoot.
+- Status: Closed (Code).
+- Implemented artifacts:
+  - UI: standardized failed-message resolver in `js/utils.js` and failed toast usage in `js/polling.js`
+  - API: failed payload normalization in `routes/status.py`
+  - Worker: centralized error classifier in `worker/error_catalog.py` + consistent failed/cancelled field writes in `worker/worker_loop.py`
 - Fix backlog:
   - [PRS-003](./PRODUCTION_READINESS_BACKLOG.md#prs-003)
   - [PRS-012](./PRODUCTION_READINESS_BACKLOG.md#prs-012)

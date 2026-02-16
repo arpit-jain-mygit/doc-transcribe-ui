@@ -323,9 +323,9 @@ function handleJobFailed(data) {
     }
   }
 
-  const raw = (data && data.error) ? String(data.error) : "";
-  const shortError = raw ? raw.split("\n")[0].trim() : "";
-  const detail = shortError || (data && data.stage) || "Please try again.";
+  const detail = typeof getJobFailureMessage === "function"
+    ? getJobFailureMessage(data)
+    : ((data && (data.error_message || data.error || data.stage)) || "Please try again.");
 
   toast(`Processing failed: ${detail}`, "error");
 }

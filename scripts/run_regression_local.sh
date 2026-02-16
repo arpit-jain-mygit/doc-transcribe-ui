@@ -9,6 +9,13 @@ set -euo pipefail
 API_BASE="${API_BASE:-http://127.0.0.1:8090}"
 REDIS_PING_CMD="${REDIS_PING_CMD:-redis-cli -u redis://localhost:6379/0 ping}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
+LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
+API_LOG="${API_LOG:-${LOG_DIR}/api.log}"
+WORKER_LOG="${WORKER_LOG:-${LOG_DIR}/worker.log}"
+UI_LOG="${UI_LOG:-${LOG_DIR}/ui.log}"
+REDIS_URL="${REDIS_URL:-redis://localhost:6379/0}"
+QUEUE_NAME="${QUEUE_NAME:-doc_jobs_local}"
+DLQ_NAME="${DLQ_NAME:-doc_jobs_dead}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -31,8 +38,51 @@ else
 fi
 
 fail() {
+  maybe_print_diagnostics
   echo "FAIL: $1" >&2
   exit 1
+}
+
+print_log_tail() {
+  local label="$1"
+  local file="$2"
+  local lines="${3:-80}"
+  if [[ -f "$file" ]]; then
+    echo "== ${label} log (last ${lines}) =="
+    tail -n "$lines" "$file" || true
+  else
+    echo "== ${label} log =="
+    echo "(not found: $file)"
+  fi
+}
+
+print_redis_diag() {
+  echo "== Redis diagnostics =="
+  if ! command -v redis-cli >/dev/null 2>&1; then
+    echo "redis-cli not found"
+    return 0
+  fi
+  local q_depth dlq_depth
+  q_depth="$(redis-cli -u "$REDIS_URL" LLEN "$QUEUE_NAME" 2>/dev/null || echo "n/a")"
+  dlq_depth="$(redis-cli -u "$REDIS_URL" LLEN "$DLQ_NAME" 2>/dev/null || echo "n/a")"
+  echo "queue=${QUEUE_NAME} depth=${q_depth}"
+  echo "dlq=${DLQ_NAME} depth=${dlq_depth}"
+}
+
+maybe_print_diagnostics() {
+  if [[ "${DIAG_PRINTED:-0}" == "1" ]]; then
+    return 0
+  fi
+  DIAG_PRINTED=1
+  echo "== Failure diagnostics =="
+  print_redis_diag
+  if [[ -n "${CURRENT_JOB_ID:-}" ]] && command -v redis-cli >/dev/null 2>&1; then
+    echo "== Redis job_status:${CURRENT_JOB_ID} =="
+    redis-cli -u "$REDIS_URL" HGETALL "job_status:${CURRENT_JOB_ID}" 2>/dev/null || true
+  fi
+  print_log_tail "API" "$API_LOG" 120
+  print_log_tail "Worker" "$WORKER_LOG" 120
+  print_log_tail "UI" "$UI_LOG" 60
 }
 
 http_call() {
@@ -100,6 +150,7 @@ extract_job_id() {
 poll_job() {
   local job_id="$1"
   local label="$2"
+  CURRENT_JOB_ID="$job_id"
   local deadline=$(( $(date +%s) + MAX_WAIT_SEC ))
   local started_at
   started_at="$(date +%s)"
@@ -143,9 +194,10 @@ poll_job() {
       return 0
     fi
     if [[ "$status" == "FAILED" ]]; then
-      local err
-      err="$(echo "$resp" | jq -r '.error // .stage // "unknown failure"')"
-      fail "Job ${job_id} failed: ${err}"
+      local err_code err_msg
+      err_code="$(echo "$resp" | jq -r '.error_code // "UNKNOWN_ERROR"')"
+      err_msg="$(echo "$resp" | jq -r '.error_message // .error // .stage // "unknown failure"')"
+      fail "Job ${job_id} failed [${err_code}]: ${err_msg}"
     fi
     if [[ "$status" == "CANCELLED" ]]; then
       fail "Job ${job_id} was cancelled unexpectedly"

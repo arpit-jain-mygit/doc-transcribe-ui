@@ -30,8 +30,31 @@ else
 fi
 
 fail() {
+  maybe_print_diagnostics
   echo "FAIL: $1" >&2
   exit 1
+}
+
+safe_get() {
+  local url="$1"
+  if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
+    "$CURL_BIN" -sS "$url" "${AUTH_HEADER_FLAG[@]}" 2>/dev/null || true
+  else
+    "$CURL_BIN" -sS "$url" 2>/dev/null || true
+  fi
+}
+
+maybe_print_diagnostics() {
+  if [[ "${DIAG_PRINTED:-0}" == "1" ]]; then
+    return 0
+  fi
+  DIAG_PRINTED=1
+  echo "== Failure diagnostics =="
+  echo "health: $(safe_get "${API_BASE}/health")"
+  echo "contract: $(safe_get "${API_BASE}/contract/job-status")"
+  if [[ -n "${CURRENT_JOB_ID:-}" ]]; then
+    echo "status(${CURRENT_JOB_ID}): $(safe_get "${API_BASE}/status/${CURRENT_JOB_ID}")"
+  fi
 }
 
 http_call() {
@@ -93,6 +116,7 @@ extract_job_id() {
 poll_job() {
   local job_id="$1"
   local label="$2"
+  CURRENT_JOB_ID="$job_id"
   local deadline=$(( $(date +%s) + MAX_WAIT_SEC ))
   local started_at
   started_at="$(date +%s)"
@@ -136,9 +160,10 @@ poll_job() {
       return 0
     fi
     if [[ "$status" == "FAILED" ]]; then
-      local err
-      err="$(echo "$resp" | jq -r '.error // .stage // "unknown failure"')"
-      fail "Job ${job_id} failed: ${err}"
+      local err_code err_msg
+      err_code="$(echo "$resp" | jq -r '.error_code // "UNKNOWN_ERROR"')"
+      err_msg="$(echo "$resp" | jq -r '.error_message // .error // .stage // "unknown failure"')"
+      fail "Job ${job_id} failed [${err_code}]: ${err_msg}"
     fi
     if [[ "$status" == "CANCELLED" ]]; then
       fail "Job ${job_id} was cancelled unexpectedly"

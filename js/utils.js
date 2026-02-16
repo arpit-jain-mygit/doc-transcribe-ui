@@ -71,3 +71,25 @@ function responseErrorMessage(res, payload, fallback) {
   }
   return fallback;
 }
+
+function getJobFailureMessage(data) {
+  if (!data || typeof data !== "object") {
+    return "Processing failed. Please try again.";
+  }
+
+  const code = String(data.error_code || "").trim().toUpperCase();
+  const message = String(data.error_message || data.error || "").trim();
+
+  if (message) return message;
+
+  if (code === "RATE_LIMIT_EXCEEDED") return "Service is busy right now. Please retry in a few minutes.";
+  if (code === "MEDIA_DECODE_FAILED") return "Input media could not be decoded. Please upload a supported file.";
+  if (code === "INPUT_NOT_FOUND") return "Input file was not found for processing.";
+  if (code === "INFRA_REDIS") return "Queue service is temporarily unavailable.";
+  if (code === "CANCELLED_BY_USER") return "Job was cancelled.";
+  if (code) return `Processing failed (${code}).`;
+
+  const stage = String(data.stage || "").trim();
+  if (stage) return stage;
+  return "Processing failed. Please try again.";
+}

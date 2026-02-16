@@ -22,7 +22,7 @@ Status values:
 |---|---|---|---|---|---|---|---|---|
 | PRS-001 | 0 | Define architecture boundaries and coding standards | All | Maintainability | Faster onboarding for new engineers | Completed (Tested) | Completed (Local + Cloud Regression) | UI: architecture/backlog/regression docs + stack/regression scripts. API: stage-wise structured logging + logging config. Worker: architecture/contribution/guide docs and module map docs. |
 | PRS-002 | 0 | Define canonical job/status field contract | All | Data consistency | Fewer UI/API/Worker mismatch bugs | Completed (Code) | Not Tested | UI: added canonical contract resolver module and contract reference doc. API: added source-of-truth contract spec + machine-readable contract endpoint + canonical constants in routes. Worker: added contract constants/reference docs aligned to API source. |
-| PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Planned | Not Tested | Pending implementation |
+| PRS-003 | 0 | Define error-code catalog | All | Predictable error handling | Clearer, actionable error messages | Completed (Code) | Not Tested | UI: standardized failed-job message rendering + script failure output includes error code/message. API: failed status normalization (`error_code`,`error_message`). Worker: centralized error classification and consistent failed/cancelled fields. |
 | PRS-004 | 0 | Add startup env validation | API, Worker | Runtime stability | Fewer production misconfig failures | Planned | Not Tested | Pending implementation |
 | PRS-005 | 1 | Correlation ID propagation (`request_id`) | UI, API, Worker | Traceability | Faster support/debug turnaround | Planned | Not Tested | Pending implementation |
 | PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Planned | Not Tested | Pending implementation |
@@ -103,12 +103,14 @@ Status values:
 - 2026-02-16: PRS-001 local bounded regression passed (`OCR job_id=e77a176513b545ceadb06bfae7f2f346`, `TRANSCRIPTION job_id=07bac199dbfd4d84b84902bdfdd7a43b`).
 - 2026-02-16: PRS-001 cloud regression confirmed passed by user run.
 - 2026-02-16: PRS-002 implemented at code/documentation level across UI/API/Worker; validation pending.
+- 2026-02-16: PRS-003 implemented at code level across UI/API/Worker/scripts; validation pending.
 
 ## Detailed Item Specifications
 
 ### Table of contents
 - [PRS-001 - Define architecture boundaries and coding standards](#prs-001---define-architecture-boundaries-and-coding-standards)
 - [PRS-002 - Define canonical job/status field contract](#prs-002---define-canonical-jobstatus-field-contract)
+- [PRS-003 - Define error-code catalog](#prs-003---define-error-code-catalog)
 
 ### PRS-001 - Define architecture boundaries and coding standards
 
@@ -260,3 +262,52 @@ Status values:
 **Exit criteria for marking status**
 - `Completed (Code)` when contract doc/endpoint/constants/resolvers exist across all repos.
 - `Completed (Tested)` after local + cloud regression pass including OCR and transcription.
+
+### PRS-003 - Define error-code catalog
+
+**Purpose**
+- Ensure failures are reported with deterministic `error_code` and user-safe `error_message` across worker, API, UI, and scripts.
+
+**Why this is in Phase 0**
+- Error consistency is foundational for supportability and user trust.
+
+**Repo touchpoints: why and how each repo is changed**
+- `doc-transcribe-worker`
+  - Added centralized classifier: `worker/error_catalog.py`.
+  - Worker failure/cancel paths now write consistent fields:
+    - `error_code`
+    - `error_message`
+    - `error_detail`
+    - `error`
+  - Also updates processing stage from queued to explicit processing start.
+
+- `doc-transcribe-api`
+  - `routes/status.py` now normalizes failed payloads if worker misses fields:
+    - default `error_code=PROCESSING_FAILED`
+    - default `error_message` from `error/stage`.
+
+- `doc-transcribe-ui`
+  - `js/utils.js`: added unified failed-job message helper.
+  - `js/polling.js`: uses consistent error helper for user toast.
+  - Regression scripts now print `error_code` + `error_message` on failed jobs.
+
+**Functional requirement served**
+- Predictable error semantics.
+
+**User benefit**
+- Clear actionable failure messages instead of ambiguous/raw exceptions.
+
+**Detailed implementation steps**
+1. Add worker error classifier and emit stable codes/messages.
+2. Normalize API status response for failure fields.
+3. Consume those fields in UI failure rendering and regression scripts.
+
+**Detailed test plan**
+1. Trigger decode failure and verify `error_code=MEDIA_DECODE_FAILED`.
+2. Trigger quota/resource failure and verify `error_code=RATE_LIMIT_EXCEEDED`.
+3. Verify UI toast uses standardized message.
+4. Verify regression scripts print `failed [ERROR_CODE]: message`.
+
+**Exit criteria for marking status**
+- `Completed (Code)` when worker/API/UI/scripts emit and consume standardized error fields.
+- `Completed (Tested)` after local + cloud regression includes at least one forced failure scenario.
