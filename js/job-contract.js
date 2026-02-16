@@ -1,5 +1,5 @@
 (() => {
-  const CONTRACT_VERSION = "2026-02-16-prs-002";
+  const CONTRACT_VERSION = "2026-02-16-prs-005";
 
   const JOB_TYPES = Object.freeze({
     OCR: "OCR",
@@ -36,6 +36,11 @@
   function resolveJobStatus(job) {
     if (!job || typeof job !== "object") return "";
     return normalizeJobStatus(job.status || "");
+  }
+
+  function resolveRequestId(job) {
+    if (!job || typeof job !== "object") return "";
+    return String(job.request_id || "").trim();
   }
 
   function resolveUploadedFilename(job) {
@@ -90,6 +95,7 @@
     normalizeJobStatus,
     resolveJobType,
     resolveJobStatus,
+    resolveRequestId,
     resolveUploadedFilename,
     resolveInputSizeBytes,
     resolveOutputFilename,

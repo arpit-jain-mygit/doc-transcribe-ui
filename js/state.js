@@ -14,5 +14,6 @@ let LAST_STATUS = null;
 let LAST_STAGE = null;
 
 let LAST_UPLOADED_FILENAME = null;
+let ACTIVE_REQUEST_ID = null;
 
 window.JOB_COMPLETED = false;

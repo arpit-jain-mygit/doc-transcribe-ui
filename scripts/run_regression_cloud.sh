@@ -371,14 +371,17 @@ api_health() {
 submit_job() {
   local file_path="$1"
   local job_type="$2"
+  local req_id="req-$job_type-$(date +%s)-$RANDOM"
   local result code body
   if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
     result="$(http_call POST "${API_BASE}/upload" \
       "${AUTH_HEADER_FLAG[@]}" \
+      -H "X-Request-ID: ${req_id}" \
       -F "file=@${file_path}" \
       -F "type=${job_type}")"
   else
     result="$(http_call POST "${API_BASE}/upload" \
+      -H "X-Request-ID: ${req_id}" \
       -F "file=@${file_path}" \
       -F "type=${job_type}")"
   fi
@@ -391,6 +394,7 @@ submit_job() {
     fi
     fail "Upload request failed for ${job_type} (HTTP ${code}): ${body}"
   fi
+  trace "${job_type}: request_id sent=${req_id}" >&2
   echo "$body"
 }
 
@@ -400,6 +404,14 @@ extract_job_id() {
   job_id="$(echo "$resp" | jq -r '.job_id // empty')"
   [[ -n "$job_id" ]] || fail "Could not extract job_id from response: $resp"
   echo "$job_id"
+}
+
+extract_request_id() {
+  local resp="$1"
+  local request_id
+  request_id="$(echo "$resp" | jq -r '.request_id // empty')"
+  [[ -n "$request_id" ]] || fail "Missing request_id in upload response: $resp"
+  echo "$request_id"
 }
 
 poll_job() {
@@ -422,7 +434,7 @@ poll_job() {
     now="$(date +%s)"
     [[ "$now" -le "$deadline" ]] || fail "Timeout waiting for ${label} job ${job_id} (>${MAX_WAIT_SEC}s). Last status payload: ${last_resp}"
 
-    local result code resp status stage progress elapsed
+    local result code resp status stage progress elapsed request_id
     if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
       result="$(http_call GET "${API_BASE}/status/${job_id}" "${AUTH_HEADER_FLAG[@]}")"
     else
@@ -441,10 +453,12 @@ poll_job() {
     status="$(echo "$resp" | jq -r '.status // empty')"
     stage="$(echo "$resp" | jq -r '.stage // "-"')"
     progress="$(echo "$resp" | jq -r '.progress // "-"')"
+    request_id="$(echo "$resp" | jq -r '.request_id // empty')"
+    [[ -n "$request_id" ]] || fail "Missing request_id in status response for job ${job_id}: ${resp}"
     elapsed=$(( now - started_at ))
 
     if [[ "$status" != "$last_status" || $(( now - last_log_at )) -ge "$LOG_EVERY_SEC" ]]; then
-      echo "[${label}] t+${elapsed}s status=${status:-UNKNOWN} stage=${stage} progress=${progress}"
+      echo "[${label}] t+${elapsed}s request_id=${request_id} status=${status:-UNKNOWN} stage=${stage} progress=${progress}"
       last_log_at="$now"
       last_status="$status"
     fi
@@ -519,7 +533,7 @@ main() {
   ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
-  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job}"
+  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job} request_id=$(extract_request_id "$ocr_resp")"
   poll_job "$ocr_job" "OCR"
   icon_ok "OCR regression step passed."
   end_step_ok
@@ -529,7 +543,7 @@ main() {
   tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"
-  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job}"
+  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job} request_id=$(extract_request_id "$tr_resp")"
   poll_job "$tr_job" "TRANSCRIPTION"
   icon_ok "Transcription regression step passed."
   end_step_ok

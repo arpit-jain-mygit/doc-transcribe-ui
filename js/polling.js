@@ -73,9 +73,13 @@ async function cancelJobById(jobId, { silent = false } = {}) {
   const activeType = String(window.ACTIVE_JOB_TYPE || "").toUpperCase();
 
   try {
+    const reqHeaders = authHeadersWithRequestId({
+      requestId: window.ACTIVE_REQUEST_ID || "",
+      includeAuth: true,
+    }).headers;
     const res = await fetch(`${API}/jobs/${jobId}/cancel`, {
       method: "POST",
-      headers: { Authorization: "Bearer " + ID_TOKEN },
+      headers: reqHeaders,
     });
 
     if (res.status === 401) {
@@ -177,8 +181,12 @@ async function pollStatus() {
 
   let res;
   try {
+    const reqHeaders = authHeadersWithRequestId({
+      requestId: window.ACTIVE_REQUEST_ID || "",
+      includeAuth: true,
+    }).headers;
     res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: { Authorization: "Bearer " + ID_TOKEN }
+      headers: reqHeaders
     });
   } catch {
     return;
@@ -193,6 +201,9 @@ async function pollStatus() {
 
   const data = await safeJson(res);
   if (!data || data._nonJson) return;
+  if (data.request_id) {
+    window.ACTIVE_REQUEST_ID = String(data.request_id).trim();
+  }
 
   updateProcessingUI(data);
 
@@ -268,6 +279,7 @@ function completeAndResetUI() {
 
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = null;
+  window.ACTIVE_REQUEST_ID = null;
   localStorage.removeItem("active_job_id");
   CANCEL_REQUESTED = false;
 

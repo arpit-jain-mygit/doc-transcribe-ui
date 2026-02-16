@@ -24,6 +24,8 @@ LOCAL_QUEUE_NAME="${LOCAL_QUEUE_NAME:-doc_jobs_local}"
 CLOUD_DLQ_NAME="${CLOUD_DLQ_NAME:-doc_jobs_dead}"
 LOCAL_DLQ_NAME="${LOCAL_DLQ_NAME:-doc_jobs_dead_local}"
 FORCE_RESTART="${FORCE_RESTART:-1}"
+RESTART_WORKER="${RESTART_WORKER:-0}"
+USE_EXISTING_WORKER_AS_IS="${USE_EXISTING_WORKER_AS_IS:-1}"
 
 LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
 mkdir -p "$LOG_DIR"
@@ -101,7 +103,11 @@ if [[ "$FORCE_RESTART" == "1" ]]; then
   stop_pid_list "API($API_PORT)" "$(lsof -tiTCP:"$API_PORT" -sTCP:LISTEN || true)"
   stop_pid_list "API($API_LEGACY_PORT)" "$(lsof -tiTCP:"$API_LEGACY_PORT" -sTCP:LISTEN || true)"
   stop_pid_list "UI($UI_PORT)" "$(lsof -tiTCP:"$UI_PORT" -sTCP:LISTEN || true)"
-  stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
+  if [[ "$RESTART_WORKER" == "1" ]]; then
+    stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
+  else
+    echo "Worker: keeping existing worker process (RESTART_WORKER=0)"
+  fi
   sleep 1
 fi
 
@@ -129,11 +135,15 @@ echo "== Starting Worker (mode=both local=${LOCAL_QUEUE_NAME} cloud=${CLOUD_QUEU
 if pgrep -af 'worker.worker_loop' >/dev/null 2>&1; then
   echo "Worker already running"
   print_worker_runtime
-  existing_targets="$(worker_targets_from_log || true)"
-  if [[ -n "$existing_targets" ]] && { ! echo "$existing_targets" | grep -q "$LOCAL_QUEUE_NAME" || ! echo "$existing_targets" | grep -q "$CLOUD_QUEUE_NAME"; }; then
-    echo "Worker queue targets are not in both mode; restarting worker..."
-    stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
-    sleep 1
+  if [[ "$USE_EXISTING_WORKER_AS_IS" != "1" ]]; then
+    existing_targets="$(worker_targets_from_log || true)"
+    if [[ -n "$existing_targets" ]] && { ! echo "$existing_targets" | grep -q "$LOCAL_QUEUE_NAME" || ! echo "$existing_targets" | grep -q "$CLOUD_QUEUE_NAME"; }; then
+      echo "Worker queue targets are not in both mode; restarting worker..."
+      stop_pid_list "Worker" "$(pgrep -f 'worker.worker_loop' || true)"
+      sleep 1
+    fi
+  else
+    echo "Worker: reusing existing process as-is (USE_EXISTING_WORKER_AS_IS=1)"
   fi
 fi
 

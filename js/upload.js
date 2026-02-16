@@ -81,11 +81,12 @@ async function normalizeUploadFile(file) {
   }
 }
 
-function uploadViaXhr(url, token, formData) {
+function uploadViaXhr(url, token, formData, requestId = "") {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Authorization", "Bearer " + token);
+    xhr.setRequestHeader("X-Request-ID", resolveRequestId(requestId));
     xhr.responseType = "text";
     xhr.timeout = 240000;
 
@@ -103,6 +104,7 @@ function uploadViaXhr(url, token, formData) {
         ok: xhr.status >= 200 && xhr.status < 300,
         status: xhr.status,
         data,
+        requestId: xhr.getResponseHeader("X-Request-ID") || "",
       });
     };
 
@@ -131,6 +133,7 @@ function resetAfterUploadError() {
   window.JOB_COMPLETED = false;
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = null;
+  window.ACTIVE_REQUEST_ID = null;
   localStorage.removeItem("active_job_id");
 
   document.body.classList.remove("processing-active");
@@ -172,6 +175,8 @@ async function upload(type, file) {
   window.JOB_COMPLETED = false;
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = String(type || "").toUpperCase();
+  const uploadRequestId = resolveRequestId(generateRequestId());
+  window.ACTIVE_REQUEST_ID = uploadRequestId;
   const uploadFile = await normalizeUploadFile(file);
   LAST_UPLOADED_FILENAME = uploadFile.name;
 
@@ -189,9 +194,10 @@ async function upload(type, file) {
   const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();
   try {
     if (preferXhrPrimary) {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type));
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId);
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
+        window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
         localStorage.setItem("active_job_id", JOB_ID);
         startPolling();
         return;
@@ -209,17 +215,19 @@ async function upload(type, file) {
       };
     } else {
       const fd = createUploadFormData(uploadFile, type);
+      const reqHeaders = authHeadersWithRequestId({ requestId: uploadRequestId, includeAuth: true }).headers;
       res = await fetch(`${API}/upload`, {
         method: "POST",
-        headers: { Authorization: "Bearer " + ID_TOKEN },
+        headers: reqHeaders,
         body: fd
       });
     }
   } catch (err) {
     try {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type));
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId);
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
+        window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
         localStorage.setItem("active_job_id", JOB_ID);
         startPolling();
         return;
@@ -257,7 +265,7 @@ async function upload(type, file) {
       try {
         const authRes = await fetch(`${API}/jobs?limit=1&offset=0`, {
           method: "GET",
-          headers: { Authorization: "Bearer " + ID_TOKEN },
+          headers: authHeadersWithRequestId({ requestId: uploadRequestId, includeAuth: true }).headers,
         });
         authReachable = authRes.ok;
         authUnauthorized = authRes.status === 401;
@@ -272,7 +280,7 @@ async function upload(type, file) {
         probeFd.append("type", "OCR");
         const probeRes = await fetch(`${API}/upload`, {
           method: "POST",
-          headers: { Authorization: "Bearer " + ID_TOKEN },
+          headers: authHeadersWithRequestId({ requestId: uploadRequestId, includeAuth: true }).headers,
           body: probeFd,
         });
         uploadProbeReachable = true;
@@ -327,6 +335,7 @@ async function upload(type, file) {
     return;
   }
   JOB_ID = data.job_id;
+  window.ACTIVE_REQUEST_ID = String(data.request_id || res.headers.get("X-Request-ID") || uploadRequestId || "").trim();
   localStorage.setItem("active_job_id", JOB_ID);
 
   startPolling();

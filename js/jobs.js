@@ -316,9 +316,10 @@ async function retryJobById(jobId) {
   if (!jobId || !ID_TOKEN) return false;
 
   try {
+    const reqHeaders = authHeadersWithRequestId({ includeAuth: true }).headers;
     const res = await fetch(`${API}/jobs/${jobId}/retry`, {
       method: "POST",
-      headers: { Authorization: "Bearer " + ID_TOKEN },
+      headers: reqHeaders,
     });
 
     if (res.status === 401) {
@@ -569,8 +570,9 @@ async function loadJobs({ reset = false, append = false } = {}) {
   const includeCounts = !append && !JOBS_STATUS_COUNTS_BY_TYPE[JOBS_TYPE_FILTER];
 
   try {
+    const reqHeaders = authHeadersWithRequestId({ includeAuth: true }).headers;
     const res = await fetch(buildJobsUrl(JOBS_TYPE_FILTER, JOBS_FILTER, JOBS_PAGE_SIZE, offset, includeCounts), {
-      headers: { Authorization: "Bearer " + ID_TOKEN }
+      headers: reqHeaders
     });
 
     if (res.status === 401) return logout();

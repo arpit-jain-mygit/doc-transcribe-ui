@@ -53,6 +53,38 @@ async function safeJson(res) {
   }
 }
 
+function generateRequestId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return `req-${window.crypto.randomUUID()}`;
+  }
+  const rand = Math.random().toString(16).slice(2, 10);
+  return `req-${Date.now().toString(16)}-${rand}`;
+}
+
+function resolveRequestId(preferred = "") {
+  const direct = String(preferred || "").trim();
+  if (direct) return direct;
+  const active = String(window.ACTIVE_REQUEST_ID || "").trim();
+  if (active) return active;
+  const next = generateRequestId();
+  window.ACTIVE_REQUEST_ID = next;
+  return next;
+}
+
+function authHeadersWithRequestId({ requestId = "", includeAuth = true } = {}) {
+  const headers = {};
+  if (includeAuth && ID_TOKEN) {
+    headers.Authorization = "Bearer " + ID_TOKEN;
+  }
+  const resolved = resolveRequestId(requestId);
+  headers["X-Request-ID"] = resolved;
+  return { headers, requestId: resolved };
+}
+
+window.generateRequestId = generateRequestId;
+window.resolveRequestId = resolveRequestId;
+window.authHeadersWithRequestId = authHeadersWithRequestId;
+
 function responseErrorMessage(res, payload, fallback) {
   const normalizeAuthError = (msg) => {
     const text = String(msg || "").toLowerCase();
