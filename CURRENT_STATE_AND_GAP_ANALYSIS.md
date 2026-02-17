@@ -98,7 +98,7 @@ Legend:
 ### G-03: Error code standard is missing
 - Severity: High
 - Impact: Different layers emit inconsistent error semantics; hard to troubleshoot.
-- Status: Closed (Code).
+- Status: Closed (Tested).
 - Implemented artifacts:
   - UI: standardized failed-message resolver in `js/utils.js` and failed toast usage in `js/polling.js`
   - API: failed payload normalization in `routes/status.py`
@@ -179,6 +179,11 @@ Legend:
 ### G-12: API exception mapping is not fully normalized
 - Severity: High
 - Impact: UI may receive mixed error styles and less actionable feedback.
+- Status: Closed (Tested).
+- Implemented artifacts:
+  - API: `app.py` global exception handlers now normalize HTTP, validation, and unhandled errors into one stable envelope.
+  - Stable payload keys: `error_code`, `error_message`, `detail`, `path`, `request_id`.
+  - Added normalized codes for auth/forbidden/not-found/conflict/validation flows.
 - Fix backlog:
   - [PRS-012](./PRODUCTION_READINESS_BACKLOG.md#prs-012)
 
@@ -186,6 +191,13 @@ Legend:
 ### G-13: Security hardening gaps (strict auth/CORS policy consistency)
 - Severity: High
 - Impact: Auth/CORS behavior can vary by environment and surprise users.
+- Status: Closed (Tested).
+- Implemented artifacts:
+  - API: `services/auth.py` now enforces strict token checks (`iss`, `aud`, `azp`, `exp`, `nbf`, `iat`, `email_verified`) with normalized auth error codes.
+  - API: `routes/auth.py` reuses shared strict validator to avoid endpoint-level drift.
+- Remaining:
+  - `PRS-014` strict CORS allowlist.
+  - `PRS-015` server-side MIME/extension/size validation.
 - Fix backlog:
   - [PRS-013](./PRODUCTION_READINESS_BACKLOG.md#prs-013)
   - [PRS-014](./PRODUCTION_READINESS_BACKLOG.md#prs-014)

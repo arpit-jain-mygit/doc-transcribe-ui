@@ -248,3 +248,40 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - Worker: `29c44d4`
 - Status: `Completed (Tested)`
+
+### PRS-012
+- Backlog ID: `PRS-012`
+- Backlog Link: [PRS-012](./PRODUCTION_READINESS_BACKLOG.md#prs-012)
+- Gap Link: [G-12](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-12)
+- Type: `NFR` + `Error consistency`
+- Summary: Standardized API global exception mapping for HTTP, validation, and unhandled errors.
+- Why: Ensure clients always receive a predictable error structure and normalized error codes.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py`
+- Risk: `Low`
+- Validation:
+  - Python compile check passed for API app handler changes.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+- Commit:
+  - API: `8a81134`
+- Status: `Completed (Tested)`
+
+### PRS-013
+- Backlog ID: `PRS-013`
+- Backlog Link: [PRS-013](./PRODUCTION_READINESS_BACKLOG.md#prs-013)
+- Gap Link: [G-13](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-13)
+- Type: `NFR` + `Security`
+- Summary: Tightened Google token validation (`iss`, `aud`, `azp`, expiry timing) with normalized auth error codes.
+- Why: Prevent token acceptance ambiguity and make auth failures deterministic for UI and ops.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/auth.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/auth.py`
+- Risk: `Medium`
+- Validation:
+  - Python compile checks passed for touched API auth modules.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+- Commit:
+  - API: `8a81134`
+- Status: `Completed (Tested)`
