@@ -66,6 +66,8 @@ Status values:
 | PRS-043 | 10 | Regression Certification Agent (auto-certify release readiness) | UI/scripts, API, Worker | Release governance automation | Faster, consistent go/no-go decisions | Planned | Pending | Test criteria: ensure certification output matches local/cloud regression, contract checks, and CI outcomes. |
 | PRS-044 | 10 | Product Insights Agent (usage/failure analytics + prioritization) | API, Worker, UI | Product feedback loop | Data-driven UX and roadmap decisions | Planned | Pending | Test criteria: validate generated insight reports, trend detection quality, and backlog recommendation relevance. |
 | PRS-045 | 11 | **BIG EPIC**: Digambar Jainism GPT using RAG | All | Domain-specific AI knowledge assistant | Accurate, grounded answers on Digambar Jain concepts with source traceability | Planned | Pending | Start after PRS-035..044. Build ingestion, indexing, retrieval, grounding, evaluation, safety, and deployment lifecycle for a Digambar Jainism RAG assistant. |
+| PRS-046A | 6 | Operations Dashboard (real-time reliability + incident triage) | API, Worker, UI | Operability observability | Faster incident detection, diagnosis, and recovery | Planned | Pending | Feature set: queue depth/inflight, funnel by status, failure taxonomy, latency/SLO, dependency/provider health, regression+CI run health. |
+| PRS-046B | 6 | Product Analytics Dashboard (usage + outcomes + cost) | API, Worker, UI | Product decision support | Better UX prioritization and cost-aware roadmap | Planned | Pending | Feature set: active users, completion/drop-off by step, median turnaround by type, quota/cost trend, cohort retention, top user pain points. |
 
 ## Backlog Item Anchors
 
@@ -114,6 +116,8 @@ Status values:
 - <a id="prs-043"></a>`PRS-043`
 - <a id="prs-044"></a>`PRS-044`
 - <a id="prs-045"></a>`PRS-045`
+- <a id="prs-046a"></a>`PRS-046A`
+- <a id="prs-046b"></a>`PRS-046B`
 
 ## Execution order
 1. Phase 1 + Phase 2
@@ -237,6 +241,8 @@ Status values:
 - [PRS-043 - Regression Certification Agent (auto-certify release readiness)](#prs-043--regression-certification-agent-auto-certify-release-readiness)
 - [PRS-044 - Product Insights Agent (usage/failure analytics + prioritization)](#prs-044--product-insights-agent-usagefailure-analytics--prioritization)
 - [PRS-045 - BIG EPIC: Digambar Jainism GPT using RAG](#prs-045---big-epic-digambar-jainism-gpt-using-rag)
+- [PRS-046A - Operations Dashboard (real-time reliability + incident triage)](#prs-046a---operations-dashboard-real-time-reliability--incident-triage)
+- [PRS-046B - Product Analytics Dashboard (usage + outcomes + cost)](#prs-046b---product-analytics-dashboard-usage--outcomes--cost)
 
 
 ### PRS-001 - Define architecture boundaries and coding standards
@@ -1740,3 +1746,60 @@ Status values:
 3. Hallucination guard tests on out-of-scope/ambiguous queries.
 4. Latency/cost benchmarks for retrieval and generation.
 5. End-to-end local + cloud regression with representative corpus snapshots.
+
+
+### PRS-046A - Operations Dashboard (real-time reliability + incident triage)
+
+**Purpose**
+- Provide one operations dashboard for engineering/support to monitor OCR/transcription health and respond quickly to incidents.
+
+**Why this is in Phase 6**
+- Depends on readiness, structured logging, and metrics baselines from operability hardening.
+
+**Repo touchpoints**
+- `API`, `Worker`, `UI`
+  - `API`: operational metrics endpoints, error/failure aggregation, SLO snapshot APIs.
+  - `Worker`: queue/inflight/retry/DLQ + dependency health telemetry.
+  - `UI`: ops dashboard views with filters and drilldowns.
+
+**Recommended ops features**
+1. Live queue panel: queue depth, inflight, oldest queued age, pickup lag.
+2. Job funnel: `QUEUED -> PROCESSING -> COMPLETED/FAILED/CANCELLED` rates by type.
+3. Failure taxonomy: top `error_code`, stage, provider/component breakdown.
+4. Latency and SLOs: p50/p95 end-to-end and stage-level timings by OCR/A-V.
+5. Dependency/provider health: Redis/GCS/model/API readiness and error-rate trends.
+6. Release quality widget: latest local/cloud regression + CI health.
+
+**Detailed test plan**
+1. Validate each ops widget against raw metrics/log samples.
+2. Simulate known failures and verify dashboard visibility within expected lag.
+3. Run load baseline and verify queue/latency/SLO charts update correctly.
+4. Validate filter/drilldown accuracy by job type, status, and time window.
+
+### PRS-046B - Product Analytics Dashboard (usage + outcomes + cost)
+
+**Purpose**
+- Provide a product dashboard for adoption, completion outcomes, and cost/limit behavior to guide roadmap decisions.
+
+**Why this is in Phase 6**
+- Product insights are strongest when operational telemetry is already reliable.
+
+**Repo touchpoints**
+- `API`, `Worker`, `UI`
+  - `API`: aggregated usage/outcome/cost endpoints.
+  - `Worker`: processing duration and quality outcome metrics.
+  - `UI`: product analytics screens and export views.
+
+**Recommended product features**
+1. Active users and new vs returning user trend.
+2. Completion/drop-off funnel by workflow stage.
+3. Median and p95 turnaround by OCR vs A/V.
+4. Quota/cost trend and rejection reason distribution.
+5. Cohort retention and repeat usage by period.
+6. Top user pain points (most frequent actionable errors).
+
+**Detailed test plan**
+1. Validate product KPIs against source events and sampled jobs.
+2. Verify cohort and funnel math with fixed fixture windows.
+3. Confirm cost/quota trend correctness against policy counters.
+4. Verify dashboard performance and filter responsiveness on larger datasets.
