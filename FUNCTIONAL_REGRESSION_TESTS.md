@@ -284,6 +284,9 @@ Behavior:
 - `PRS-008`
   - Local regression: `PASS` (2026-02-16, user-run confirmation)
   - Cloud regression: `PASS` (2026-02-16, user-run confirmation)
+- `PRS-009`
+  - Local regression: `PASS` (2026-02-17, user-run confirmation)
+  - Cloud regression: `PASS` (2026-02-17, user-run confirmation)
 - `PRS-019..021`: run all smoke + `FT-RG-07..09`.
 - `PRS-022..024`: run all smoke + `FT-RG-06`, `FT-RG-07`.
 - `PRS-025..027`: run all smoke + `FT-RG-01`, `FT-RG-03`.
@@ -379,3 +382,13 @@ Behavior:
   - `Cloud`: PASS (user-run confirmation)
 - `Fail`: `None`
 - `Notes`: `Status transition guards validated for API upload/cancel and worker lifecycle writes.`
+
+- `Backlog ID`: `PRS-009`
+- `Date`: `2026-02-17`
+- `Environment`: `Local + Cloud`
+- `Executed tests`: `Bounded OCR + Transcription lifecycle after idempotent upload key + duplicate reuse changes`
+- `Pass`:
+  - `Local`: PASS (user-run confirmation)
+  - `Cloud`: PASS (user-run confirmation)
+- `Fail`: `None`
+- `Notes`: `Regression output confirms successful OCR/Transcription and no duplicate-job breakage on upload retries.`

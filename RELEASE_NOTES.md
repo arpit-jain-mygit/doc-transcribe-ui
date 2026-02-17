@@ -185,3 +185,25 @@ This file tracks release-level changes with backlog traceability.
   - API: `d2f8afb`
   - Worker: `021542f`
 - Status: `Completed (Tested)`
+
+### PRS-009
+- Backlog ID: `PRS-009`
+- Backlog Link: [PRS-009](./PRODUCTION_READINESS_BACKLOG.md#prs-009)
+- Type: `NFR` + `Reliability`
+- Summary: Added upload idempotency key support with duplicate job reuse.
+- Why: Prevent duplicate job creation during client retry/network glitches.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/upload.js`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/contract.py`
+- Risk: `Medium`
+- Validation:
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+  - Upload response includes idempotency reuse behavior (`reused` flag) without duplicate queue pushes.
+- Commits:
+  - UI: `74c1ec1`
+  - API: `ab5f3cb`
+  - Worker: `7b0d273`
+- Status: `Completed (Tested)`

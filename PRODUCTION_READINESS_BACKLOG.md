@@ -1,4 +1,5 @@
 # Production Readiness & Scalability Backlog
+Companion impact guide: [Production Readiness Impact Guide](./PRODUCTION_READINESS_IMPACT_GUIDE.md)
 
 Status values:
 - `Planned`
@@ -28,7 +29,7 @@ Status values:
 | PRS-006 | 1 | Structured JSON logging with mandatory fields | API, Worker | Observability | Easier root-cause analysis | Completed (Tested) | Completed (Local + Cloud Regression) | API: structured JSON formatter + mandatory stage payload fields (`5cdae48`). Worker: structured JSON logs + stage event payload normalization (`a119f7a`). |
 | PRS-007 | 1 | Add operational metrics (success/fail/retry/latency) | API, Worker | Monitoring | Detect issues before users report | Completed (Tested) | Completed (Local + Cloud Regression) | API: request counters/latency metrics + `/metrics` endpoint (`87e8a45`). Worker: dispatch/GCS retry/latency metrics (`bdbf74f`) and GCS error-path hardening (`41223a3`). |
 | PRS-008 | 2 | Enforce job status transition state machine | API, Worker | Reliability | Predictable job lifecycle behavior | Completed (Tested) | Completed (Local + Cloud Regression) | API: guarded status transitions for upload/cancel + transition helper (`d2f8afb`). Worker: guarded transitions across loop/OCR/transcribe/dispatcher + helper (`021542f`). |
-| PRS-009 | 2 | Add idempotent upload key and duplicate job reuse | API, UI | Reliability | No duplicate jobs on retry/network glitches | Planned | Not Tested | Pending implementation |
+| PRS-009 | 2 | Add idempotent upload key and duplicate job reuse | API, UI | Reliability | No duplicate jobs on retry/network glitches | Completed (Tested) | Completed (Local + Cloud Regression) | UI: upload idempotency key generation + header propagation (`74c1ec1`). API: idempotent key handling + duplicate reuse + enqueue-once guard (`ab5f3cb`). Worker: contract version alignment for rollout (`7b0d273`). |
 | PRS-010 | 2 | Typed retry policy with backoff + jitter | Worker | Reliability | Better success under transient failures | Planned | Not Tested | Pending implementation |
 | PRS-011 | 2 | DLQ enrichment (`error_code`, `attempts`, stage) | Worker | Recoverability | Easier failed-job replay and diagnosis | Planned | Not Tested | Pending implementation |
 | PRS-012 | 2 | Global exception mapping to stable API payloads | API | Error consistency | Less confusing UI errors | Planned | Not Tested | Pending implementation |
