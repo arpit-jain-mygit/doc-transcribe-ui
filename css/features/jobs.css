@@ -359,16 +359,18 @@
     78px 0 0 0 #388e3c,
     104px 0 0 0 #1976d2;
   margin-right: 104px;
+  margin-top: 1px;
   transform-origin: left center;
   filter: drop-shadow(0 0 2px rgba(100, 116, 139, 0.22));
   animation:
+    jain-dot-train var(--pulse-speed, 2.6s) steps(1, end) infinite,
     jain-dot-breathe 1.9s ease-in-out infinite,
     jain-dot-white-flicker 1.6s ease-in-out infinite;
 }
 
 .job-status-dot-swastik {
   position: absolute;
-  left: 52px;
+  left: 59px;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 25px;
@@ -625,7 +627,7 @@
 .history-load-more-dots::after {
   content: "";
   position: absolute;
-  left: 52px;
+  left: 59px;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 25px;
@@ -689,7 +691,7 @@
 .history-loading-dots::after {
   content: "";
   position: absolute;
-  left: 52px;
+  left: 59px;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 25px;
