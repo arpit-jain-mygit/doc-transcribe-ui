@@ -135,6 +135,18 @@ function getStatusDotSymbol(statusRaw) {
   return "…";
 }
 
+function buildStatusDotHtml(statusRaw) {
+  const status = String(statusRaw || "").toUpperCase();
+  if (status === "PROCESSING" || status === "PENDING" || status === "QUEUED") {
+    return (
+      `<span class="job-status-dot-train" aria-hidden="true">` +
+        `<span class="job-status-dot-swastik"></span>` +
+      `</span>`
+    );
+  }
+  return `<span class="job-status-dot">${escapeHtml(getStatusDotSymbol(statusRaw))}</span>`;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -362,7 +374,7 @@ function renderJobsList(jobs) {
     const detailsHtml = buildJobDetailsHtml(j);
     const uploadedFile = (contract().resolveUploadedFilename ? contract().resolveUploadedFilename(j) : (j.input_filename || j.input_file || "") ) || "-";
     const status = formatStatus(j.status);
-    const statusDotSymbol = getStatusDotSymbol(j.status);
+    const statusDotHtml = buildStatusDotHtml(j.status);
     const typeLabel = formatJobTypeLabel(j);
     const typeThemeClass = getJobTypeThemeClass(j);
     const rowStatusClass = String(j.status || "").toUpperCase();
@@ -385,7 +397,7 @@ function renderJobsList(jobs) {
     div.innerHTML = `
     <div class="job-row-inline">
       <div class="job-left job-left-${rowStatusClass}">
-        <span class="job-status-dot">${escapeHtml(statusDotSymbol)}</span>
+        ${statusDotHtml}
         <span class="job-type-label ${escapeHtml(typeThemeClass)}">${escapeHtml(typeLabel)}</span>
       </div>
 

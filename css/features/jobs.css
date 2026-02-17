@@ -328,18 +328,58 @@
 }
 
 .job-left-PROCESSING,
-.job-left-PENDING {
+.job-left-PENDING,
+.job-left-QUEUED {
   color: #334155;
 }
 
 .job-left-PROCESSING .job-status,
-.job-left-PENDING .job-status {
+.job-left-PENDING .job-status,
+.job-left-QUEUED .job-status {
   color: #475569;
 }
 
 .job-left-PROCESSING .job-status-dot,
-.job-left-PENDING .job-status-dot {
+.job-left-PENDING .job-status-dot,
+.job-left-QUEUED .job-status-dot {
   background: #f59e0b;
+}
+
+.job-status-dot-train {
+  display: inline-flex;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #d32f2f;
+  box-shadow:
+    0 0 0 0 transparent,
+    26px 0 0 0 #fbc02d,
+    52px 0 0 0 #ffffff,
+    78px 0 0 0 #388e3c,
+    104px 0 0 0 #1976d2;
+  margin-right: 104px;
+  transform-origin: left center;
+  filter: drop-shadow(0 0 2px rgba(100, 116, 139, 0.22));
+  animation:
+    jain-dot-breathe 1.9s ease-in-out infinite,
+    jain-dot-white-flicker 1.6s ease-in-out infinite;
+}
+
+.job-status-dot-swastik {
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-image: url("/assets/icons/Swastika-Jain.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.85);
 }
 
 .job-middle {
@@ -582,12 +622,30 @@
   filter: drop-shadow(0 0 2px rgba(100, 116, 139, 0.22));
 }
 
+.history-load-more-dots::after {
+  content: "";
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-image: url("/assets/icons/Swastika-Jain.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.85);
+}
+
 .history-load-more-btn.loading .history-load-more-label {
   display: none;
 }
 
 .history-load-more-btn.loading .history-load-more-dots {
   display: inline-flex;
+  position: relative;
   animation:
     jain-dot-train 2.4s steps(1, end) infinite,
     jain-dot-breathe 1.9s ease-in-out infinite,
@@ -601,6 +659,7 @@
 .history-loading-dots {
   display: inline-flex;
   align-items: center;
+  position: relative;
   --pulse-speed: 2.4s;
 }
 
@@ -625,4 +684,21 @@
     jain-dot-train var(--pulse-speed, 2.6s) steps(1, end) infinite,
     jain-dot-breathe 1.9s ease-in-out infinite,
     jain-dot-white-flicker 1.6s ease-in-out infinite;
+}
+
+.history-loading-dots::after {
+  content: "";
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-image: url("/assets/icons/Swastika-Jain.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.85);
 }
