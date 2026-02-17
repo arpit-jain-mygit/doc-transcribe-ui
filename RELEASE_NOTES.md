@@ -338,6 +338,6 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
   - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
 - Commit:
-  - API: `pending push`
-  - UI: `pending push`
+  - API: `83060ac`
+  - UI: `5e14f4a`
 - Status: `Completed (Code)`
