@@ -243,7 +243,8 @@ This file tracks release-level changes with backlog traceability.
 - Risk: `Low`
 - Validation:
   - Python compile checks passed for touched worker modules.
-  - Local/cloud regression pending.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
 - Commit:
-  - Worker: `TO_BE_FILLED_AFTER_COMMIT`
-- Status: `Completed (Code)`
+  - Worker: `29c44d4`
+- Status: `Completed (Tested)`
