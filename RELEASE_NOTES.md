@@ -373,5 +373,5 @@ This file tracks release-level changes with backlog traceability.
   - Local bounded regression passed.
   - Cloud bounded regression passed.
 - Commit:
-  - UI: `<pending-commit>`
+  - UI: `2b3dd83`
 - Status: `Completed (Tested)`
