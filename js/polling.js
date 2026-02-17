@@ -92,13 +92,8 @@ async function cancelJobById(jobId, { silent = false } = {}) {
   const activeType = String(window.ACTIVE_JOB_TYPE || "").toUpperCase();
 
   try {
-    const reqHeaders = authHeadersWithRequestId({
+    const { res } = await window.ApiClient.cancelJob(jobId, {
       requestId: window.ACTIVE_REQUEST_ID || "",
-      includeAuth: true,
-    }).headers;
-    const res = await fetch(`${API}/jobs/${jobId}/cancel`, {
-      method: "POST",
-      headers: reqHeaders,
     });
 
     if (res.status === 401) {
@@ -214,13 +209,10 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
   let res;
   POLL_IN_FLIGHT = true;
   try {
-    const reqHeaders = authHeadersWithRequestId({
+    const { res: statusRes } = await window.ApiClient.getStatus(JOB_ID, {
       requestId: window.ACTIVE_REQUEST_ID || "",
-      includeAuth: true,
-    }).headers;
-    res = await fetch(`${API}/status/${JOB_ID}`, {
-      headers: reqHeaders
     });
+    res = statusRes;
   } catch {
     POLL_IN_FLIGHT = false;
     scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);

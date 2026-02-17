@@ -50,7 +50,7 @@ Status values:
 | PRS-027 | 7 | User-facing cost/effort hints for large jobs | UI | Cost transparency | Better user expectations pre-upload | Planned | Not Tested | Pending implementation |
 | PRS-028 | 8 | Refactor API into layered modules | API | Maintainability | Easier long-term feature development | Completed (Tested) | Completed (Local + Cloud Regression) | API: extracted upload orchestration from `routes/upload.py` into `services/upload_orchestrator.py` to keep route thin and move business/infra flow into service layer (`e8a9b4f`). |
 | PRS-029 | 8 | Refactor Worker into orchestrator/adapters/executors | Worker | Maintainability | Clearer ownership and easier debugging | Completed (Code) | Not Tested | Worker: introduced layered modules `worker/orchestrator/router.py`, `worker/executors/*`, `worker/adapters/*`; kept backward-compatible dispatcher/processor shims and added route/executor logs with identifiers (`1de5432`). |
-| PRS-030 | 8 | Refactor UI into api-client/controllers/views/formatters | UI | Maintainability | Faster UI iteration with fewer regressions | Planned | Not Tested | Pending implementation |
+| PRS-030 | 8 | Refactor UI into api-client/controllers/views/formatters | UI | Maintainability | Faster UI iteration with fewer regressions | Completed (Code) | Not Tested | UI: introduced centralized `js/api-client.js` and migrated polling/history API calls from `jobs.js` and `polling.js` to client layer; updated module map docs (`js/README.md`) (`<pending-commit>`). |
 | PRS-031 | 9 | Add unit tests for core logic and formatters | All | Quality | Prevents regressions | Planned | Not Tested | Pending implementation |
 | PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Planned | Not Tested | Pending implementation |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Planned | Not Tested | Pending implementation |
@@ -117,6 +117,7 @@ Status values:
 - 2026-02-17: PRS-018 completed and regression-validated (local + cloud) in Worker with configurable chunk/page strategy and startup env guardrails.
 - 2026-02-17: PRS-028 completed and regression-validated (local + cloud) in API after extracting upload orchestration into service layer.
 - 2026-02-17: PRS-029 implementation completed at code level in Worker by introducing explicit orchestrator/adapter/executor module boundaries; regression pending.
+- 2026-02-17: PRS-030 implementation completed at code level in UI with centralized API client layer and migrated polling/history network calls; regression pending.
 
 ## Detailed Item Specifications
 

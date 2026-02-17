@@ -350,18 +350,13 @@ async function retryJobById(jobId) {
   if (!jobId || !ID_TOKEN) return false;
 
   try {
-    const reqHeaders = authHeadersWithRequestId({ includeAuth: true }).headers;
-    const res = await fetch(`${API}/jobs/${jobId}/retry`, {
-      method: "POST",
-      headers: reqHeaders,
-    });
+    const { res, data: payload } = await window.ApiClient.retryJob(jobId);
 
     if (res.status === 401) {
       logout();
       return false;
     }
 
-    const payload = await safeJson(res);
     if (!res.ok) {
       toast(responseErrorMessage(res, payload, "Unable to retry job"), "error");
       return false;
@@ -607,14 +602,12 @@ async function loadJobs({ reset = false, append = false } = {}) {
   const includeCounts = !append && !JOBS_STATUS_COUNTS_BY_TYPE[JOBS_TYPE_FILTER];
 
   try {
-    const reqHeaders = authHeadersWithRequestId({ includeAuth: true }).headers;
-    const res = await fetch(buildJobsUrl(JOBS_TYPE_FILTER, JOBS_FILTER, JOBS_PAGE_SIZE, offset, includeCounts), {
-      headers: reqHeaders
-    });
+    const { res, data: payload } = await window.ApiClient.getJobs(
+      buildJobsUrl(JOBS_TYPE_FILTER, JOBS_FILTER, JOBS_PAGE_SIZE, offset, includeCounts)
+    );
 
     if (res.status === 401) return logout();
 
-    const payload = await safeJson(res);
     if (!res.ok) {
       toast(responseErrorMessage(res, payload, "Failed to load history"), "error");
       if (!append) box.innerHTML = "";

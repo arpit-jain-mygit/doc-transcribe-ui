@@ -436,3 +436,23 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - Worker: `1de5432`
 - Status: `Completed (Code)`
+
+### PRS-030
+- Backlog ID: `PRS-030`
+- Backlog Link: [PRS-030](./PRODUCTION_READINESS_BACKLOG.md#prs-030)
+- Gap Link: [G-21](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-21)
+- Type: `NFR` + `Maintainability`
+- Summary: Refactored UI toward layered boundaries by introducing a centralized API client and routing polling/history network calls through it.
+- Why: Reduce API-call duplication and create clear UI-side separation between API access and view/render logic.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/api-client.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/polling.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/README.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/index.html`
+- Validation:
+  - JavaScript syntax checks passed for touched UI modules.
+  - Local/cloud regression pending.
+- Commit:
+  - UI: `<pending-commit>`
+- Status: `Completed (Code)`
