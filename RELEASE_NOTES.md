@@ -408,7 +408,8 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/upload_orchestrator.py`
 - Validation:
   - Python compile checks passed for touched API files.
-  - Local/cloud regression pending.
+  - Local bounded regression passed (user-run confirmation).
+  - Cloud bounded regression passed (user-run confirmation).
 - Commit:
   - API: `e8a9b4f`
-- Status: `Completed (Code)`
+- Status: `Completed (Tested)`
