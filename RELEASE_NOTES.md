@@ -413,3 +413,26 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - API: `e8a9b4f`
 - Status: `Completed (Tested)`
+
+### PRS-029
+- Backlog ID: `PRS-029`
+- Backlog Link: [PRS-029](./PRODUCTION_READINESS_BACKLOG.md#prs-029)
+- Gap Link: [G-21](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-21)
+- Type: `NFR` + `Maintainability`
+- Summary: Refactored worker into explicit layered boundaries: orchestrator routing, executor wrappers, and adapter primitives, while preserving existing runtime behavior.
+- Why: Improve module ownership and debugging clarity without changing external contract/queue behavior.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/orchestrator/router.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/executors/ocr_executor.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/executors/transcription_executor.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/adapters/status_store.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/dispatcher.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/jobs/processor.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/ARCHITECTURE.md`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/CONTRIBUTING.md`
+- Validation:
+  - Python compile checks passed for touched worker modules.
+  - Local/cloud regression pending.
+- Commit:
+  - Worker: `1de5432`
+- Status: `Completed (Code)`
