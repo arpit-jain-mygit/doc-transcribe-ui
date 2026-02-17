@@ -8,9 +8,14 @@ set -euo pipefail
 
 API_BASE="${API_BASE:-https://doc-transcribe-api.onrender.com}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
+LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
+API_LOG="${API_LOG:-${LOG_DIR}/api.log}"
 WORKER_LOG="${WORKER_LOG:-/tmp/doc_transcribe_logs/worker.log}"
+UI_LOG="${UI_LOG:-${LOG_DIR}/ui.log}"
+REGRESSION_LOG_FILE="${REGRESSION_LOG_FILE:-${LOG_DIR}/regression-cloud-$(date +%Y%m%d-%H%M%S).log}"
 CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
 REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
+REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -29,6 +34,7 @@ MAX_WAIT_SEC="${MAX_WAIT_SEC:-300}"
 POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-3}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
 TRACE_FLOW="${TRACE_FLOW:-1}"
+CORRELATION_WAIT_SEC="${CORRELATION_WAIT_SEC:-8}"
 RUN_START_EPOCH="$(date +%s)"
 RUN_START_ISO="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
 
@@ -47,6 +53,23 @@ fi
 icon_info() { printf "%sℹ%s %s\n" "$C_BLUE" "$C_RESET" "$1"; }
 icon_ok() { printf "%s✔%s %s\n" "$C_GREEN" "$C_RESET" "$1"; }
 icon_fail() { printf "%s✖%s %s\n" "$C_RED" "$C_RESET" "$1" >&2; }
+
+setup_script_logging() {
+  if [[ "${SCRIPT_LOG_SETUP:-0}" == "1" ]]; then
+    return 0
+  fi
+  SCRIPT_LOG_SETUP=1
+  mkdir -p "$LOG_DIR"
+  exec > >(tee -a "$REGRESSION_LOG_FILE") 2>&1
+}
+
+print_log_paths() {
+  echo "== Log paths =="
+  echo "API_LOG=${API_LOG}"
+  echo "WORKER_LOG=${WORKER_LOG}"
+  echo "UI_LOG=${UI_LOG}"
+  echo "REGRESSION_LOG=${REGRESSION_LOG_FILE}"
+}
 
 STEP_NAME=""
 STEP_START_EPOCH=0
@@ -261,9 +284,10 @@ email = claims.get("email")
 if isinstance(exp, (int, float)):
     now = int(time.time())
     rem = int(exp - now)
+    rem_min = rem // 60
     exp_iso = datetime.datetime.utcfromtimestamp(exp).isoformat() + "Z"
     state = "expired" if rem <= 0 else "valid"
-    print(f"AUTH_TOKEN_META=state={state} expires_utc={exp_iso} remaining_sec={rem} aud={aud} email={email}")
+    print(f"AUTH_TOKEN_META=state={state} expires_utc={exp_iso} remaining_sec={rem} remaining_min={rem_min} aud={aud} email={email}")
 else:
     print(f"AUTH_TOKEN_META=state=unknown_exp aud={aud} email={email}")
 PY
@@ -275,6 +299,12 @@ print_token_refresh_hint() {
   fi
   TOKEN_HINT_PRINTED=1
   echo "HINT: Token may be invalid/expired. Update AUTH_TOKEN_FILE=${AUTH_TOKEN_FILE} and retry."
+  echo "How to get a fresh token from browser:"
+  echo "1) Open the UI and sign in: https://doc-transcribe-ui.vercel.app/"
+  echo "2) Open browser DevTools (F12) -> Console."
+  echo "3) Run: JSON.stringify({ token: window.ID_TOKEN, email: window.USER_EMAIL, picture: window.USER_PICTURE })"
+  echo "4) Copy output JSON into: ${AUTH_TOKEN_FILE}"
+  echo "5) Re-run regression script."
 }
 
 print_cloud_worker_pickup_diagnosis() {
@@ -408,21 +438,50 @@ check_render_deploy_state() {
   return 0
 }
 
+generate_request_id() {
+  local kind="${1:-GEN}"
+  local rid
+  rid="$(python3 - "$kind" <<'PY'
+import sys, uuid
+kind = (sys.argv[1] if len(sys.argv) > 1 else "GEN").strip().upper()
+print(f"req-{kind}-{uuid.uuid4().hex}")
+PY
+)"
+  [[ -n "$rid" ]] || fail "Could not generate request_id"
+  echo "$rid"
+}
+
 submit_job() {
   local file_path="$1"
   local job_type="$2"
-  local req_id="req-$job_type-$(date +%s)-$RANDOM"
+  local req_id="${3:-}"
+  local ext mime_override file_form
+  if [[ -z "$req_id" ]]; then
+    req_id="$(generate_request_id "$job_type")"
+  fi
+  ext="${file_path##*.}"
+  ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
+  mime_override=""
+  case "$ext" in
+    mp3) mime_override="audio/mpeg" ;;
+    pdf) mime_override="application/pdf" ;;
+  esac
+  if [[ -n "$mime_override" ]]; then
+    file_form="file=@${file_path};type=${mime_override}"
+  else
+    file_form="file=@${file_path}"
+  fi
   local result code body
   if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
     result="$(http_call POST "${API_BASE}/upload" \
       "${AUTH_HEADER_FLAG[@]}" \
       -H "X-Request-ID: ${req_id}" \
-      -F "file=@${file_path}" \
+      -F "${file_form}" \
       -F "type=${job_type}")"
   else
     result="$(http_call POST "${API_BASE}/upload" \
       -H "X-Request-ID: ${req_id}" \
-      -F "file=@${file_path}" \
+      -F "${file_form}" \
       -F "type=${job_type}")"
   fi
   code="$(echo "$result" | sed -n '1p')"
@@ -454,9 +513,48 @@ extract_request_id() {
   echo "$request_id"
 }
 
+assert_request_id_match() {
+  local source="$1"
+  local expected="$2"
+  local actual="$3"
+  if [[ -z "$actual" ]]; then
+    fail "CORRELATION_ID_MISSING at ${source}: expected=${expected} actual=empty"
+  fi
+  if [[ "$expected" != "$actual" ]]; then
+    fail "CORRELATION_ID_MISMATCH at ${source}: expected=${expected} actual=${actual}"
+  fi
+}
+
+require_non_empty() {
+  local value="$1"
+  local label="$2"
+  if [[ -z "$value" ]]; then
+    fail "${label} is empty"
+  fi
+}
+
+certify_worker_log_correlation() {
+  local job_id="$1"
+  local request_id="$2"
+  if [[ "$REQUIRE_WORKER_LOG_CORRELATION" != "1" ]]; then
+    trace "Correlation(Worker): skipped strict worker-log certification (REQUIRE_WORKER_LOG_CORRELATION=0)."
+    return 0
+  fi
+  local wait_until=$(( $(date +%s) + CORRELATION_WAIT_SEC ))
+  while [[ "$(date +%s)" -le "$wait_until" ]]; do
+    if [[ -f "$WORKER_LOG" ]] && grep -F "$job_id" "$WORKER_LOG" | grep -Fq "$request_id"; then
+      trace "Correlation(Worker): certified request_id=${request_id} for job_id=${job_id}"
+      return 0
+    fi
+    sleep 1
+  done
+  fail "CORRELATION_ID_MISSING in worker logs for job_id=${job_id} request_id=${request_id}. Active worker may not be writing to WORKER_LOG=${WORKER_LOG}. Start via start_local_stack.sh or set WORKER_LOG to your manual worker log file."
+}
+
 poll_job() {
   local job_id="$1"
   local label="$2"
+  local expected_request_id="$3"
   CURRENT_JOB_ID="$job_id"
   local deadline=$(( $(date +%s) + MAX_WAIT_SEC ))
   local started_at
@@ -494,7 +592,7 @@ poll_job() {
     stage="$(echo "$resp" | jq -r '.stage // "-"')"
     progress="$(echo "$resp" | jq -r '.progress // "-"')"
     request_id="$(echo "$resp" | jq -r '.request_id // empty')"
-    [[ -n "$request_id" ]] || fail "Missing request_id in status response for job ${job_id}: ${resp}"
+    assert_request_id_match "status(${job_id})" "$expected_request_id" "$request_id"
     elapsed=$(( now - started_at ))
 
     if [[ "$status" != "$last_status" || $(( now - last_log_at )) -ge "$LOG_EVERY_SEC" ]]; then
@@ -524,6 +622,7 @@ poll_job() {
         seen_completed="1"
       fi
       echo "Job ${job_id} completed"
+      certify_worker_log_correlation "$job_id" "$expected_request_id"
       print_component_trace_cloud "$job_id"
       return 0
     fi
@@ -542,6 +641,7 @@ poll_job() {
 }
 
 main() {
+  setup_script_logging
   load_auth_token
   rebuild_auth_header
 
@@ -550,6 +650,7 @@ main() {
     auth_set="yes"
   fi
   begin_step "Cloud Regression: pre-checks"
+  print_log_paths
   echo "API_BASE=${API_BASE}"
   echo "AUTH_BEARER_TOKEN set=${auth_set}"
   echo "AUTH_TOKEN_SOURCE=${TOKEN_SOURCE}"
@@ -571,21 +672,29 @@ main() {
 
   begin_step "OCR test (sample.pdf)"
   local ocr_resp ocr_job
-  ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR")"
+  local ocr_req_id=""
+  ocr_req_id="$(generate_request_id "OCR")"
+  require_non_empty "${ocr_req_id:-}" "ocr_req_id"
+  ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR" "$ocr_req_id")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
-  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job} request_id=$(extract_request_id "$ocr_resp")"
-  poll_job "$ocr_job" "OCR"
+  assert_request_id_match "upload(OCR)" "$ocr_req_id" "$(extract_request_id "$ocr_resp")"
+  trace "OCR flow: UI -> API /upload -> job_id=${ocr_job} request_id=${ocr_req_id}"
+  poll_job "$ocr_job" "OCR" "$ocr_req_id"
   icon_ok "OCR regression step passed."
   end_step_ok
 
   begin_step "Transcription test (sample.mp3)"
   local tr_resp tr_job
-  tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION")"
+  local tr_req_id=""
+  tr_req_id="$(generate_request_id "TRANSCRIPTION")"
+  require_non_empty "${tr_req_id:-}" "tr_req_id"
+  tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION" "$tr_req_id")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"
-  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job} request_id=$(extract_request_id "$tr_resp")"
-  poll_job "$tr_job" "TRANSCRIPTION"
+  assert_request_id_match "upload(TRANSCRIPTION)" "$tr_req_id" "$(extract_request_id "$tr_resp")"
+  trace "Transcription flow: UI -> API /upload -> job_id=${tr_job} request_id=${tr_req_id}"
+  poll_job "$tr_job" "TRANSCRIPTION" "$tr_req_id"
   icon_ok "Transcription regression step passed."
   end_step_ok
 

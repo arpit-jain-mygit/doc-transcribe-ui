@@ -324,3 +324,20 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - API: `ac7f150`
 - Status: `Completed (Tested)`
+
+### PRS-012 / PRS-013 Follow-up Hardening
+- Backlog Link: [PRS-012](./PRODUCTION_READINESS_BACKLOG.md#prs-012), [PRS-013](./PRODUCTION_READINESS_BACKLOG.md#prs-013)
+- Type: `NFR` + `Reliability` + `Error consistency`
+- Summary:
+  - API auth path now returns `503 INFRA_REDIS` when Redis blocklist lookup is unavailable (instead of generic 500).
+  - API error handler now always falls back to `X-Request-ID` so `request_id` is not null in failure responses.
+  - Regression scripts hardened for manual-worker mode, opaque UUID request IDs, token-refresh guidance, dual logging (console + file), and clearer diagnostics.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/auth.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+- Commit:
+  - API: `pending push`
+  - UI: `pending push`
+- Status: `Completed (Code)`
