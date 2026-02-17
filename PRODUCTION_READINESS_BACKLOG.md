@@ -55,6 +55,17 @@ Status values:
 | PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Completed (Tested) | Completed (Local + Cloud Regression) | UI/scripts: upgraded local/cloud regression runners to certify lifecycle status sequences (`QUEUED/PROCESSING->COMPLETED`), and emit machine-readable integration reports (`integration-local*.jsonl`, `integration-cloud*.jsonl`) with scenario/job/request/duration/result. |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Completed (Tested) | Completed (Local + Cloud Regression) | Added repo CI workflows: API/Worker run unit tests + contract sanity checks; UI runs unit tests + regression script syntax gates in GitHub Actions. |
 | PRS-034 | 8 | Add user-centric file and method comments across code/config files | All | Maintainability and supportability | Faster developer/tester/support understanding of OCR/transcription flow | Completed (Code) | Pending (Run Local + Cloud Regression) | UI/API/Worker: added crisp user-centric comments at file top and method/function level (where applicable) across `.js`, `.html`, `.css`, `.py`, `.yaml`, `.yml` tracked files. |
+| PRS-035 | 10 | Smart Intake Agent (auto-routing + prechecks + ETA) | UI, API | Intelligent intake and routing | Faster first response and fewer bad uploads | Planned | Pending | Test criteria: verify routing decisions, precheck hints, and ETA accuracy against sampled OCR/A-V files. |
+| PRS-036 | 10 | OCR Quality Agent (confidence scoring + page-level guidance) | Worker, API, UI | OCR quality assurance | Better text quality with actionable remediation | Planned | Pending | Test criteria: validate low-confidence detection, page-level quality signals, and UI guidance on poor scans. |
+| PRS-037 | 10 | Transcription Quality Agent (segment confidence + noise/speaker hints) | Worker, API, UI | Transcription quality assurance | More reliable transcripts with targeted fixes | Planned | Pending | Test criteria: verify segment confidence output, noisy-audio flags, and recommended reprocessing strategies. |
+| PRS-038 | 10 | Retry & Recovery Agent (policy-driven recovery orchestration) | Worker, API | Autonomous failure recovery | Higher completion rate during transient failures | Planned | Pending | Test criteria: inject transient/provider failures and confirm bounded retry, recovery action, and DLQ traceability. |
+| PRS-039 | 10 | Cost Guardrail Agent (quota/cost prediction + enforcement) | API, UI | Cost governance | Predictable usage and reduced surprise failures | Planned | Pending | Test criteria: validate projected-cost hints, quota threshold behavior, and controlled rejection paths. |
+| PRS-040 | 10 | Queue Orchestration Agent (dynamic balancing/prioritization) | Worker, API | Throughput and fairness optimization | Lower wait time under mixed OCR/A-V load | Planned | Pending | Test criteria: load-test mixed jobs and confirm adaptive queue balancing improves p95 queue wait. |
+| PRS-041 | 10 | User Assist Agent (in-flow guidance + next-best action) | UI, API | UX assistance | Clearer guidance during wait/failure/retry states | Planned | Pending | Test criteria: verify contextual guidance appears for queued/failed/cancelled scenarios and improves task completion. |
+| PRS-042 | 10 | Incident Triage Agent (cross-layer root-cause assistant) | API, Worker, UI/scripts | Operational triage acceleration | Faster support resolution with fewer manual hops | Planned | Pending | Test criteria: replay incidents and verify agent maps request_id/job_id to root cause and runbook steps. |
+| PRS-043 | 10 | Regression Certification Agent (auto-certify release readiness) | UI/scripts, API, Worker | Release governance automation | Faster, consistent go/no-go decisions | Planned | Pending | Test criteria: ensure certification output matches local/cloud regression, contract checks, and CI outcomes. |
+| PRS-044 | 10 | Product Insights Agent (usage/failure analytics + prioritization) | API, Worker, UI | Product feedback loop | Data-driven UX and roadmap decisions | Planned | Pending | Test criteria: validate generated insight reports, trend detection quality, and backlog recommendation relevance. |
+| PRS-045 | 11 | **BIG EPIC**: Digambar Jainism GPT using RAG | All | Domain-specific AI knowledge assistant | Accurate, grounded answers on Digambar Jain concepts with source traceability | Planned | Pending | Start after PRS-035..044. Build ingestion, indexing, retrieval, grounding, evaluation, safety, and deployment lifecycle for a Digambar Jainism RAG assistant. |
 
 ## Backlog Item Anchors
 
@@ -92,6 +103,17 @@ Status values:
 - <a id="prs-032"></a>`PRS-032`
 - <a id="prs-033"></a>`PRS-033`
 - <a id="prs-034"></a>`PRS-034`
+- <a id="prs-035"></a>`PRS-035`
+- <a id="prs-036"></a>`PRS-036`
+- <a id="prs-037"></a>`PRS-037`
+- <a id="prs-038"></a>`PRS-038`
+- <a id="prs-039"></a>`PRS-039`
+- <a id="prs-040"></a>`PRS-040`
+- <a id="prs-041"></a>`PRS-041`
+- <a id="prs-042"></a>`PRS-042`
+- <a id="prs-043"></a>`PRS-043`
+- <a id="prs-044"></a>`PRS-044`
+- <a id="prs-045"></a>`PRS-045`
 
 ## Execution order
 1. Phase 1 + Phase 2
@@ -125,6 +147,47 @@ Status values:
 - 2026-02-18: PRS-019..027 and PRS-033 implemented at code level (queue partitioning, worker concurrency controls, load baseline, readiness checks, runbooks, feature flags, quotas/limits, retry budgets, UI effort hints, CI gates); awaiting bounded regression validation.
 - 2026-02-18: PRS-016, PRS-019..027, PRS-031..033 validated with local + cloud regression and marked `Completed (Tested)`.
 - 2026-02-18: PRS-034 completed at code level by adding crisp user-centric file/method comments across UI/API/Worker source/config files; regression pending.
+
+## Recommended Agentic AI Opportunities
+
+1. Smart Intake Agent
+- Routes file type, validates input quality, predicts processing path/time, and suggests best settings.
+
+2. OCR Quality Agent
+- Scores OCR confidence/page quality, flags low-quality pages, and suggests enhancement or re-upload.
+
+3. Transcription Quality Agent
+- Detects low-confidence segments, speaker/noise issues, and recommends chunk/model strategy.
+
+4. Retry & Recovery Agent
+- Classifies failures, applies policy-based retries, enriches DLQ context, and proposes recovery actions.
+
+5. Cost Guardrail Agent
+- Monitors quotas/limits, predicts cost impact, and enforces safe usage policies.
+
+6. Queue Orchestration Agent
+- Balances OCR vs A/V queues, concurrency, and prioritization for stable throughput.
+
+7. User Assist Agent
+- Provides real-time wait estimates, actionable errors, and next-best guidance in UI.
+
+8. Incident Triage Agent
+- Correlates `request_id`/`job_id` across UI/API/Worker logs and drafts root-cause + runbook actions.
+
+9. Regression Certification Agent
+- Runs local/cloud regression + contract checks and certifies release readiness per backlog item.
+
+10. Product Insights Agent
+- Analyzes usage/failure trends and recommends prioritized UX/product improvements.
+
+### Recommended starter order (for first-time Agentic AI implementation)
+
+1. `PRS-035` Smart Intake Agent
+2. `PRS-041` User Assist Agent
+3. `PRS-039` Cost Guardrail Agent
+4. `PRS-042` Incident Triage Agent
+5. `PRS-043` Regression Certification Agent
+6. Advanced pipeline agents: `PRS-036`, `PRS-037`, `PRS-038`, `PRS-040`, `PRS-044`
 
 ## Detailed Item Specifications
 
@@ -163,6 +226,17 @@ Status values:
 - [PRS-032 - Add integration tests for e2e job lifecycle](#prs-032--add-integration-tests-for-e2e-job-lifecycle)
 - [PRS-033 - Add CI gates (`lint`, tests, contract checks)](#prs-033--add-ci-gates-lint-tests-contract-checks)
 - [PRS-034 - Add user-centric file and method comments across code/config files](#prs-034--add-user-centric-file-and-method-comments-across-codeconfig-files)
+- [PRS-035 - Smart Intake Agent (auto-routing + prechecks + ETA)](#prs-035--smart-intake-agent-auto-routing--prechecks--eta)
+- [PRS-036 - OCR Quality Agent (confidence scoring + page-level guidance)](#prs-036--ocr-quality-agent-confidence-scoring--page-level-guidance)
+- [PRS-037 - Transcription Quality Agent (segment confidence + noise/speaker hints)](#prs-037--transcription-quality-agent-segment-confidence--noisespeaker-hints)
+- [PRS-038 - Retry & Recovery Agent (policy-driven recovery orchestration)](#prs-038--retry--recovery-agent-policy-driven-recovery-orchestration)
+- [PRS-039 - Cost Guardrail Agent (quota/cost prediction + enforcement)](#prs-039--cost-guardrail-agent-quotacost-prediction--enforcement)
+- [PRS-040 - Queue Orchestration Agent (dynamic balancing/prioritization)](#prs-040--queue-orchestration-agent-dynamic-balancingprioritization)
+- [PRS-041 - User Assist Agent (in-flow guidance + next-best action)](#prs-041--user-assist-agent-in-flow-guidance--next-best-action)
+- [PRS-042 - Incident Triage Agent (cross-layer root-cause assistant)](#prs-042--incident-triage-agent-cross-layer-root-cause-assistant)
+- [PRS-043 - Regression Certification Agent (auto-certify release readiness)](#prs-043--regression-certification-agent-auto-certify-release-readiness)
+- [PRS-044 - Product Insights Agent (usage/failure analytics + prioritization)](#prs-044--product-insights-agent-usagefailure-analytics--prioritization)
+- [PRS-045 - BIG EPIC: Digambar Jainism GPT using RAG](#prs-045---big-epic-digambar-jainism-gpt-using-rag)
 
 
 ### PRS-001 - Define architecture boundaries and coding standards
@@ -1470,3 +1544,199 @@ Status values:
 - `Completed (Code)`: comments added across scoped files with syntax validation passing.
 - `Completed (Tested)`: local + cloud regression green and docs updated.
 
+
+### PRS-035 - Smart Intake Agent (auto-routing + prechecks + ETA)
+
+**Purpose**
+- Automatically choose the best OCR/transcription path before enqueue to reduce avoidable failures and improve perceived speed.
+
+**Why this is in Phase 10**
+- Built after core reliability and observability so routing decisions can be measured and safely rolled out.
+
+**Repo touchpoints**
+- `UI`, `API`
+
+**Detailed test plan**
+1. Submit mixed file types and verify correct route selection.
+2. Validate precheck warning quality (size/type/page/duration guidance).
+3. Compare ETA estimates vs actual completion distribution.
+
+### PRS-036 - OCR Quality Agent (confidence scoring + page-level guidance)
+
+**Purpose**
+- Score OCR quality and provide actionable next steps when scan quality is low.
+
+**Why this is in Phase 10**
+- Requires stable OCR pipeline and normalized error/metrics baselines.
+
+**Repo touchpoints**
+- `Worker`, `API`, `UI`
+
+**Detailed test plan**
+1. Run low/high-quality PDFs and compare confidence signal behavior.
+2. Verify page-level issue hints in status/history payloads.
+3. Confirm UI guidance suggests practical remediation.
+
+### PRS-037 - Transcription Quality Agent (segment confidence + noise/speaker hints)
+
+**Purpose**
+- Detect weak transcript segments and highlight noise/speaker issues with reprocessing advice.
+
+**Why this is in Phase 10**
+- Requires chunking, retries, and status stages already stabilized.
+
+**Repo touchpoints**
+- `Worker`, `API`, `UI`
+
+**Detailed test plan**
+1. Run noisy and clean audio samples.
+2. Verify segment confidence and quality flags in output metadata.
+3. Validate user guidance for improve-and-retry loop.
+
+### PRS-038 - Retry & Recovery Agent (policy-driven recovery orchestration)
+
+**Purpose**
+- Move from static retries to context-aware recovery actions per error class.
+
+**Why this is in Phase 10**
+- Depends on typed error catalog and retry budget foundations.
+
+**Repo touchpoints**
+- `Worker`, `API`
+
+**Detailed test plan**
+1. Inject transient provider/network failures.
+2. Confirm recovery path chosen by policy and bounded attempts.
+3. Validate DLQ contains recovery decision trace.
+
+### PRS-039 - Cost Guardrail Agent (quota/cost prediction + enforcement)
+
+**Purpose**
+- Predict cost impact and enforce budget-aware controls before expensive jobs run.
+
+**Why this is in Phase 10**
+- Extends quota/limit groundwork with predictive decisioning.
+
+**Repo touchpoints**
+- `API`, `UI`
+
+**Detailed test plan**
+1. Validate cost/effort projection for diverse media/page sizes.
+2. Confirm threshold breaches trigger clear policy outcomes.
+3. Ensure user messaging stays deterministic and actionable.
+
+### PRS-040 - Queue Orchestration Agent (dynamic balancing/prioritization)
+
+**Purpose**
+- Dynamically rebalance queue consumption to minimize starvation and reduce p95 wait.
+
+**Why this is in Phase 10**
+- Requires partitioned queues and concurrency controls already implemented.
+
+**Repo touchpoints**
+- `Worker`, `API`
+
+**Detailed test plan**
+1. Load-test mixed OCR/A-V traffic.
+2. Compare queue wait percentiles before/after.
+3. Confirm fairness and no starvation under bursts.
+
+### PRS-041 - User Assist Agent (in-flow guidance + next-best action)
+
+**Purpose**
+- Give context-aware recommendations during upload, wait, and failure states.
+
+**Why this is in Phase 10**
+- Uses matured telemetry and error semantics for reliable guidance.
+
+**Repo touchpoints**
+- `UI`, `API`
+
+**Detailed test plan**
+1. Simulate queued, failed, and cancelled scenarios.
+2. Verify guidance relevance and clarity.
+3. Measure completion improvement in guided flows.
+
+### PRS-042 - Incident Triage Agent (cross-layer root-cause assistant)
+
+**Purpose**
+- Automatically map an incident to probable root cause using cross-layer traces.
+
+**Why this is in Phase 10**
+- Depends on request_id/job_id propagation and structured logs.
+
+**Repo touchpoints**
+- `API`, `Worker`, `UI/scripts`
+
+**Detailed test plan**
+1. Replay known failure cases.
+2. Validate triage output links evidence across layers.
+3. Confirm generated runbook action list correctness.
+
+### PRS-043 - Regression Certification Agent (auto-certify release readiness)
+
+**Purpose**
+- Automate release go/no-go based on functional, contract, and CI evidence.
+
+**Why this is in Phase 10**
+- Uses complete test/CI baseline delivered in prior phases.
+
+**Repo touchpoints**
+- `UI/scripts`, `API`, `Worker`
+
+**Detailed test plan**
+1. Run local/cloud regression and CI checks.
+2. Validate generated certification report and gating verdict.
+3. Confirm failed checks block certification output.
+
+### PRS-044 - Product Insights Agent (usage/failure analytics + prioritization)
+
+**Purpose**
+- Convert usage and failure signals into prioritized product and UX actions.
+
+**Why this is in Phase 10**
+- Needs stable metrics/logging contracts for trustworthy insights.
+
+**Repo touchpoints**
+- `API`, `Worker`, `UI`
+
+**Detailed test plan**
+1. Generate periodic insight reports from real run data.
+2. Validate top findings against observed incidents/feedback.
+3. Confirm backlog recommendations are specific and actionable.
+
+### PRS-045 - BIG EPIC: Digambar Jainism GPT using RAG
+
+**Purpose**
+- Build a production-grade GPT assistant grounded in Digambar Jainism source material using RAG (Retrieval-Augmented Generation).
+
+**Why this is in Phase 11**
+- This is a larger strategic initiative and should begin after Phase 10 agentic foundations (`PRS-035` to `PRS-044`) are complete and stable.
+
+**Repo touchpoints**
+- `All`:
+  - `UI`: domain search/chat UX, citations view, feedback loop.
+  - `API`: query orchestration, retrieval APIs, prompt grounding, policy/safety filters.
+  - `Worker`: ingestion/indexing pipelines, chunking, embedding generation, refresh jobs.
+
+**Functional requirement served**
+- Domain-specific trustworthy AI assistant for Digambar Jainism concepts.
+
+**User benefit**
+- Users get faster, source-grounded answers with citation links and reduced hallucinations.
+
+**Implementation outline**
+1. Corpus strategy: identify trusted Digambar Jain texts and metadata schema.
+2. Ingestion pipeline: normalize OCR/transcripts, clean text, chunk, tag by source/topic.
+3. Retrieval layer: embeddings + hybrid retrieval + reranking.
+4. Grounded response layer: prompt templates with strict citation-first output.
+5. Safety and policy: relevance filtering, refusal rules, confidence thresholds.
+6. Evaluation: benchmark Q/A sets, faithfulness/groundedness scoring, regression suite.
+7. Productization: observability, feedback capture, periodic re-indexing workflow.
+
+**Detailed test plan**
+1. Gold-set evaluation on representative Digambar Jainism questions.
+2. Citation correctness checks (answer claims must map to retrieved passages).
+3. Hallucination guard tests on out-of-scope/ambiguous queries.
+4. Latency/cost benchmarks for retrieval and generation.
+5. End-to-end local + cloud regression with representative corpus snapshots.
