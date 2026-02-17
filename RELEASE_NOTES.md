@@ -390,7 +390,8 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/GUIDE.md`
 - Validation:
   - Python compile checks passed for touched worker files.
-  - Local/cloud regression pending (token refresh required for full certification).
+  - Local bounded regression passed (user-run confirmation).
+  - Cloud bounded regression passed (user-run confirmation).
 - Commit:
   - Worker: `ecd757d`
-- Status: `Completed (Code)`
+- Status: `Completed (Tested)`
