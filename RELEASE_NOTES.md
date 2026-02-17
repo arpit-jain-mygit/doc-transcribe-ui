@@ -341,3 +341,18 @@ This file tracks release-level changes with backlog traceability.
   - API: `83060ac`
   - UI: `5e14f4a`
 - Status: `Completed (Code)`
+
+### PRS-016
+- Backlog ID: `PRS-016`
+- Backlog Link: [PRS-016](./PRODUCTION_READINESS_BACKLOG.md#prs-016)
+- Type: `NFR` + `Performance`
+- Summary: Optimized API `/jobs` pagination/count path for lower Redis load and faster history retrieval.
+- Why: Avoid full-history metadata scans for common unfiltered paginated history calls.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/jobs.py`
+- Validation:
+  - Python compile check passed for `routes/jobs.py`.
+  - Local/cloud regression pending.
+- Commit:
+  - API: `e645e78`
+- Status: `Completed (Code)`

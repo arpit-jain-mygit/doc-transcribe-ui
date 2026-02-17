@@ -36,7 +36,7 @@ Status values:
 | PRS-013 | 3 | Tighten token validation (`iss`, `aud`, expiry) | API | Security | Stronger auth correctness | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict token checks for issuer/audience/authorized party/exp/nbf/iat + normalized auth error codes via `services/auth.py` and shared validation path in `routes/auth.py` (`8a81134`). |
 | PRS-014 | 3 | Environment-based strict CORS allowlist | API | Security | Fewer CORS/auth surprises | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict env-driven CORS allowlist (`CORS_ALLOW_ORIGINS`) with startup validation; optional regex only when explicitly configured (`CORS_ALLOW_ORIGIN_REGEX`) in `app.py` and `startup_env.py`. UI scripts: local stack now injects safe default `CORS_ALLOW_ORIGINS` for API startup. |
 | PRS-015 | 3 | Server-side MIME/extension/size validation | API | Security and validation | Clear rejection of unsupported files | Completed (Tested) | Completed (Local + Cloud Regression) | API: upload validation enforces allowed extensions/MIME prefixes and max-size per job type (`MAX_OCR_FILE_SIZE_MB`, `MAX_TRANSCRIPTION_FILE_SIZE_MB`) with stable error codes (`UNSUPPORTED_FILE_TYPE`, `UNSUPPORTED_MIME_TYPE`, `FILE_TOO_LARGE`) in `routes/upload.py`. |
-| PRS-016 | 4 | Optimize `/jobs` pagination and counts path | API | Performance | Faster history loading | Planned | Not Tested | Pending implementation |
+| PRS-016 | 4 | Optimize `/jobs` pagination and counts path | API | Performance | Faster history loading | Completed (Code) | Not Tested | API: optimized `/jobs` with unfiltered fast-path pagination (slice-only read), avoided full metadata prefetch when `include_counts=false`, and added stage/metric observability (`total_user_jobs`, `scanned_count`, `matched_total`, `fast_path`) in `routes/jobs.py`. |
 | PRS-017 | 4 | Reduce polling overhead and duplicate pollers | UI | Performance | Smoother app under load | Planned | Not Tested | Pending implementation |
 | PRS-018 | 4 | Make worker chunk/page strategy configurable | Worker | Performance | Better throughput and tuning flexibility | Planned | Not Tested | Pending implementation |
 | PRS-019 | 5 | Queue partitioning by workload (OCR vs A/V) | API, Worker | Scalability | Reduced queue contention | Planned | Not Tested | Pending implementation |
@@ -112,6 +112,7 @@ Status values:
 - 2026-02-17: PRS-013 completed and regression-validated (local + cloud) with strict token validation (`iss`, `aud`, `azp`, expiry) and normalized auth error codes.
 - 2026-02-17: PRS-014 completed and regression-validated (local + cloud) with strict environment-based CORS allowlist and local startup default wiring.
 - 2026-02-17: PRS-015 completed and regression-validated (local + cloud) with strict server-side MIME/extension/size validation.
+- 2026-02-17: PRS-016 implementation completed at code level in API (`routes/jobs.py`); regression pending.
 
 ## Detailed Item Specifications
 

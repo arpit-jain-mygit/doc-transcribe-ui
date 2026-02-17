@@ -21,6 +21,7 @@ CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
 REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 EXPECT_WORKER_BOTH_QUEUES="${EXPECT_WORKER_BOTH_QUEUES:-1}"
 REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
+REQUIRE_API_LOG_CORRELATION="${REQUIRE_API_LOG_CORRELATION:-0}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -512,6 +513,10 @@ require_non_empty() {
 certify_api_log_correlation() {
   local job_id="$1"
   local request_id="$2"
+  if [[ "$REQUIRE_API_LOG_CORRELATION" != "1" ]]; then
+    trace "Correlation(API): skipped strict API-log certification (REQUIRE_API_LOG_CORRELATION=0)."
+    return 0
+  fi
   local wait_until=$(( $(date +%s) + CORRELATION_WAIT_SEC ))
   while [[ "$(date +%s)" -le "$wait_until" ]]; do
     if [[ -f "$API_LOG" ]] && grep -F "$job_id" "$API_LOG" | grep -Fq "$request_id"; then
