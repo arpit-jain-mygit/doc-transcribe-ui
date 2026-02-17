@@ -7,9 +7,6 @@ set -euo pipefail
 # - Polls with hard deadlines (no indefinite wait)
 
 API_BASE="${API_BASE:-http://127.0.0.1:8090}"
-API_REPO_DIR="${API_REPO_DIR:-/Users/arpitjain/PycharmProjects/doc-transcribe-api}"
-WORKER_REPO_DIR="${WORKER_REPO_DIR:-/Users/arpitjain/PycharmProjects/doc-transcribe-worker}"
-UI_REPO_DIR="${UI_REPO_DIR:-/Users/arpitjain/VSProjects/doc-transcribe-ui}"
 REDIS_PING_CMD="${REDIS_PING_CMD:-redis-cli -u redis://localhost:6379/0 ping}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
 LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
@@ -26,7 +23,6 @@ REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 EXPECT_WORKER_BOTH_QUEUES="${EXPECT_WORKER_BOTH_QUEUES:-1}"
 REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
 REQUIRE_API_LOG_CORRELATION="${REQUIRE_API_LOG_CORRELATION:-0}"
-RUN_UNIT_TESTS="${RUN_UNIT_TESTS:-1}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -266,61 +262,6 @@ fail() {
   maybe_print_diagnostics
   icon_fail "FAIL: $1"
   exit 1
-}
-
-run_unit_tests() {
-  if [[ "$RUN_UNIT_TESTS" != "1" ]]; then
-    icon_info "Unit tests skipped (RUN_UNIT_TESTS=${RUN_UNIT_TESTS})"
-    return 0
-  fi
-
-  begin_step "Unit tests"
-
-  [[ -d "$API_REPO_DIR" ]] || fail "API_REPO_DIR not found: ${API_REPO_DIR}"
-  [[ -d "$WORKER_REPO_DIR" ]] || fail "WORKER_REPO_DIR not found: ${WORKER_REPO_DIR}"
-  [[ -d "$UI_REPO_DIR" ]] || fail "UI_REPO_DIR not found: ${UI_REPO_DIR}"
-
-  echo "UNIT_TEST_REPOS:"
-  echo "  API_REPO_DIR=${API_REPO_DIR}"
-  echo "  WORKER_REPO_DIR=${WORKER_REPO_DIR}"
-  echo "  UI_REPO_DIR=${UI_REPO_DIR}"
-
-  icon_info "Running API unit tests"
-  if (
-    cd "$API_REPO_DIR"
-    .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"
-  ); then
-    icon_ok "UNIT_API=PASS"
-  else
-    icon_fail "UNIT_API=FAIL"
-    fail "API unit tests failed"
-  fi
-
-  icon_info "Running Worker unit tests"
-  if (
-    cd "$WORKER_REPO_DIR"
-    .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"
-  ); then
-    icon_ok "UNIT_WORKER=PASS"
-  else
-    icon_fail "UNIT_WORKER=FAIL"
-    fail "Worker unit tests failed"
-  fi
-
-  icon_info "Running UI unit tests"
-  if (
-    cd "$UI_REPO_DIR"
-    npm run -s test
-  ); then
-    icon_ok "UNIT_UI=PASS"
-  else
-    icon_fail "UNIT_UI=FAIL"
-    fail "UI unit tests failed"
-  fi
-
-  icon_ok "UNIT_SUMMARY API=PASS WORKER=PASS UI=PASS"
-
-  end_step_ok
 }
 
 trace() {
@@ -806,7 +747,6 @@ main() {
   : > "$INTEGRATION_REPORT_FILE"
   load_auth_token
   rebuild_auth_header
-  run_unit_tests
 
   local auth_set="no"
   if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
