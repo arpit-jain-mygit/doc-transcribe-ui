@@ -432,10 +432,11 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/CONTRIBUTING.md`
 - Validation:
   - Python compile checks passed for touched worker modules.
-  - Local/cloud regression pending.
+  - Local bounded regression passed (user-run confirmation).
+  - Cloud bounded regression passed (user-run confirmation).
 - Commit:
   - Worker: `1de5432`
-- Status: `Completed (Code)`
+- Status: `Completed (Tested)`
 
 ### PRS-030
 - Backlog ID: `PRS-030`
@@ -452,7 +453,8 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/VSProjects/doc-transcribe-ui/index.html`
 - Validation:
   - JavaScript syntax checks passed for touched UI modules.
-  - Local/cloud regression pending.
+  - Local bounded regression passed (user-run confirmation).
+  - Cloud bounded regression passed (user-run confirmation).
 - Commit:
   - UI: `53f5a7b`
-- Status: `Completed (Code)`
+- Status: `Completed (Tested)`
