@@ -103,7 +103,47 @@ function getUploadIdempotencyKey(type, file) {
   return key;
 }
 
-function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "") {
+function estimateProcessingHint(type, file, mediaDurationSec = null) {
+  const sizeMb = Math.max(0, Number(file?.size || 0) / (1024 * 1024));
+  if (String(type).toUpperCase() === "TRANSCRIPTION") {
+    if (Number.isFinite(mediaDurationSec) && mediaDurationSec > 0) {
+      const mins = Math.max(1, Math.round(mediaDurationSec / 60));
+      return `अनुमानित समय: ${mins} मिनट मीडिया के लिए लगभग ${Math.max(1, Math.round(mins * 0.15))}-${Math.max(2, Math.round(mins * 0.25))} मिनट।`;
+    }
+    return "अनुमानित समय: ऑडियो/वीडियो की अवधि पर निर्भर (आमतौर पर 15-25%).";
+  }
+  const bands = sizeMb <= 2 ? "1-2" : sizeMb <= 10 ? "2-4" : "4-8";
+  return `अनुमानित समय: PDF/Image के लिए लगभग ${bands} मिनट (गुणवत्ता/पेज पर निर्भर)।`;
+}
+
+async function getMediaDurationSec(file) {
+  if (!file) return null;
+  const name = String(file.name || "").toLowerCase();
+  const isMedia = AV_EXTENSIONS.some((ext) => name.endsWith(ext));
+  if (!isMedia) return null;
+  return new Promise((resolve) => {
+    const el = document.createElement("audio");
+    el.preload = "metadata";
+    const url = URL.createObjectURL(file);
+    const cleanup = () => {
+      try { URL.revokeObjectURL(url); } catch {}
+      el.src = "";
+      el.remove();
+    };
+    el.onloadedmetadata = () => {
+      const d = Number(el.duration);
+      cleanup();
+      resolve(Number.isFinite(d) && d > 0 ? d : null);
+    };
+    el.onerror = () => {
+      cleanup();
+      resolve(null);
+    };
+    el.src = url;
+  });
+}
+
+function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "", extraHeaders = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
@@ -112,6 +152,11 @@ function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "")
     if (idempotencyKey) {
       xhr.setRequestHeader("X-Idempotency-Key", idempotencyKey);
     }
+    Object.entries(extraHeaders || {}).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== "") {
+        xhr.setRequestHeader(String(k), String(v));
+      }
+    });
     xhr.responseType = "text";
     xhr.timeout = 240000;
 
@@ -202,6 +247,7 @@ async function upload(type, file) {
   window.ACTIVE_JOB_TYPE = String(type || "").toUpperCase();
   const uploadRequestId = resolveRequestId(generateRequestId());
   const uploadFile = await normalizeUploadFile(file);
+  const mediaDurationSec = await getMediaDurationSec(uploadFile);
   const idempotencyKey = getUploadIdempotencyKey(type, uploadFile);
   window.ACTIVE_REQUEST_ID = uploadRequestId;
   LAST_UPLOADED_FILENAME = uploadFile.name;
@@ -212,6 +258,9 @@ async function upload(type, file) {
   if (typeof bootstrapProgress === "function") {
     bootstrapProgress("Uploading file…", 5);
   }
+  if (window.FEATURE_COST_HINTS) {
+    toast(estimateProcessingHint(type, uploadFile, mediaDurationSec), "info");
+  }
 
   const header = document.getElementById("processingHeader");
   if (header) header.textContent = `PROCESSING ${file.name}`;
@@ -220,7 +269,14 @@ async function upload(type, file) {
   const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();
   try {
     if (preferXhrPrimary) {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId, idempotencyKey);
+      const xhrRes = await uploadViaXhr(
+        `${API}/upload`,
+        ID_TOKEN,
+        createUploadFormData(uploadFile, type),
+        uploadRequestId,
+        idempotencyKey,
+        { "X-Media-Duration-Sec": mediaDurationSec ?? "" }
+      );
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
@@ -243,6 +299,9 @@ async function upload(type, file) {
       const fd = createUploadFormData(uploadFile, type);
       const reqHeaders = authHeadersWithRequestId({ requestId: uploadRequestId, includeAuth: true }).headers;
       reqHeaders["X-Idempotency-Key"] = idempotencyKey;
+      if (Number.isFinite(mediaDurationSec) && mediaDurationSec > 0) {
+        reqHeaders["X-Media-Duration-Sec"] = String(Math.round(mediaDurationSec));
+      }
       res = await fetch(`${API}/upload`, {
         method: "POST",
         headers: reqHeaders,
@@ -251,7 +310,14 @@ async function upload(type, file) {
     }
   } catch (err) {
     try {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId, idempotencyKey);
+      const xhrRes = await uploadViaXhr(
+        `${API}/upload`,
+        ID_TOKEN,
+        createUploadFormData(uploadFile, type),
+        uploadRequestId,
+        idempotencyKey,
+        { "X-Media-Duration-Sec": mediaDurationSec ?? "" }
+      );
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();

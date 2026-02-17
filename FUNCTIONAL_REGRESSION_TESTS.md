@@ -20,6 +20,8 @@ Use this bounded local runner first for every backlog item:
 
 Cloud API runner:
 - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+- Load baseline runner:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/load_test_baseline.sh`
 
 Stack lifecycle helpers:
 - Start local UI+API+worker:
@@ -263,6 +265,7 @@ Behavior:
 - `PRS-013..015`: run all smoke + `FT-RG-01`, `FT-RG-02`, `FT-RG-10`.
 - `PRS-016..018`: run all smoke + `FT-RG-03`, `FT-RG-04`, `FT-RG-09`.
 - `PRS-031..033`: run all smoke + both bounded runners and verify integration report artifacts are generated.
+- `PRS-019..027`: run all smoke + both bounded runners + load baseline (`5/10`) + readiness endpoints (`/ready`, `worker.readiness`).
 
 ## Latest verification status
 - `PRS-001`

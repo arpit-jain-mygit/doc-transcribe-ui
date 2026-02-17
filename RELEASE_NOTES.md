@@ -477,10 +477,13 @@ This file tracks release-level changes with backlog traceability.
   - API unit tests passed via `.venv/bin/python -m unittest discover -s tests -p \"test_*_unit.py\"`.
   - Worker unit tests passed via `.venv/bin/python -m unittest discover -s tests -p \"test_*_unit.py\"`.
   - UI unit tests passed via `npm run test`.
-  - Local/cloud bounded regression: pending user run.
+  - Local bounded regression: user-run passed.
+  - Cloud bounded regression: user-run passed.
 - Commit:
-  - Pending commit after regression validation.
-- Status: `Completed (Code Complete, Regression Pending)`
+  - API: `5869c0a`
+  - Worker: `000d913`
+  - UI: `e5fa7f8`
+- Status: `Completed (Tested)`
 
 ### PRS-032
 - Backlog ID: `PRS-032`
@@ -496,7 +499,40 @@ This file tracks release-level changes with backlog traceability.
   - `/Users/arpitjain/VSProjects/doc-transcribe-ui/FUNCTIONAL_REGRESSION_TESTS.md`
 - Validation:
   - Script syntax checks pass for local/cloud regression runners.
-  - Local/cloud bounded regression: pending user run.
+  - Local bounded regression: user-run passed.
+  - Cloud bounded regression: user-run passed.
 - Commit:
-  - Pending commit after regression validation.
-- Status: `Completed (Code Complete, Regression Pending)`
+  - UI: `e5fa7f8`
+- Status: `Completed (Tested)`
+
+### PRS-019 to PRS-027 + PRS-033 (Bundled Code Complete)
+- Backlog IDs:
+  - `PRS-019`, `PRS-020`, `PRS-021`, `PRS-022`, `PRS-023`, `PRS-024`, `PRS-025`, `PRS-026`, `PRS-027`, `PRS-033`
+- Type: `NFR` + `Scalability` + `Operability` + `Cost` + `Quality governance`
+- Summary:
+  - API: queue partitioning + readiness endpoint + quota/limit enforcement + feature flags.
+  - Worker: partitioned queue mode, per-type inflight controls, retry budgets by error type, readiness utility.
+  - UI/scripts/docs: load-test baseline script, runbooks, feature flag guide, user-facing effort hints, CI workflow gates.
+- Files (high-impact):
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/upload_orchestrator.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/quota.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/feature_flags.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/readiness.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/.github/workflows/ci.yml`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/startup_env.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/readiness.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/.github/workflows/ci.yml`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/upload.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/config.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/load_test_baseline.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/LOAD_TEST_BASELINE.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/RUNBOOKS.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/FEATURE_FLAGS.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/.github/workflows/ci.yml`
+- Validation:
+  - API/Worker/UI unit suites passing.
+  - Syntax checks passing for changed API/Worker/UI runtime files.
+  - Local/cloud bounded regression pending user run.
+- Status: `Completed (Tested)`

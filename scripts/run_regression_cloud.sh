@@ -36,6 +36,7 @@ POLL_INTERVAL_SEC="${POLL_INTERVAL_SEC:-3}"
 LOG_EVERY_SEC="${LOG_EVERY_SEC:-10}"
 TRACE_FLOW="${TRACE_FLOW:-1}"
 CORRELATION_WAIT_SEC="${CORRELATION_WAIT_SEC:-8}"
+MAX_UPLOAD_ATTEMPTS="${MAX_UPLOAD_ATTEMPTS:-2}"
 RUN_START_EPOCH="$(date +%s)"
 RUN_START_ISO="$(TZ=Asia/Kolkata date +%Y-%m-%dT%H:%M:%S%z)"
 
@@ -522,9 +523,20 @@ submit_job() {
   local file_path="$1"
   local job_type="$2"
   local req_id="${3:-}"
+  local idem_key="${4:-}"
   local ext mime_override file_form
   if [[ -z "$req_id" ]]; then
     req_id="$(generate_request_id "$job_type")"
+  fi
+  if [[ -z "$idem_key" ]]; then
+    idem_key="$(python3 - "$job_type" "$(basename "$file_path")" "$req_id" <<'PY'
+import hashlib, sys
+job_type = sys.argv[1]
+name = sys.argv[2]
+req_id = sys.argv[3]
+print(hashlib.sha1(f"{job_type}|{name}|{req_id}".encode("utf-8")).hexdigest())
+PY
+)"
   fi
   ext="${file_path##*.}"
   ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
@@ -538,21 +550,36 @@ submit_job() {
   else
     file_form="file=@${file_path}"
   fi
-  local result code body
-  if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
-    result="$(http_call POST "${API_BASE}/upload" \
-      "${AUTH_HEADER_FLAG[@]}" \
-      -H "X-Request-ID: ${req_id}" \
-      -F "${file_form}" \
-      -F "type=${job_type}")"
-  else
-    result="$(http_call POST "${API_BASE}/upload" \
-      -H "X-Request-ID: ${req_id}" \
-      -F "${file_form}" \
-      -F "type=${job_type}")"
-  fi
-  code="$(echo "$result" | sed -n '1p')"
-  body="$(echo "$result" | sed -n '2,$p')"
+  local result code body attempt
+  attempt=1
+  while true; do
+    if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
+      result="$(http_call POST "${API_BASE}/upload" \
+        "${AUTH_HEADER_FLAG[@]}" \
+        -H "X-Request-ID: ${req_id}" \
+        -H "X-Idempotency-Key: ${idem_key}" \
+        -F "${file_form}" \
+        -F "type=${job_type}")"
+    else
+      result="$(http_call POST "${API_BASE}/upload" \
+        -H "X-Request-ID: ${req_id}" \
+        -H "X-Idempotency-Key: ${idem_key}" \
+        -F "${file_form}" \
+        -F "type=${job_type}")"
+    fi
+    code="$(echo "$result" | sed -n '1p')"
+    body="$(echo "$result" | sed -n '2,$p')"
+    if [[ "$code" =~ ^2 ]]; then
+      break
+    fi
+    if [[ "$code" =~ ^(502|503|504)$ && "$attempt" -lt "$MAX_UPLOAD_ATTEMPTS" ]]; then
+      trace "${job_type}: transient upload error HTTP ${code}; retrying attempt $((attempt + 1))/${MAX_UPLOAD_ATTEMPTS}"
+      attempt=$((attempt + 1))
+      sleep 2
+      continue
+    fi
+    break
+  done
   if [[ ! "$code" =~ ^2 ]]; then
     if [[ "$code" == "401" ]]; then
       print_token_refresh_hint

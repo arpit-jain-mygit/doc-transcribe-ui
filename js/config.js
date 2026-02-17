@@ -30,3 +30,6 @@ window.getApiMode = function getApiMode() {
 
 const AUTH_STORAGE_KEY = "doc_app_auth";
 const GOOGLE_CLIENT_ID="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googleusercontent.com";
+
+// Feature flags (UI-side guarded rollouts)
+window.FEATURE_COST_HINTS = true;
