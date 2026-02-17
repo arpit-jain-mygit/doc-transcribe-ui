@@ -375,3 +375,22 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - UI: `2b3dd83`
 - Status: `Completed (Tested)`
+
+### PRS-018
+- Backlog ID: `PRS-018`
+- Backlog Link: [PRS-018](./PRODUCTION_READINESS_BACKLOG.md#prs-018)
+- Gap Link: [G-16](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-16)
+- Type: `NFR` + `Performance`
+- Summary: Made worker chunk/page strategy configurable for transcription and OCR to support throughput/memory tuning per deployment.
+- Why: Fixed hardcoded processing strategy that limited tuning flexibility across local/cloud environments.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/startup_env.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/GUIDE.md`
+- Validation:
+  - Python compile checks passed for touched worker files.
+  - Local/cloud regression pending (token refresh required for full certification).
+- Commit:
+  - Worker: `ecd757d`
+- Status: `Completed (Code)`
