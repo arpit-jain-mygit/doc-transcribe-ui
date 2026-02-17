@@ -13,12 +13,12 @@ const POLL_INTERVAL_ACTIVE_MS = 3000;
 const POLL_INTERVAL_BACKGROUND_MS = 10000;
 const POLL_INTERVAL_RETRY_MS = 5000;
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function currentPollDelayMs() {
   return document.hidden ? POLL_INTERVAL_BACKGROUND_MS : POLL_INTERVAL_ACTIVE_MS;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function scheduleNextPoll(sessionId, delayMs) {
   if (!window.POLLING_ACTIVE || !JOB_ID || sessionId !== POLL_SESSION_ID) return;
   if (POLL_INTERVAL) clearTimeout(POLL_INTERVAL);
@@ -27,7 +27,7 @@ function scheduleNextPoll(sessionId, delayMs) {
     pollStatus(sessionId);
   }, nextDelay);
 }
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateProcessingMetrics({ progressValue }) {
   const pctEl = document.getElementById("progressPct");
   if (!pctEl) return;
@@ -36,7 +36,7 @@ function updateProcessingMetrics({ progressValue }) {
   pctEl.textContent = `${pct}%`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports humanizeStage so the OCR/transcription journey stays clear and reliable.
 function humanizeStage(stage) {
   if (!stage) return "";
 
@@ -60,7 +60,7 @@ function humanizeStage(stage) {
 /* ---------------------------------------------------------
    IMMEDIATE PROGRESS BOOTSTRAP (UI ONLY)
    --------------------------------------------------------- */
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: prepares a stable OCR/transcription experience before user actions.
 function bootstrapProgress(stageText = "Preparing…", value = 3) {
   const statusBox = document.getElementById("statusBox");
   const progressEl = document.getElementById("progress");
@@ -93,7 +93,7 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
 
 window.bootstrapProgress = bootstrapProgress;
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: lets users stop running OCR/transcription jobs quickly.
 async function cancelJobById(jobId, { silent = false } = {}) {
   if (!jobId || !ID_TOKEN) return false;
   const activeType = String(window.ACTIVE_JOB_TYPE || "").toUpperCase();
@@ -164,7 +164,7 @@ window.cancelCurrentJob = async function cancelCurrentJob() {
   }
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function startPolling() {
   if (!JOB_ID) return;
   if (
@@ -200,7 +200,7 @@ function startPolling() {
   pollStatus(sessionId);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function stopPolling() {
   if (POLL_INTERVAL) {
     clearTimeout(POLL_INTERVAL);
@@ -210,7 +210,7 @@ function stopPolling() {
   ACTIVE_POLLED_JOB_ID = null;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 async function pollStatus(sessionId = POLL_SESSION_ID) {
   if (sessionId !== POLL_SESSION_ID) return;
   if (!JOB_ID || !ID_TOKEN) return;
@@ -265,7 +265,7 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateProcessingUI(data) {
   const progressEl = document.getElementById("progress");
   const stageEl = document.getElementById("stage");
@@ -309,7 +309,7 @@ function updateProcessingUI(data) {
   updateProcessingMetrics({ progressValue: effectiveProgress });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports completeAndResetUI so the OCR/transcription journey stays clear and reliable.
 function completeAndResetUI() {
   if (typeof stopThoughts === "function") stopThoughts();
 
@@ -338,7 +338,7 @@ function completeAndResetUI() {
   if (typeof clearUploadInputState === "function") clearUploadInputState("unifiedFile");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: handles user/system events to keep OCR/transcription flow stable.
 function handleJobCompleted(data) {
   if (CANCEL_REQUESTED) {
     completeAndResetUI();
@@ -376,7 +376,7 @@ function handleJobCompleted(data) {
   toast("Processing completed", "success");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: handles user/system events to keep OCR/transcription flow stable.
 function handleJobFailed(data) {
   completeAndResetUI();
 
@@ -395,7 +395,7 @@ function handleJobFailed(data) {
   toast(`Processing failed: ${detail}`, "error");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: lets users stop running OCR/transcription jobs quickly.
 function handleJobCancelled(data) {
   CANCEL_REQUESTED = false;
   completeAndResetUI();

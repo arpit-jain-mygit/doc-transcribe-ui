@@ -1,4 +1,4 @@
-// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
+// User value: shows clear processing timing so users can set expectations.
 function formatJobDuration(secondsRaw) {
   const seconds = Number(secondsRaw);
   if (!Number.isFinite(seconds) || seconds < 0) return "";
@@ -6,12 +6,12 @@ function formatJobDuration(secondsRaw) {
   return formatCompactDuration(rounded);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps job/status fields consistent across OCR/transcription views.
 function contract() {
   return window.JOB_CONTRACT || {};
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function formatCompactDuration(totalSeconds) {
   const rounded = Math.max(0, Math.round(Number(totalSeconds) || 0));
   const hrs = Math.floor(rounded / 3600);
@@ -38,7 +38,7 @@ const JOBS_STATUS_COUNTS_BY_TYPE = {
 };
 const JOBS_TAB_STATE = {};
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function parseDurationSeconds(raw) {
   if (raw === null || raw === undefined || raw === "") return NaN;
   if (typeof raw === "number") return raw;
@@ -64,7 +64,7 @@ function parseDurationSeconds(raw) {
   return NaN;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function formatMediaDuration(secondsRaw) {
   const total = parseDurationSeconds(secondsRaw);
   if (!Number.isFinite(total) || total < 0) return "";
@@ -78,7 +78,7 @@ function formatMediaDuration(secondsRaw) {
   return `${secs}s`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function getTranscriptionMediaDuration(job) {
   const candidates = [
     job.media_duration_sec,
@@ -101,7 +101,7 @@ function getTranscriptionMediaDuration(job) {
   return "";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: formats OCR/transcription details into clear user-facing text.
 function formatJobTypeLabel(job) {
   const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
@@ -109,7 +109,7 @@ function formatJobTypeLabel(job) {
   return job?.job_type || job?.mode || "Processing";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getJobTypeThemeClass(job) {
   const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
   if (jobType === "OCR") return "job-type-label-ocr";
@@ -117,7 +117,7 @@ function getJobTypeThemeClass(job) {
   return "job-type-label-neutral";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function buildStatusBadgeHtml(statusRaw) {
   const status = String(statusRaw || "").toUpperCase();
   const text = formatStatus(statusRaw);
@@ -136,7 +136,7 @@ function buildStatusBadgeHtml(statusRaw) {
   );
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getStatusDotSymbol(statusRaw) {
   const status = String(statusRaw || "").toUpperCase();
   if (status === "COMPLETED") return "✓";
@@ -145,7 +145,7 @@ function getStatusDotSymbol(statusRaw) {
   return "…";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function buildStatusDotHtml(statusRaw) {
   const status = String(statusRaw || "").toUpperCase();
   if (status === "PROCESSING" || status === "PENDING" || status === "QUEUED") {
@@ -158,7 +158,7 @@ function buildStatusDotHtml(statusRaw) {
   return `<span class="job-status-dot">${escapeHtml(getStatusDotSymbol(statusRaw))}</span>`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports escapeHtml so the OCR/transcription journey stays clear and reliable.
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -168,7 +168,7 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports detailClassToken so the OCR/transcription journey stays clear and reliable.
 function detailClassToken(value) {
   return String(value || "")
     .trim()
@@ -177,24 +177,24 @@ function detailClassToken(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function normalizeJobStatus(statusRaw) {
   if (contract().normalizeJobStatus) return contract().normalizeJobStatus(statusRaw);
   return String(statusRaw || "").toUpperCase();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: normalizes data so users see consistent OCR/transcription results.
 function normalizeJobType(typeRaw) {
   if (contract().normalizeJobType) return contract().normalizeJobType(typeRaw);
   return String(typeRaw || "").toUpperCase();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getJobsStateKey(jobType, status) {
   return `${normalizeJobType(jobType)}|${normalizeJobStatus(status)}`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports ensureJobsState so the OCR/transcription journey stays clear and reliable.
 function ensureJobsState(jobType, status) {
   const key = getJobsStateKey(jobType, status);
   if (!JOBS_TAB_STATE[key]) {
@@ -209,21 +209,21 @@ function ensureJobsState(jobType, status) {
   return JOBS_TAB_STATE[key];
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function updateHistoryStatusControlState() {
   const select = document.getElementById("historyStatusSelect");
   if (!select) return;
   select.value = JOBS_FILTER;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function setHistoryStatusControlVisible(visible) {
   const wrap = document.getElementById("historyStatusControl");
   if (!wrap) return;
   wrap.style.display = visible ? "inline-flex" : "none";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateHistoryTypeTabState() {
   const typeMap = {
     TRANSCRIPTION: document.getElementById("historyKindTranscription"),
@@ -238,7 +238,7 @@ function updateHistoryTypeTabState() {
   });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateHistoryCounts(source) {
   const counts = {
     COMPLETED: 0,
@@ -268,7 +268,7 @@ function updateHistoryCounts(source) {
   if (cancelledEl) cancelledEl.textContent = `Cancelled (${counts.CANCELLED})`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps users updated with live OCR/transcription progress.
 function applyCachedStatusCountsForCurrentType() {
   const cached = JOBS_STATUS_COUNTS_BY_TYPE[JOBS_TYPE_FILTER];
   if (!cached) return false;
@@ -276,7 +276,7 @@ function applyCachedStatusCountsForCurrentType() {
   return true;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateHistoryTypeCounts(source) {
   const counts = {
     TRANSCRIPTION: 0,
@@ -305,7 +305,7 @@ function updateHistoryTypeCounts(source) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports clearHistoryCountsUi so the OCR/transcription journey stays clear and reliable.
 function clearHistoryCountsUi() {
   const completedEl = document.getElementById("historyStatusOptionCompleted");
   const failedEl = document.getElementById("historyStatusOptionFailed");
@@ -326,7 +326,7 @@ function clearHistoryCountsUi() {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: formats OCR/transcription details into clear user-facing text.
 function formatLastRefreshedLabel(date) {
   if (!date) return "Last refreshed: --";
   const deltaSec = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
@@ -338,14 +338,14 @@ function formatLastRefreshedLabel(date) {
   return `Last refreshed: ${hrs}h ago`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateLastRefreshedUi() {
   const el = document.getElementById("historyLastRefreshed");
   if (!el) return;
   el.textContent = formatLastRefreshedLabel(JOBS_LAST_REFRESH_AT);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports isHistoryVisibleForTicker so the OCR/transcription journey stays clear and reliable.
 function isHistoryVisibleForTicker() {
   const historyView = document.getElementById("workspaceHistoryView");
   if (!historyView) return false;
@@ -354,20 +354,20 @@ function isHistoryVisibleForTicker() {
   return isShown && !document.hidden;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports ensureLastRefreshedTicker so the OCR/transcription journey stays clear and reliable.
 function ensureLastRefreshedTicker() {
   if (JOBS_LAST_REFRESH_TIMER) return;
   JOBS_LAST_REFRESH_TIMER = setInterval(updateLastRefreshedUi, 10000);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: controls OCR/transcription execution timing for a smooth user flow.
 function stopLastRefreshedTicker() {
   if (!JOBS_LAST_REFRESH_TIMER) return;
   clearInterval(JOBS_LAST_REFRESH_TIMER);
   JOBS_LAST_REFRESH_TIMER = null;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports syncLastRefreshedTicker so the OCR/transcription journey stays clear and reliable.
 function syncLastRefreshedTicker() {
   if (isHistoryVisibleForTicker() && JOBS_LAST_REFRESH_AT) {
     ensureLastRefreshedTicker();
@@ -376,7 +376,7 @@ function syncLastRefreshedTicker() {
   stopLastRefreshedTicker();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: improves reliability when OCR/transcription dependencies fail transiently.
 async function retryJobById(jobId) {
   if (!jobId || !ID_TOKEN) return false;
 
@@ -402,7 +402,7 @@ async function retryJobById(jobId) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: renders UI state so users can track OCR/transcription progress.
 function renderJobsList(jobs) {
   const box = document.getElementById("jobs");
   if (!box) return;
@@ -498,14 +498,14 @@ function renderJobsList(jobs) {
   });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: renders UI state so users can track OCR/transcription progress.
 function renderFilteredJobs() {
   const state = ensureJobsState(JOBS_TYPE_FILTER, JOBS_FILTER);
   renderJobsList(state?.items || []);
   updatePaginationUi();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updatePaginationUi() {
   const wrapper = document.getElementById("historyPagination");
   const loadMoreBtn = document.getElementById("historyLoadMoreBtn");
@@ -522,7 +522,7 @@ function updatePaginationUi() {
   loadMoreBtn.disabled = JOBS_LOADING || !state.hasMore;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: builds the required payload/state for user OCR/transcription flow.
 function buildJobDetailItems(job) {
   const details = [];
   const type = contract().resolveJobType ? contract().resolveJobType(job) : String(job.job_type || "").toUpperCase();
@@ -565,7 +565,7 @@ function buildJobDetailItems(job) {
   return details;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: builds the required payload/state for user OCR/transcription flow.
 function buildJobDetailsHtml(job) {
   const items = buildJobDetailItems(job);
   if (!items.length) return "";
@@ -586,7 +586,7 @@ function buildJobDetailsHtml(job) {
   return `<span class="history-meta">${parts.join("")}</span>`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: builds the required payload/state for user OCR/transcription flow.
 function buildJobsUrl(jobType, status, limit, offset, includeCounts = false) {
   const params = new URLSearchParams();
   params.set("job_type", jobType);
@@ -597,7 +597,7 @@ function buildJobsUrl(jobType, status, limit, offset, includeCounts = false) {
   return `${API}/jobs?${params.toString()}`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports resetJobsTabState so the OCR/transcription journey stays clear and reliable.
 function resetJobsTabState() {
   Object.keys(JOBS_TAB_STATE).forEach((key) => delete JOBS_TAB_STATE[key]);
   JOBS_STATUS_COUNTS_BY_TYPE.TRANSCRIPTION = null;
@@ -608,7 +608,7 @@ function resetJobsTabState() {
   syncLastRefreshedTicker();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 async function loadJobs({ reset = false, append = false } = {}) {
   if (!ID_TOKEN) return;
   if (JOBS_LOADING) return;
@@ -787,7 +787,7 @@ if (!window.__JOBS_TICKER_VISIBILITY_WIRED__) {
   window.__JOBS_TICKER_VISIBILITY_WIRED__ = true;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: renders UI state so users can track OCR/transcription progress.
 function renderJob(job) {
   const row = document.createElement("div");
   row.className = "job-row";

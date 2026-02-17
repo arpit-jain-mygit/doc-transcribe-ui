@@ -13,12 +13,12 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 
 
 class AppHandler(SimpleHTTPRequestHandler):
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports end_headers so the OCR/transcription journey stays clear and reliable.
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_OPTIONS so the OCR/transcription journey stays clear and reliable.
     def do_OPTIONS(self):
         if self.path.startswith("/api/"):
             self.send_response(204)
@@ -29,42 +29,42 @@ class AppHandler(SimpleHTTPRequestHandler):
             return
         super().do_OPTIONS()
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_GET so the OCR/transcription journey stays clear and reliable.
     def do_GET(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         super().do_GET()
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_POST so the OCR/transcription journey stays clear and reliable.
     def do_POST(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_PUT so the OCR/transcription journey stays clear and reliable.
     def do_PUT(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_PATCH so the OCR/transcription journey stays clear and reliable.
     def do_PATCH(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports do_DELETE so the OCR/transcription journey stays clear and reliable.
     def do_DELETE(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
-    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
+    # User value: supports _proxy so the OCR/transcription journey stays clear and reliable.
     def _proxy(self):
         upstream_path = self.path[len("/api"):]
         upstream_url = f"{API_ORIGIN}{upstream_path}"
@@ -109,7 +109,7 @@ class AppHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(msg).encode("utf-8"))
 
 
-# User value: This step keeps the user OCR/transcription flow accurate and dependable.
+# User value: supports main so the OCR/transcription journey stays clear and reliable.
 def main():
     server = ThreadingHTTPServer((HOST, PORT), AppHandler)
     print(f"Server running at http://{HOST}:{PORT} -> API_ORIGIN={API_ORIGIN}")

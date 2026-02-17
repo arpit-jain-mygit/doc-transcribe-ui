@@ -66,7 +66,7 @@ const THOUGHTS = [
 
 
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports applyThought so the OCR/transcription journey stays clear and reliable.
 function applyThought(text, { immediate = false } = {}) {
   const thoughtText = document.getElementById("thoughtText");
   if (!thoughtText) return;
@@ -93,7 +93,7 @@ function applyThought(text, { immediate = false } = {}) {
   }, 180);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: controls OCR/transcription execution timing for a smooth user flow.
 function startThoughts() {
   const box = document.getElementById("thoughtBox");
   const text = document.getElementById("thoughtText");
@@ -112,7 +112,7 @@ function startThoughts() {
   }, 3200);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: controls OCR/transcription execution timing for a smooth user flow.
 function stopThoughts() {
   clearInterval(THOUGHT_INTERVAL);
   THOUGHT_INTERVAL = null;

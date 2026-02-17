@@ -1,4 +1,4 @@
-// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
+// User value: shows clear processing timing so users can set expectations.
 function parseBackendTime(value) {
   if (!value || typeof value !== "string") return null;
   if (!value.endsWith("Z") && !value.includes("+")) value += "Z";
@@ -6,7 +6,7 @@ function parseBackendTime(value) {
   return isNaN(d) ? null : d;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: formats OCR/transcription details into clear user-facing text.
 function formatDate(value) {
   const d = parseBackendTime(value);
   if (!d) return "";
@@ -22,7 +22,7 @@ function formatDate(value) {
   }) + " IST";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function formatRelativeTime(value) {
   const past = parseBackendTime(value);
   if (!past) return "";
@@ -39,7 +39,7 @@ function formatRelativeTime(value) {
   return `${day} day${day > 1 ? "s" : ""} ago`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: formats OCR/transcription details into clear user-facing text.
 function formatStatus(status) {
   if (!status) return "";
   return status.toLowerCase()
@@ -47,7 +47,7 @@ function formatStatus(status) {
     .replace(" — ", " ");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports safeJson so the OCR/transcription journey stays clear and reliable.
 async function safeJson(res) {
   const raw = await res.text();
   if (!raw) return null;
@@ -58,7 +58,7 @@ async function safeJson(res) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports generateRequestId so the OCR/transcription journey stays clear and reliable.
 function generateRequestId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return `req-${window.crypto.randomUUID()}`;
@@ -67,7 +67,7 @@ function generateRequestId() {
   return `req-${Date.now().toString(16)}-${rand}`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports resolveRequestId so the OCR/transcription journey stays clear and reliable.
 function resolveRequestId(preferred = "") {
   const direct = String(preferred || "").trim();
   if (direct) return direct;
@@ -78,7 +78,7 @@ function resolveRequestId(preferred = "") {
   return next;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: protects user access before OCR/transcription actions are allowed.
 function authHeadersWithRequestId({ requestId = "", includeAuth = true } = {}) {
   const headers = {};
   if (includeAuth && ID_TOKEN) {
@@ -93,9 +93,9 @@ window.generateRequestId = generateRequestId;
 window.resolveRequestId = resolveRequestId;
 window.authHeadersWithRequestId = authHeadersWithRequestId;
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports responseErrorMessage so the OCR/transcription journey stays clear and reliable.
 function responseErrorMessage(res, payload, fallback) {
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: protects user access before OCR/transcription actions are allowed.
   const normalizeAuthError = (msg) => {
     const text = String(msg || "").toLowerCase();
     if (text.includes("invalid google token") || text.includes("invalid token")) {
@@ -114,7 +114,7 @@ function responseErrorMessage(res, payload, fallback) {
   return fallback;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getJobFailureMessage(data) {
   if (!data || typeof data !== "object") {
     return "Processing failed. Please try again.";

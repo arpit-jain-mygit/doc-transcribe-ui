@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function loadUtils() {
   const code = fs.readFileSync("/Users/arpitjain/VSProjects/doc-transcribe-ui/js/utils.js", "utf8");
   const sandbox = {

@@ -1,4 +1,4 @@
-// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
+// User value: updates user-visible OCR/transcription state accurately.
 function setUIBusy(isBusy) {
   UI_BUSY = isBusy;
 
@@ -15,14 +15,14 @@ function setUIBusy(isBusy) {
   });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getDisplayName(email) {
   const raw = String(email || "").trim();
   if (!raw) return "Account";
   return raw.split("@")[0] || raw;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getAvatarInitials(email) {
   const base = String(email || "").split("@")[0].replace(/[^a-zA-Z0-9]+/g, " ").trim();
   if (!base) return "U";
@@ -31,7 +31,7 @@ function getAvatarInitials(email) {
   return base.slice(0, 2).toUpperCase();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: renders UI state so users can track OCR/transcription progress.
 function renderAvatar(picture, email) {
   const wrap = document.querySelector(".user-avatar-wrap");
   const avatar = document.getElementById("userAvatar");
@@ -64,7 +64,7 @@ window.setUserProfileIdentity = function setUserProfileIdentity({ email, picture
 
 window.WORKSPACE_VIEW = "conversion";
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports applyWorkspaceTabState so the OCR/transcription journey stays clear and reliable.
 function applyWorkspaceTabState(view) {
   const conversionTab = document.getElementById("workspaceTabConversion");
   const historyTab = document.getElementById("workspaceTabHistory");
@@ -107,7 +107,7 @@ window.initWorkspaceView = function initWorkspaceView() {
   window.setWorkspaceView("conversion", { loadHistory: false });
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports closeAccountMenu so the OCR/transcription journey stays clear and reliable.
 function closeAccountMenu() {
   const dropdown = document.getElementById("accountDropdown");
   const chip = document.getElementById("accountChip");
@@ -138,7 +138,7 @@ if (!window.__ACCOUNT_MENU_WIRED__) {
   window.__ACCOUNT_MENU_WIRED__ = true;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function showLoggedInUI() {
   document.body.classList.add("logged-in");   // ✅ ADD THIS
 
@@ -161,7 +161,7 @@ function showLoggedInUI() {
 }
 
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function showLoggedOutUI() {
   document.body.classList.remove("logged-in"); // ✅ ADD THIS
 
@@ -177,7 +177,7 @@ function showLoggedOutUI() {
 }
 
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function toast(message, type = "info") {
   const box = document.getElementById("toasts");
   if (!box) return;
@@ -206,7 +206,7 @@ function toast(message, type = "info") {
   setTimeout(() => div.remove(), durationMs);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function showPending() {
   IS_PENDING = true;
   const banner = document.getElementById("approvalBanner");
@@ -216,7 +216,7 @@ function showPending() {
     .forEach(z => z.classList.add("disabled"));
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function hidePending() {
   IS_PENDING = false;
   const banner = document.getElementById("approvalBanner");
@@ -233,7 +233,7 @@ window.toggleAuthOnly = function (isLoggedIn) {
   authOnly.style.display = isLoggedIn ? "block" : "none";
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function hideCompletion() {
   const wrapper = document.querySelector(".completion-wrapper");
   if (wrapper) wrapper.style.display = "none";
@@ -263,7 +263,7 @@ window.toggleFormatChips = function toggleFormatChips(button) {
 };
 
 // COMPLETION RENDER
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function parseCompletionDurationSeconds(raw) {
   if (raw === null || raw === undefined || raw === "") return NaN;
   if (typeof raw === "number") return raw;
@@ -289,7 +289,7 @@ function parseCompletionDurationSeconds(raw) {
   return NaN;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function formatCompletionCompactDuration(totalSeconds) {
   const rounded = Math.max(0, Math.round(Number(totalSeconds) || 0));
   const hrs = Math.floor(rounded / 3600);
@@ -303,7 +303,7 @@ function formatCompletionCompactDuration(totalSeconds) {
   return parts.join(" ");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function formatCompletionMediaDuration(secondsRaw) {
   const total = parseCompletionDurationSeconds(secondsRaw);
   if (!Number.isFinite(total) || total < 0) return "";
@@ -317,12 +317,12 @@ function formatCompletionMediaDuration(secondsRaw) {
   return `${secs}s`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps job/status fields consistent across OCR/transcription views.
 function jobContract() {
   return window.JOB_CONTRACT || {};
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 function getCompletionTranscriptionMediaDuration(job) {
   const candidates = [
     job.media_duration_sec,
@@ -345,7 +345,7 @@ function getCompletionTranscriptionMediaDuration(job) {
   return "";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: formats OCR/transcription details into clear user-facing text.
 function formatCompletionJobTypeLabel(job) {
   const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
   if (jobType === "OCR") return "PDF / Image to Hindi Text";
@@ -353,7 +353,7 @@ function formatCompletionJobTypeLabel(job) {
   return job?.job_type || "";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports completionDetailClassToken so the OCR/transcription journey stays clear and reliable.
 function completionDetailClassToken(value) {
   return String(value || "")
     .trim()
@@ -362,7 +362,7 @@ function completionDetailClassToken(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getCompletionJobTypeThemeClass(job) {
   const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
   if (jobType === "OCR") return "completion-job-type-ocr";
@@ -370,7 +370,7 @@ function getCompletionJobTypeThemeClass(job) {
   return "completion-job-type-neutral";
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: gives users clear feedback during OCR/transcription operations.
 function showCompletion(job) {
   const wrapper = document.querySelector(".completion-wrapper");
   if (wrapper) {
@@ -485,7 +485,7 @@ function showCompletion(job) {
 
 
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: updates user-visible OCR/transcription state accurately.
 function updateProcessingHeader(job) {
   const header = document.getElementById("processingHeader");
   if (!header || !job) return;

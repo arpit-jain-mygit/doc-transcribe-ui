@@ -103,7 +103,7 @@ window.hideProcessing = function () {
   // Backend job continues safely.
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: prepares a stable OCR/transcription experience before user actions.
 function bootstrapLoggedOutUI() {
   // Ensure logged-out UI is visible
   showLoggedOutUI();

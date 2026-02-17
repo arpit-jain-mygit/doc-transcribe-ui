@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: keeps job/status fields consistent across OCR/transcription views.
 function loadJobContract() {
   const code = fs.readFileSync("/Users/arpitjain/VSProjects/doc-transcribe-ui/js/job-contract.js", "utf8");
   const sandbox = { window: {} };

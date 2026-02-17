@@ -21,59 +21,59 @@
     JOB_STATUSES.CANCELLED,
   ]);
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: normalizes data so users see consistent OCR/transcription results.
   function normalizeJobType(raw) {
     return String(raw || "").trim().toUpperCase();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: keeps users updated with live OCR/transcription progress.
   function normalizeJobStatus(raw) {
     return String(raw || "").trim().toUpperCase();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: supports resolveJobType so the OCR/transcription journey stays clear and reliable.
   function resolveJobType(job) {
     if (!job || typeof job !== "object") return "";
     return normalizeJobType(job.job_type || job.type || job.mode || "");
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: keeps users updated with live OCR/transcription progress.
   function resolveJobStatus(job) {
     if (!job || typeof job !== "object") return "";
     return normalizeJobStatus(job.status || "");
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: supports resolveRequestId so the OCR/transcription journey stays clear and reliable.
   function resolveRequestId(job) {
     if (!job || typeof job !== "object") return "";
     return String(job.request_id || "").trim();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: submits user files safely for OCR/transcription processing.
   function resolveUploadedFilename(job) {
     if (!job || typeof job !== "object") return "";
     return String(job.input_filename || job.filename || job.input_file || "").trim();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: supports resolveInputSizeBytes so the OCR/transcription journey stays clear and reliable.
   function resolveInputSizeBytes(job) {
     if (!job || typeof job !== "object") return NaN;
     return Number(job.input_size_bytes);
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: supports resolveOutputFilename so the OCR/transcription journey stays clear and reliable.
   function resolveOutputFilename(job) {
     if (!job || typeof job !== "object") return "";
     return String(job.output_filename || job.output_file || "transcript.txt").trim();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: lets users fetch generated OCR/transcription output reliably.
   function resolveDownloadUrl(job) {
     if (!job || typeof job !== "object") return "";
     return String(job.download_url || job.output_path || "").trim();
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: shows clear processing timing so users can set expectations.
   function resolveDurationSec(job) {
     if (!job || typeof job !== "object") return NaN;
     const candidates = [
@@ -91,7 +91,7 @@
     return NaN;
   }
 
-  // User value: This step keeps the user OCR/transcription flow clear and dependable.
+  // User value: supports resolveTotalPages so the OCR/transcription journey stays clear and reliable.
   function resolveTotalPages(job) {
     if (!job || typeof job !== "object") return NaN;
     const n = Number(job.total_pages);

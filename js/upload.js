@@ -1,4 +1,4 @@
-// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
+// User value: submits user files safely for OCR/transcription processing.
 async function uploadFrom(type, inputId) {
   const input = document.getElementById(inputId);
   if (!input || !input.files.length) {
@@ -21,7 +21,7 @@ const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ �
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 const IDEMPOTENCY_CACHE = Object.create(null);
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports detectModeForFile so the OCR/transcription journey stays clear and reliable.
 function detectModeForFile(file) {
   const name = String(file?.name || "").toLowerCase();
   if (OCR_EXTENSIONS.some((ext) => name.endsWith(ext))) return "OCR";
@@ -29,7 +29,7 @@ function detectModeForFile(file) {
   return UPLOAD_MODE;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function applyUploadMode(mode) {
   const next = String(mode || "").toUpperCase() === "TRANSCRIPTION" ? "TRANSCRIPTION" : "OCR";
   UPLOAD_MODE = next;
@@ -44,7 +44,7 @@ function applyUploadMode(mode) {
   if (label) label.textContent = DROPZONE_HINT_HI;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function clearUploadInputState(inputId = "unifiedFile") {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -67,7 +67,7 @@ window.initUnifiedUpload = function initUnifiedUpload() {
   applyUploadMode(UPLOAD_MODE);
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function createUploadFormData(file, type) {
   const fd = new FormData();
   fd.append("file", file);
@@ -75,7 +75,7 @@ function createUploadFormData(file, type) {
   return fd;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 async function normalizeUploadFile(file) {
   if (!file) return file;
   try {
@@ -89,7 +89,7 @@ async function normalizeUploadFile(file) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function uploadFingerprint(type, file) {
   const t = String(type || "").toUpperCase();
   const n = String(file?.name || "").trim();
@@ -98,7 +98,7 @@ function uploadFingerprint(type, file) {
   return `${t}|${n}|${s}|${m}`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: loads latest OCR/transcription data so users see current status.
 function getUploadIdempotencyKey(type, file) {
   const fp = uploadFingerprint(type, file);
   const now = Date.now();
@@ -111,7 +111,7 @@ function getUploadIdempotencyKey(type, file) {
   return key;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports estimateProcessingHint so the OCR/transcription journey stays clear and reliable.
 function estimateProcessingHint(type, file, mediaDurationSec = null) {
   const sizeMb = Math.max(0, Number(file?.size || 0) / (1024 * 1024));
   if (String(type).toUpperCase() === "TRANSCRIPTION") {
@@ -125,7 +125,7 @@ function estimateProcessingHint(type, file, mediaDurationSec = null) {
   return `अनुमानित समय: PDF/Image के लिए लगभग ${bands} मिनट (गुणवत्ता/पेज पर निर्भर)।`;
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: shows clear processing timing so users can set expectations.
 async function getMediaDurationSec(file) {
   if (!file) return null;
   const name = String(file.name || "").toLowerCase();
@@ -135,7 +135,7 @@ async function getMediaDurationSec(file) {
     const el = document.createElement("audio");
     el.preload = "metadata";
     const url = URL.createObjectURL(file);
-    // User value: This step keeps the user OCR/transcription flow clear and dependable.
+    // User value: supports cleanup so the OCR/transcription journey stays clear and reliable.
     const cleanup = () => {
       try { URL.revokeObjectURL(url); } catch {}
       el.src = "";
@@ -154,7 +154,7 @@ async function getMediaDurationSec(file) {
   });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "", extraHeaders = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -197,19 +197,19 @@ function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "",
   });
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports isLikelyInAppBrowser so the OCR/transcription journey stays clear and reliable.
 function isLikelyInAppBrowser() {
   const ua = String(navigator.userAgent || "");
   return /FBAN|FBAV|Instagram|Line|LinkedInApp|Snapchat|Twitter|wv\)|; wv\)/i.test(ua);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports isMobileBrowser so the OCR/transcription journey stays clear and reliable.
 function isMobileBrowser() {
   const ua = String(navigator.userAgent || "");
   return /Android|iPhone|iPad|iPod/i.test(ua);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 function resetAfterUploadError() {
   if (typeof stopPolling === "function") stopPolling();
   if (typeof stopThoughts === "function") stopThoughts();
@@ -241,7 +241,7 @@ function resetAfterUploadError() {
   if (typeof setUIBusy === "function") setUIBusy(false);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: submits user files safely for OCR/transcription processing.
 async function upload(type, file) {
   if (JOB_ID && !window.JOB_COMPLETED) {
     toast("A job is already running", "info");
@@ -450,7 +450,7 @@ async function upload(type, file) {
   startPolling();
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: lets users fetch generated OCR/transcription output reliably.
 function forceDownload(url, filename) {
   if (!filename) {
     throw new Error("forceDownload called without filename");

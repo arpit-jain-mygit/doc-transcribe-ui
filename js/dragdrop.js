@@ -1,4 +1,4 @@
-// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
+// User value: supports attachDragDrop so the OCR/transcription journey stays clear and reliable.
 function attachDragDrop(zoneId, inputId, nameId) {
   const zone = document.getElementById(zoneId);
   const input = document.getElementById(inputId);

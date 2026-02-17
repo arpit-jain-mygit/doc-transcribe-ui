@@ -22,7 +22,7 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
 };
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports send so the OCR/transcription journey stays clear and reliable.
 function send(res, statusCode, body, headers = {}) {
   if (!headers["Cache-Control"]) {
     headers["Cache-Control"] = "no-store";
@@ -31,14 +31,14 @@ function send(res, statusCode, body, headers = {}) {
   res.end(body);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports safePath so the OCR/transcription journey stays clear and reliable.
 function safePath(urlPath) {
   const clean = decodeURIComponent(urlPath.split('?')[0]);
   const normalized = path.normalize(clean).replace(/^(\.\.[/\\])+/, '');
   return path.join(ROOT, normalized);
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports proxyApi so the OCR/transcription journey stays clear and reliable.
 async function proxyApi(req, res) {
   const upstreamUrl = `${API_ORIGIN}${req.url.replace(/^\/api/, '')}`;
   const headers = { ...req.headers };
@@ -81,7 +81,7 @@ async function proxyApi(req, res) {
   }
 }
 
-// User value: This step keeps the user OCR/transcription flow clear and dependable.
+// User value: supports serveStatic so the OCR/transcription journey stays clear and reliable.
 function serveStatic(req, res) {
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';
