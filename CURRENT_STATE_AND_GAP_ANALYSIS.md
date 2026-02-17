@@ -167,7 +167,7 @@ Legend:
 ### G-11: DLQ payload lacks full diagnostic envelope
 - Severity: Medium
 - Impact: Replay and root-cause analysis need manual digging.
-- Status: Closed (Code).
+- Status: Closed (Tested).
 - Implemented artifacts:
   - Worker: `worker/dead_letter.py` (DLQ envelope builder)
   - Worker: `worker/worker_loop.py` (DLQ push now stores enriched JSON instead of raw payload only)
@@ -196,8 +196,7 @@ Legend:
   - API: `services/auth.py` now enforces strict token checks (`iss`, `aud`, `azp`, `exp`, `nbf`, `iat`, `email_verified`) with normalized auth error codes.
   - API: `routes/auth.py` reuses shared strict validator to avoid endpoint-level drift.
   - API: strict CORS allowlist moved to env config (`CORS_ALLOW_ORIGINS`) with startup validation; no implicit broad regex defaults.
-- Remaining:
-  - `PRS-015` server-side MIME/extension/size validation.
+  - API: upload now validates extension/MIME/size per job type (`routes/upload.py`) with stable error codes and env limits.
 - Fix backlog:
   - [PRS-013](./PRODUCTION_READINESS_BACKLOG.md#prs-013)
   - [PRS-014](./PRODUCTION_READINESS_BACKLOG.md#prs-014)

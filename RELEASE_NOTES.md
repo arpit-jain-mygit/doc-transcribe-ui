@@ -305,3 +305,22 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - API: `c43bd1d`
 - Status: `Completed (Tested)`
+
+### PRS-015
+- Backlog ID: `PRS-015`
+- Backlog Link: [PRS-015](./PRODUCTION_READINESS_BACKLOG.md#prs-015)
+- Gap Link: [G-13](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-13)
+- Type: `NFR` + `Security and validation`
+- Summary: Added strict server-side upload validation for extension, MIME type, and file size.
+- Why: Reject unsupported files early and avoid late worker failures for invalid payloads.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/startup_env.py`
+- Risk: `Medium`
+- Validation:
+  - Python compile checks passed for touched upload/startup modules.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+- Commit:
+  - API: `ac7f150`
+- Status: `Completed (Tested)`
