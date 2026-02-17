@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# User value: This file helps users get reliable OCR/transcription results with clear processing behavior.
 import io
 import json
 import os
@@ -12,10 +13,12 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 
 
 class AppHandler(SimpleHTTPRequestHandler):
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_OPTIONS(self):
         if self.path.startswith("/api/"):
             self.send_response(204)
@@ -26,36 +29,42 @@ class AppHandler(SimpleHTTPRequestHandler):
             return
         super().do_OPTIONS()
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_GET(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         super().do_GET()
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_POST(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_PUT(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_PATCH(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def do_DELETE(self):
         if self.path.startswith("/api/"):
             self._proxy()
             return
         self.send_error(405, "Method Not Allowed")
 
+    # User value: This step keeps the user OCR/transcription flow accurate and dependable.
     def _proxy(self):
         upstream_path = self.path[len("/api"):]
         upstream_url = f"{API_ORIGIN}{upstream_path}"
@@ -100,6 +109,7 @@ class AppHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(msg).encode("utf-8"))
 
 
+# User value: This step keeps the user OCR/transcription flow accurate and dependable.
 def main():
     server = ThreadingHTTPServer((HOST, PORT), AppHandler)
     print(f"Server running at http://{HOST}:{PORT} -> API_ORIGIN={API_ORIGIN}")

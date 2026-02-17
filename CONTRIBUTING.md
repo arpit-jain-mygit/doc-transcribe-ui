@@ -9,6 +9,7 @@ Follow `/ARCHITECTURE.md` layer boundaries before creating/modifying files.
 - Keep user-facing error messages deterministic.
 - Update docs if contract/behavior changed.
 - Add test notes (what was verified locally).
+- Add a crisp user-centric comment at file top and at method/function level for every new/modified code file.
 
 ## Logging minimum
 - Include `job_id` where available.

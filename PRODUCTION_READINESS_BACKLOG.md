@@ -54,6 +54,7 @@ Status values:
 | PRS-031 | 9 | Add unit tests for core logic and formatters | All | Quality | Prevents regressions | Completed (Tested) | Completed (Local + Cloud Regression) | API: added `unittest` coverage for upload orchestrator constraints/idempotency helpers; Worker: added `unittest` coverage for status transitions and error classification; UI: added Node unit tests for `job-contract.js` and `utils.js` plus `npm test` script. |
 | PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Completed (Tested) | Completed (Local + Cloud Regression) | UI/scripts: upgraded local/cloud regression runners to certify lifecycle status sequences (`QUEUED/PROCESSING->COMPLETED`), and emit machine-readable integration reports (`integration-local*.jsonl`, `integration-cloud*.jsonl`) with scenario/job/request/duration/result. |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Completed (Tested) | Completed (Local + Cloud Regression) | Added repo CI workflows: API/Worker run unit tests + contract sanity checks; UI runs unit tests + regression script syntax gates in GitHub Actions. |
+| PRS-034 | 8 | Add user-centric file and method comments across code/config files | All | Maintainability and supportability | Faster developer/tester/support understanding of OCR/transcription flow | Completed (Code) | Pending (Run Local + Cloud Regression) | UI/API/Worker: added crisp user-centric comments at file top and method/function level (where applicable) across `.js`, `.html`, `.css`, `.py`, `.yaml`, `.yml` tracked files. |
 
 ## Backlog Item Anchors
 
@@ -90,6 +91,7 @@ Status values:
 - <a id="prs-031"></a>`PRS-031`
 - <a id="prs-032"></a>`PRS-032`
 - <a id="prs-033"></a>`PRS-033`
+- <a id="prs-034"></a>`PRS-034`
 
 ## Execution order
 1. Phase 1 + Phase 2
@@ -122,6 +124,7 @@ Status values:
 - 2026-02-17: PRS-032 code-complete with lifecycle-aware integration assertions and JSONL evidence reports in local/cloud regression runners; awaiting bounded regression validation.
 - 2026-02-18: PRS-019..027 and PRS-033 implemented at code level (queue partitioning, worker concurrency controls, load baseline, readiness checks, runbooks, feature flags, quotas/limits, retry budgets, UI effort hints, CI gates); awaiting bounded regression validation.
 - 2026-02-18: PRS-016, PRS-019..027, PRS-031..033 validated with local + cloud regression and marked `Completed (Tested)`.
+- 2026-02-18: PRS-034 completed at code level by adding crisp user-centric file/method comments across UI/API/Worker source/config files; regression pending.
 
 ## Detailed Item Specifications
 
@@ -159,6 +162,7 @@ Status values:
 - [PRS-031 - Add unit tests for core logic and formatters](#prs-031--add-unit-tests-for-core-logic-and-formatters)
 - [PRS-032 - Add integration tests for e2e job lifecycle](#prs-032--add-integration-tests-for-e2e-job-lifecycle)
 - [PRS-033 - Add CI gates (`lint`, tests, contract checks)](#prs-033--add-ci-gates-lint-tests-contract-checks)
+- [PRS-034 - Add user-centric file and method comments across code/config files](#prs-034--add-user-centric-file-and-method-comments-across-codeconfig-files)
 
 
 ### PRS-001 - Define architecture boundaries and coding standards
@@ -1431,3 +1435,38 @@ Status values:
 **Exit criteria for marking status**
 - `Completed (Code)`: code and docs updated in scoped repos.
 - `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+
+### PRS-034 - Add user-centric file and method comments across code/config files
+
+**Purpose**
+- Add short, user-centric comments so each file/function quickly explains how it helps users complete OCR/transcription successfully.
+
+**Why this is in Phase 8**
+- This is a maintainability and supportability improvement tied to modularization quality in Phase 8.
+
+**Repo touchpoints**
+- Scope: `All` (`UI`, `API`, `Worker`).
+- File-level comments added for tracked `.js`, `.html`, `.css`, `.py`, `.yaml`, `.yml` files.
+- Method/function-level comments added where methods exist (`.py` and `.js`).
+
+**Functional requirement served**
+- Maintainability and supportability
+
+**User benefit**
+- Faster issue triage and safer changes, leading to fewer OCR/transcription regressions in user-facing flows.
+
+**Implementation outline**
+1. Add a crisp file-top comment (1 line) describing user value.
+2. Add a crisp method-level comment (1 line) before each function/method where applicable.
+3. Keep comments idempotent and non-duplicative when rerun.
+4. Keep syntax-safe across Python/JS/HTML/CSS/YAML.
+
+**Detailed test plan**
+1. Run Python syntax validation for API/Worker tracked `.py` files (`py_compile`).
+2. Run local bounded regression script.
+3. Run cloud bounded regression script.
+
+**Exit criteria for marking status**
+- `Completed (Code)`: comments added across scoped files with syntax validation passing.
+- `Completed (Tested)`: local + cloud regression green and docs updated.
+

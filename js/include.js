@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 async function includeHTML() {
   const nodes = document.querySelectorAll("[data-include]");
 

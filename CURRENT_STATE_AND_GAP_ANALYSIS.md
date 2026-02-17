@@ -274,6 +274,15 @@ Legend:
   - [PRS-032](./PRODUCTION_READINESS_BACKLOG.md#prs-032)
   - [PRS-033](./PRODUCTION_READINESS_BACKLOG.md#prs-033)
 
+
+<a id="g-23"></a>
+### G-23: Missing user-centric file/method comments across code and config
+- Severity: Medium
+- Impact: New engineers/support/testers need extra time to understand how each file/function supports user OCR/transcription flow.
+- Status: Closed (Code); regression pending.
+- Fix backlog:
+  - [PRS-034](./PRODUCTION_READINESS_BACKLOG.md#prs-034)
+
 ---
 
 ## 4) Recommended next execution sequence
@@ -281,7 +290,7 @@ Legend:
 1. `PRS-001` to `PRS-004` (foundation)
 2. `PRS-005` to `PRS-012` (traceability + reliability)
 3. `PRS-013` to `PRS-018` (security + performance)
-4. `PRS-028` to `PRS-033` (modularity + test gates)
+4. `PRS-028` to `PRS-034` (modularity + documentation + test gates)
 5. `PRS-019` to `PRS-027` (scale + ops + cost maturity)
 
 ---

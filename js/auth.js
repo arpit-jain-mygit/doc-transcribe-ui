@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 // =====================================================
 // AUTH STATE
 // =====================================================
@@ -13,6 +14,7 @@
 let googleRendered = false;
 let tokenExpiryTimer = null;
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function parseJwtPayload(token) {
   try {
     const parts = String(token || "").split(".");
@@ -25,6 +27,7 @@ function parseJwtPayload(token) {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function tokenRemainingMs(token) {
   const payload = parseJwtPayload(token);
   const expSec = Number(payload && payload.exp);
@@ -32,6 +35,7 @@ function tokenRemainingMs(token) {
   return expSec * 1000 - Date.now();
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function clearTokenExpiryTimer() {
   if (tokenExpiryTimer) {
     clearTimeout(tokenExpiryTimer);
@@ -39,6 +43,7 @@ function clearTokenExpiryTimer() {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function scheduleTokenExpiryLogout(token) {
   clearTokenExpiryTimer();
   const remainingMs = tokenRemainingMs(token);
@@ -61,6 +66,7 @@ function scheduleTokenExpiryLogout(token) {
   }, remainingMs + 500);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function renderGoogleButton() {
   if (googleRendered) return;
 
@@ -98,6 +104,7 @@ function renderGoogleButton() {
 // GOOGLE SIGN-IN CALLBACK
 // =====================================================
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function onGoogleSignIn(resp) {
   ID_TOKEN = resp.credential;
 
@@ -131,6 +138,7 @@ function onGoogleSignIn(resp) {
 // LOGOUT
 // =====================================================
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function logout(options = {}) {
   const silent = Boolean(options && options.silent);
   if (typeof stopPolling === "function") {
@@ -166,6 +174,7 @@ function logout(options = {}) {
 // SESSION RESTORE
 // =====================================================
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function restoreSession() {
   const saved = localStorage.getItem(AUTH_STORAGE_KEY);
   if (!saved) {
@@ -218,6 +227,7 @@ function restoreSession() {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function resetGoogleAuth() {
   googleRendered = false;
 

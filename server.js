@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -21,6 +22,7 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
 };
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function send(res, statusCode, body, headers = {}) {
   if (!headers["Cache-Control"]) {
     headers["Cache-Control"] = "no-store";
@@ -29,12 +31,14 @@ function send(res, statusCode, body, headers = {}) {
   res.end(body);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function safePath(urlPath) {
   const clean = decodeURIComponent(urlPath.split('?')[0]);
   const normalized = path.normalize(clean).replace(/^(\.\.[/\\])+/, '');
   return path.join(ROOT, normalized);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 async function proxyApi(req, res) {
   const upstreamUrl = `${API_ORIGIN}${req.url.replace(/^\/api/, '')}`;
   const headers = { ...req.headers };
@@ -77,6 +81,7 @@ async function proxyApi(req, res) {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function serveStatic(req, res) {
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';

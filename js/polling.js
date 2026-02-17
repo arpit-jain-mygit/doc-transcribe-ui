@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 /* =========================================================
    POLLING — SINGLE SOURCE OF TRUTH (FINAL)
    ========================================================= */
@@ -12,10 +13,12 @@ const POLL_INTERVAL_ACTIVE_MS = 3000;
 const POLL_INTERVAL_BACKGROUND_MS = 10000;
 const POLL_INTERVAL_RETRY_MS = 5000;
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function currentPollDelayMs() {
   return document.hidden ? POLL_INTERVAL_BACKGROUND_MS : POLL_INTERVAL_ACTIVE_MS;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function scheduleNextPoll(sessionId, delayMs) {
   if (!window.POLLING_ACTIVE || !JOB_ID || sessionId !== POLL_SESSION_ID) return;
   if (POLL_INTERVAL) clearTimeout(POLL_INTERVAL);
@@ -24,6 +27,7 @@ function scheduleNextPoll(sessionId, delayMs) {
     pollStatus(sessionId);
   }, nextDelay);
 }
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function updateProcessingMetrics({ progressValue }) {
   const pctEl = document.getElementById("progressPct");
   if (!pctEl) return;
@@ -32,6 +36,7 @@ function updateProcessingMetrics({ progressValue }) {
   pctEl.textContent = `${pct}%`;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function humanizeStage(stage) {
   if (!stage) return "";
 
@@ -55,6 +60,7 @@ function humanizeStage(stage) {
 /* ---------------------------------------------------------
    IMMEDIATE PROGRESS BOOTSTRAP (UI ONLY)
    --------------------------------------------------------- */
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function bootstrapProgress(stageText = "Preparing…", value = 3) {
   const statusBox = document.getElementById("statusBox");
   const progressEl = document.getElementById("progress");
@@ -87,6 +93,7 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
 
 window.bootstrapProgress = bootstrapProgress;
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 async function cancelJobById(jobId, { silent = false } = {}) {
   if (!jobId || !ID_TOKEN) return false;
   const activeType = String(window.ACTIVE_JOB_TYPE || "").toUpperCase();
@@ -157,6 +164,7 @@ window.cancelCurrentJob = async function cancelCurrentJob() {
   }
 };
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function startPolling() {
   if (!JOB_ID) return;
   if (
@@ -192,6 +200,7 @@ function startPolling() {
   pollStatus(sessionId);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function stopPolling() {
   if (POLL_INTERVAL) {
     clearTimeout(POLL_INTERVAL);
@@ -201,6 +210,7 @@ function stopPolling() {
   ACTIVE_POLLED_JOB_ID = null;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 async function pollStatus(sessionId = POLL_SESSION_ID) {
   if (sessionId !== POLL_SESSION_ID) return;
   if (!JOB_ID || !ID_TOKEN) return;
@@ -255,6 +265,7 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function updateProcessingUI(data) {
   const progressEl = document.getElementById("progress");
   const stageEl = document.getElementById("stage");
@@ -298,6 +309,7 @@ function updateProcessingUI(data) {
   updateProcessingMetrics({ progressValue: effectiveProgress });
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function completeAndResetUI() {
   if (typeof stopThoughts === "function") stopThoughts();
 
@@ -326,6 +338,7 @@ function completeAndResetUI() {
   if (typeof clearUploadInputState === "function") clearUploadInputState("unifiedFile");
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function handleJobCompleted(data) {
   if (CANCEL_REQUESTED) {
     completeAndResetUI();
@@ -363,6 +376,7 @@ function handleJobCompleted(data) {
   toast("Processing completed", "success");
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function handleJobFailed(data) {
   completeAndResetUI();
 
@@ -381,6 +395,7 @@ function handleJobFailed(data) {
   toast(`Processing failed: ${detail}`, "error");
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function handleJobCancelled(data) {
   CANCEL_REQUESTED = false;
   completeAndResetUI();

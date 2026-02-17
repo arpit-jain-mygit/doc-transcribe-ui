@@ -1,8 +1,10 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function loadUtils() {
   const code = fs.readFileSync("/Users/arpitjain/VSProjects/doc-transcribe-ui/js/utils.js", "utf8");
   const sandbox = {

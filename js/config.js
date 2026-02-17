@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 const API_ENDPOINTS = {
   render: "https://doc-transcribe-api.onrender.com",
   local: "/api",

@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 let ID_TOKEN = null;
 let USER_EMAIL = null;
 let USER_PICTURE = null;

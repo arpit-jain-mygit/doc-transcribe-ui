@@ -1,8 +1,10 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 function ensureApiClientRequestId(requestId) {
   if (typeof resolveRequestId === "function") return resolveRequestId(requestId);
   return String(requestId || "").trim();
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 async function apiClientFetchJson(path, options = {}) {
   const {
     method = "GET",

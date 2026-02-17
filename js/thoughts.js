@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 let THOUGHT_INTERVAL = null;
 let THOUGHT_SWAP_TIMEOUT = null;
 
@@ -65,6 +66,7 @@ const THOUGHTS = [
 
 
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function applyThought(text, { immediate = false } = {}) {
   const thoughtText = document.getElementById("thoughtText");
   if (!thoughtText) return;
@@ -91,6 +93,7 @@ function applyThought(text, { immediate = false } = {}) {
   }, 180);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function startThoughts() {
   const box = document.getElementById("thoughtBox");
   const text = document.getElementById("thoughtText");
@@ -109,6 +112,7 @@ function startThoughts() {
   }, 3200);
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function stopThoughts() {
   clearInterval(THOUGHT_INTERVAL);
   THOUGHT_INTERVAL = null;

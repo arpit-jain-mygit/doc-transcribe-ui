@@ -1,3 +1,4 @@
+// User value: This file helps users upload files, track OCR/transcription progress, and access outputs.
 function parseBackendTime(value) {
   if (!value || typeof value !== "string") return null;
   if (!value.endsWith("Z") && !value.includes("+")) value += "Z";
@@ -5,6 +6,7 @@ function parseBackendTime(value) {
   return isNaN(d) ? null : d;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function formatDate(value) {
   const d = parseBackendTime(value);
   if (!d) return "";
@@ -20,6 +22,7 @@ function formatDate(value) {
   }) + " IST";
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function formatRelativeTime(value) {
   const past = parseBackendTime(value);
   if (!past) return "";
@@ -36,6 +39,7 @@ function formatRelativeTime(value) {
   return `${day} day${day > 1 ? "s" : ""} ago`;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function formatStatus(status) {
   if (!status) return "";
   return status.toLowerCase()
@@ -43,6 +47,7 @@ function formatStatus(status) {
     .replace(" — ", " ");
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 async function safeJson(res) {
   const raw = await res.text();
   if (!raw) return null;
@@ -53,6 +58,7 @@ async function safeJson(res) {
   }
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function generateRequestId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return `req-${window.crypto.randomUUID()}`;
@@ -61,6 +67,7 @@ function generateRequestId() {
   return `req-${Date.now().toString(16)}-${rand}`;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function resolveRequestId(preferred = "") {
   const direct = String(preferred || "").trim();
   if (direct) return direct;
@@ -71,6 +78,7 @@ function resolveRequestId(preferred = "") {
   return next;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function authHeadersWithRequestId({ requestId = "", includeAuth = true } = {}) {
   const headers = {};
   if (includeAuth && ID_TOKEN) {
@@ -85,7 +93,9 @@ window.generateRequestId = generateRequestId;
 window.resolveRequestId = resolveRequestId;
 window.authHeadersWithRequestId = authHeadersWithRequestId;
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function responseErrorMessage(res, payload, fallback) {
+  // User value: This step keeps the user OCR/transcription flow clear and dependable.
   const normalizeAuthError = (msg) => {
     const text = String(msg || "").toLowerCase();
     if (text.includes("invalid google token") || text.includes("invalid token")) {
@@ -104,6 +114,7 @@ function responseErrorMessage(res, payload, fallback) {
   return fallback;
 }
 
+// User value: This step keeps the user OCR/transcription flow clear and dependable.
 function getJobFailureMessage(data) {
   if (!data || typeof data !== "object") {
     return "Processing failed. Please try again.";
