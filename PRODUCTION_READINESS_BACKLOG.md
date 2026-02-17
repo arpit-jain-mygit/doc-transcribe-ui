@@ -34,7 +34,7 @@ Status values:
 | PRS-011 | 2 | DLQ enrichment (`error_code`, `attempts`, stage) | Worker | Recoverability | Easier failed-job replay and diagnosis | Completed (Tested) | Completed (Local + Cloud Regression) | Worker: enriched DLQ envelope with `error_code/error_type`, `attempts/max_attempts`, failed stage, queue/source/request_id, worker_id, and original payload for replay (`29c44d4`). |
 | PRS-012 | 2 | Global exception mapping to stable API payloads | API | Error consistency | Less confusing UI errors | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict global error envelope in `app.py` for HTTP/validation/unhandled exceptions with stable fields (`error_code`, `error_message`, `detail`, `path`, `request_id`) and normalized auth/not-found/conflict codes. |
 | PRS-013 | 3 | Tighten token validation (`iss`, `aud`, expiry) | API | Security | Stronger auth correctness | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict token checks for issuer/audience/authorized party/exp/nbf/iat + normalized auth error codes via `services/auth.py` and shared validation path in `routes/auth.py` (`8a81134`). |
-| PRS-014 | 3 | Environment-based strict CORS allowlist | API | Security | Fewer CORS/auth surprises | Planned | Not Tested | Pending implementation |
+| PRS-014 | 3 | Environment-based strict CORS allowlist | API | Security | Fewer CORS/auth surprises | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict env-driven CORS allowlist (`CORS_ALLOW_ORIGINS`) with startup validation; optional regex only when explicitly configured (`CORS_ALLOW_ORIGIN_REGEX`) in `app.py` and `startup_env.py`. UI scripts: local stack now injects safe default `CORS_ALLOW_ORIGINS` for API startup. |
 | PRS-015 | 3 | Server-side MIME/extension/size validation | API | Security and validation | Clear rejection of unsupported files | Planned | Not Tested | Pending implementation |
 | PRS-016 | 4 | Optimize `/jobs` pagination and counts path | API | Performance | Faster history loading | Planned | Not Tested | Pending implementation |
 | PRS-017 | 4 | Reduce polling overhead and duplicate pollers | UI | Performance | Smoother app under load | Planned | Not Tested | Pending implementation |
@@ -110,6 +110,7 @@ Status values:
 - 2026-02-17: PRS-011 completed and regression-validated (local + cloud) with enriched DLQ envelope metadata in Worker.
 - 2026-02-17: PRS-012 completed and regression-validated (local + cloud) with global API exception envelope normalization.
 - 2026-02-17: PRS-013 completed and regression-validated (local + cloud) with strict token validation (`iss`, `aud`, `azp`, expiry) and normalized auth error codes.
+- 2026-02-17: PRS-014 completed and regression-validated (local + cloud) with strict environment-based CORS allowlist and local startup default wiring.
 
 ## Detailed Item Specifications
 

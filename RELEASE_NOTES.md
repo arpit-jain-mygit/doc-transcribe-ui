@@ -285,3 +285,23 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - API: `8a81134`
 - Status: `Completed (Tested)`
+
+### PRS-014
+- Backlog ID: `PRS-014`
+- Backlog Link: [PRS-014](./PRODUCTION_READINESS_BACKLOG.md#prs-014)
+- Gap Link: [G-13](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-13)
+- Type: `NFR` + `Security`
+- Summary: Enforced strict environment-based CORS allowlist and startup validation.
+- Why: Remove CORS drift and avoid implicit broad origin acceptance across environments.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/app.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/startup_env.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/start_local_stack.sh`
+- Risk: `Medium`
+- Validation:
+  - Python compile checks passed for touched API CORS/startup modules.
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+- Commit:
+  - API: `c43bd1d`
+- Status: `Completed (Tested)`

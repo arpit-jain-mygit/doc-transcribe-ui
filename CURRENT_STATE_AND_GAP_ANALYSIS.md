@@ -195,8 +195,8 @@ Legend:
 - Implemented artifacts:
   - API: `services/auth.py` now enforces strict token checks (`iss`, `aud`, `azp`, `exp`, `nbf`, `iat`, `email_verified`) with normalized auth error codes.
   - API: `routes/auth.py` reuses shared strict validator to avoid endpoint-level drift.
+  - API: strict CORS allowlist moved to env config (`CORS_ALLOW_ORIGINS`) with startup validation; no implicit broad regex defaults.
 - Remaining:
-  - `PRS-014` strict CORS allowlist.
   - `PRS-015` server-side MIME/extension/size validation.
 - Fix backlog:
   - [PRS-013](./PRODUCTION_READINESS_BACKLOG.md#prs-013)

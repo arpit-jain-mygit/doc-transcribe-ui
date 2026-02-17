@@ -12,6 +12,7 @@ API_REPO="${API_REPO:-/Users/arpitjain/PycharmProjects/doc-transcribe-api}"
 WORKER_REPO="${WORKER_REPO:-/Users/arpitjain/PycharmProjects/doc-transcribe-worker}"
 
 REDIS_URL="${REDIS_URL:-redis://localhost:6379/0}"
+CORS_ALLOW_ORIGINS="${CORS_ALLOW_ORIGINS:-http://127.0.0.1:4200,http://localhost:4200,https://doc-transcribe-ui.vercel.app}"
 API_HOST="${API_HOST:-127.0.0.1}"
 API_PORT="${API_PORT:-8090}"
 API_LEGACY_PORT="${API_LEGACY_PORT:-8080}"
@@ -123,7 +124,7 @@ if curl -fsS "http://${API_HOST}:${API_PORT}/health" >/dev/null 2>&1; then
   echo "API already running"
 else
   : >"$API_LOG"
-  nohup env REDIS_URL="$REDIS_URL" \
+  nohup env REDIS_URL="$REDIS_URL" CORS_ALLOW_ORIGINS="$CORS_ALLOW_ORIGINS" \
     "$API_REPO/.venv/bin/uvicorn" app:app \
     --app-dir "$API_REPO" \
     --host "$API_HOST" --port "$API_PORT" \
