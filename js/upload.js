@@ -17,6 +17,8 @@ const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
 const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
 let UPLOAD_MODE = "OCR";
 const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ ड्रॉप करें    ·    20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट    ·    PDF/Image: समय पेज संख्या और गुणवत्ता पर निर्भर";
+const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
+const IDEMPOTENCY_CACHE = Object.create(null);
 
 function detectModeForFile(file) {
   const name = String(file?.name || "").toLowerCase();
@@ -81,12 +83,35 @@ async function normalizeUploadFile(file) {
   }
 }
 
-function uploadViaXhr(url, token, formData, requestId = "") {
+function uploadFingerprint(type, file) {
+  const t = String(type || "").toUpperCase();
+  const n = String(file?.name || "").trim();
+  const s = String(Number(file?.size || 0));
+  const m = String(Number(file?.lastModified || 0));
+  return `${t}|${n}|${s}|${m}`;
+}
+
+function getUploadIdempotencyKey(type, file) {
+  const fp = uploadFingerprint(type, file);
+  const now = Date.now();
+  const cached = IDEMPOTENCY_CACHE[fp];
+  if (cached && (now - cached.ts) <= IDEMPOTENCY_WINDOW_MS) {
+    return cached.key;
+  }
+  const key = `idem_${now}_${Math.random().toString(36).slice(2, 10)}`;
+  IDEMPOTENCY_CACHE[fp] = { key, ts: now };
+  return key;
+}
+
+function uploadViaXhr(url, token, formData, requestId = "", idempotencyKey = "") {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Authorization", "Bearer " + token);
     xhr.setRequestHeader("X-Request-ID", resolveRequestId(requestId));
+    if (idempotencyKey) {
+      xhr.setRequestHeader("X-Idempotency-Key", idempotencyKey);
+    }
     xhr.responseType = "text";
     xhr.timeout = 240000;
 
@@ -176,8 +201,9 @@ async function upload(type, file) {
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = String(type || "").toUpperCase();
   const uploadRequestId = resolveRequestId(generateRequestId());
-  window.ACTIVE_REQUEST_ID = uploadRequestId;
   const uploadFile = await normalizeUploadFile(file);
+  const idempotencyKey = getUploadIdempotencyKey(type, uploadFile);
+  window.ACTIVE_REQUEST_ID = uploadRequestId;
   LAST_UPLOADED_FILENAME = uploadFile.name;
 
   setUIBusy(true);
@@ -194,7 +220,7 @@ async function upload(type, file) {
   const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();
   try {
     if (preferXhrPrimary) {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId);
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId, idempotencyKey);
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
@@ -216,6 +242,7 @@ async function upload(type, file) {
     } else {
       const fd = createUploadFormData(uploadFile, type);
       const reqHeaders = authHeadersWithRequestId({ requestId: uploadRequestId, includeAuth: true }).headers;
+      reqHeaders["X-Idempotency-Key"] = idempotencyKey;
       res = await fetch(`${API}/upload`, {
         method: "POST",
         headers: reqHeaders,
@@ -224,7 +251,7 @@ async function upload(type, file) {
     }
   } catch (err) {
     try {
-      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId);
+      const xhrRes = await uploadViaXhr(`${API}/upload`, ID_TOKEN, createUploadFormData(uploadFile, type), uploadRequestId, idempotencyKey);
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
