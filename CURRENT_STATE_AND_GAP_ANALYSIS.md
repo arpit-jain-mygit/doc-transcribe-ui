@@ -153,6 +153,12 @@ Legend:
 ### G-10: Retry policy is not typed by failure class
 - Severity: High
 - Impact: Potential over-retry on fatal errors or under-retry on transient ones.
+- Status: Closed (Tested).
+- Implemented artifacts:
+  - Worker: `worker/utils/retry_policy.py` (typed policies + bounded backoff + jitter)
+  - Worker: `worker/utils/gcs.py` (GCS retry path moved to typed retry runner)
+  - Worker: `worker/cancel.py` (cancel Redis check uses typed retry policy)
+  - Worker: `worker/ocr.py`, `worker/transcribe.py` (Redis status writes use typed retry policy)
 - Fix backlog:
   - [PRS-010](./PRODUCTION_READINESS_BACKLOG.md#prs-010)
   - [PRS-026](./PRODUCTION_READINESS_BACKLOG.md#prs-026)

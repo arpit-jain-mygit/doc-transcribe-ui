@@ -80,3 +80,40 @@ Primary source backlog: `/Users/arpitjain/VSProjects/doc-transcribe-ui/PRODUCTIO
 | PRS-031 | Small code changes can break core logic unnoticed. | Faster feedback on logic regressions. | Before: formatter bug found in production. After: unit test fails during development. | Unit tests for formatters/helpers/status/validation logic. | Developers, testers |
 | PRS-032 | End-to-end flow can fail despite passing unit tests. | Higher release confidence for real workflows. | Before: upload succeeds but status polling breaks after deploy. After: integration test catches full lifecycle regression. | Integration tests for upload->queue->worker->status->download lifecycle. | Testers, PM, developers |
 | PRS-033 | Quality depends on manual discipline. | Consistent release quality gates. | Before: untested code merges on Friday. After: CI blocks merge until lint/tests/contracts pass. | CI gates for lint/tests/contract checks as merge requirements. | PM, developers, ops |
+
+## Consolidated Example List (All PRS)
+Use this section when you want one quick, concrete example per backlog item.
+
+- `PRS-001`: Before: onboarding engineer asks 5 people where upload/state logic lives. After: engineer follows architecture/contribution docs and ships first change safely.
+- `PRS-002`: Before: API returns `job_type`, UI expects `type`. After: canonical contract maps one agreed field set.
+- `PRS-003`: Before: UI shows raw `Connection closed by server`. After: UI shows stable `PROCESSING_FAILED` message; ops still get technical detail in logs.
+- `PRS-004`: Before: missing `REDIS_URL` discovered during first user upload. After: service fails at startup with explicit env validation error.
+- `PRS-005`: Before: support traces by timestamp and filename. After: support traces all API/worker events by one `request_id`.
+- `PRS-006`: Before: grep-heavy text logs with inconsistent wording. After: JSON logs filter by `job_id`, `stage`, `event`, `error_code`.
+- `PRS-007`: Before: slowdown known only after user complaint. After: metrics show retry and latency spikes proactively.
+- `PRS-008`: Before: race can write invalid lifecycle transition. After: state machine blocks disallowed transition and logs rejection.
+- `PRS-009`: Before: user retry creates duplicate jobs and duplicate billing/usage. After: same idempotency key returns existing job.
+- `PRS-010`: Before: tight retry loop hammers Redis/GCS. After: typed retry policy adds bounded exponential backoff + jitter.
+- `PRS-011`: Before: DLQ record only says failed. After: DLQ record includes attempts, stage, and error code for replay.
+- `PRS-012`: Before: some API failures return `detail`, others return raw strings. After: single stable error envelope.
+- `PRS-013`: Before: token with wrong audience may pass a weak check. After: strict `iss/aud/exp` validation rejects it.
+- `PRS-014`: Before: mobile browser works in one env and fails in another due to CORS drift. After: strict allowlist by environment.
+- `PRS-015`: Before: unsupported file enters queue and fails late. After: upload blocked immediately with clear reason.
+- `PRS-016`: Before: history page loads all records slowly. After: first page and counts return quickly using optimized query path.
+- `PRS-017`: Before: duplicate pollers issue repeated `/status` calls. After: one controlled poller per active job.
+- `PRS-018`: Before: same chunk/page strategy for all files wastes compute. After: strategy tuned by workload profile.
+- `PRS-019`: Before: long A/V job delays OCR queue. After: OCR and A/V queues isolated for better tail latency.
+- `PRS-020`: Before: one worker setting underperforms for mixed workloads. After: concurrency tuned per queue/type.
+- `PRS-021`: Before: concurrency capacity is guessed. After: measured 5/10-user baseline informs product planning.
+- `PRS-022`: Before: app says healthy while dependency is down. After: readiness check fails and traffic avoids bad instance.
+- `PRS-023`: Before: incident fix depends on who is online. After: runbook provides deterministic diagnose/recover steps.
+- `PRS-024`: Before: risky release needs full rollback. After: feature flag disables risky path immediately.
+- `PRS-025`: Before: one user can consume disproportionate resources. After: quotas keep service stable for everyone.
+- `PRS-026`: Before: retries continue despite rising cost and low success chance. After: retry budgets cap spend by error type.
+- `PRS-027`: Before: user uploads very large file with unrealistic expectation. After: UI shows effort/time hint before submit.
+- `PRS-028`: Before: API change touches too many layers and causes regressions. After: layered boundaries localize impact.
+- `PRS-029`: Before: worker failure source is unclear in monolithic flow. After: orchestrator/adapters split narrows failure location.
+- `PRS-030`: Before: UI change in one feature breaks unrelated behavior. After: modular UI layers reduce blast radius.
+- `PRS-031`: Before: helper regression reaches production. After: unit tests fail in PR stage.
+- `PRS-032`: Before: isolated tests pass but full workflow breaks. After: integration lifecycle test catches break before release.
+- `PRS-033`: Before: merge quality depends on manual discipline. After: CI gate enforces minimum quality bar every time.

@@ -207,3 +207,25 @@ This file tracks release-level changes with backlog traceability.
   - API: `ab5f3cb`
   - Worker: `7b0d273`
 - Status: `Completed (Tested)`
+
+### PRS-010
+- Backlog ID: `PRS-010`
+- Backlog Link: [PRS-010](./PRODUCTION_READINESS_BACKLOG.md#prs-010)
+- Gap Link: [G-10](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-10)
+- Type: `NFR` + `Reliability`
+- Summary: Added typed retry policy with bounded backoff + jitter in worker retry paths.
+- Why: Improve resilience for transient Redis/GCS failures while avoiding retry storms.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/utils/retry_policy.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/utils/gcs.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/cancel.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+- Risk: `Medium`
+- Validation:
+  - Local regression passed (user-run confirmation).
+  - Cloud regression passed (user-run confirmation).
+  - Worker retry logs now show typed policy + backoff/jitter attempts.
+- Commit:
+  - Worker: `edaf8c8`
+- Status: `Completed (Tested)`
