@@ -55,6 +55,10 @@ Behavior:
 - Hard bounded polling (no indefinite waits).
 - Fails fast with explicit reason.
 - Covers OCR and transcription success paths.
+- Emits lifecycle integration evidence:
+  - Local: `/tmp/doc_transcribe_logs/integration-local-*.jsonl`
+  - Cloud: `/tmp/doc_transcribe_logs/integration-cloud-*.jsonl`
+  - Each entry includes `scenario`, `job_id`, `request_id`, `status_sequence`, `duration_sec`, `result`.
 
 ## Test case format
 - `ID`
@@ -258,6 +262,7 @@ Behavior:
 - `PRS-005..012`: run all smoke + `FT-RG-02`, `FT-RG-07..09`.
 - `PRS-013..015`: run all smoke + `FT-RG-01`, `FT-RG-02`, `FT-RG-10`.
 - `PRS-016..018`: run all smoke + `FT-RG-03`, `FT-RG-04`, `FT-RG-09`.
+- `PRS-031..033`: run all smoke + both bounded runners and verify integration report artifacts are generated.
 
 ## Latest verification status
 - `PRS-001`

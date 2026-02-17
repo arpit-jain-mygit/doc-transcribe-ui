@@ -51,8 +51,8 @@ Status values:
 | PRS-028 | 8 | Refactor API into layered modules | API | Maintainability | Easier long-term feature development | Completed (Tested) | Completed (Local + Cloud Regression) | API: extracted upload orchestration from `routes/upload.py` into `services/upload_orchestrator.py` to keep route thin and move business/infra flow into service layer (`e8a9b4f`). |
 | PRS-029 | 8 | Refactor Worker into orchestrator/adapters/executors | Worker | Maintainability | Clearer ownership and easier debugging | Completed (Tested) | Completed (Local + Cloud Regression) | Worker: introduced layered modules `worker/orchestrator/router.py`, `worker/executors/*`, `worker/adapters/*`; kept backward-compatible dispatcher/processor shims and added route/executor logs with identifiers (`1de5432`). |
 | PRS-030 | 8 | Refactor UI into api-client/controllers/views/formatters | UI | Maintainability | Faster UI iteration with fewer regressions | Completed (Tested) | Completed (Local + Cloud Regression) | UI: introduced centralized `js/api-client.js` and migrated polling/history API calls from `jobs.js` and `polling.js` to client layer; updated module map docs (`js/README.md`) (`53f5a7b`). |
-| PRS-031 | 9 | Add unit tests for core logic and formatters | All | Quality | Prevents regressions | Planned | Not Tested | Pending implementation |
-| PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Planned | Not Tested | Pending implementation |
+| PRS-031 | 9 | Add unit tests for core logic and formatters | All | Quality | Prevents regressions | Completed (Code Complete) | Regression Pending (Local + Cloud) | API: added `unittest` coverage for upload orchestrator constraints/idempotency helpers; Worker: added `unittest` coverage for status transitions and error classification; UI: added Node unit tests for `job-contract.js` and `utils.js` plus `npm test` script. |
+| PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Completed (Code Complete) | Regression Pending (Local + Cloud) | UI/scripts: upgraded local/cloud regression runners to certify lifecycle status sequences (`QUEUED/PROCESSING->COMPLETED`), and emit machine-readable integration reports (`integration-local*.jsonl`, `integration-cloud*.jsonl`) with scenario/job/request/duration/result. |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Planned | Not Tested | Pending implementation |
 
 ## Backlog Item Anchors
@@ -118,6 +118,8 @@ Status values:
 - 2026-02-17: PRS-028 completed and regression-validated (local + cloud) in API after extracting upload orchestration into service layer.
 - 2026-02-17: PRS-029 completed and regression-validated (local + cloud) in Worker with explicit orchestrator/adapter/executor boundaries.
 - 2026-02-17: PRS-030 completed and regression-validated (local + cloud) in UI with centralized API client layer for polling/history calls.
+- 2026-02-17: PRS-031 code-complete with passing unit suites in API/Worker/UI; awaiting bounded regression validation (local + cloud).
+- 2026-02-17: PRS-032 code-complete with lifecycle-aware integration assertions and JSONL evidence reports in local/cloud regression runners; awaiting bounded regression validation.
 
 ## Detailed Item Specifications
 
@@ -1305,67 +1307,89 @@ Status values:
 ### PRS-031 - Add unit tests for core logic and formatters
 
 **Purpose**
-- Add unit tests for core logic and formatters to strengthen quality.
+- Establish deterministic unit-level safety checks for the most reusable logic in API, Worker, and UI.
 
 **Why this is in Phase 9**
-- Sequenced in Phase 9 per dependency and rollout risk in the backlog.
+- This phase converts refactoring gains from Phase 8 into enforceable quality gates before broader CI expansion (`PRS-033`).
 
 **Repo touchpoints**
-- Scope: `All`.
-- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+- API (`doc-transcribe-api`):
+  - `tests/test_upload_orchestrator_unit.py`
+  - Covers filename normalization, idempotency helpers, deterministic job-id hashing, and upload constraint validation.
+- Worker (`doc-transcribe-worker`):
+  - `tests/test_status_machine_unit.py`
+  - `tests/test_error_catalog_unit.py`
+  - Covers transition guard rules and exception-to-error-code classification.
+- UI (`doc-transcribe-ui`):
+  - `tests/job-contract.test.js`
+  - `tests/utils-formatters.test.js`
+  - `package.json` (`npm test`)
+  - Covers canonical field resolution and formatter/request-id helper behavior.
 
 **Functional requirement served**
-- Quality
+- Prevent regressions in shared, high-reuse logic without waiting for full end-to-end runs.
 
 **User benefit**
-- Prevents regressions
+- More stable releases and fewer UI/API behavior drifts after refactors.
 
 **Implementation outline**
-1. Add/adjust modules in listed repos for this capability.
-2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
-3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
-4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+1. Add unit-test files in each repo focused on pure/helper logic.
+2. Keep production runtime paths unchanged; test-only additions.
+3. Add a one-command UI test entry (`npm test`) with Node built-in test runner.
+4. Update backlog/release notes with explicit validation commands and status.
 
 **Detailed test plan**
-1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
-2. Run local bounded regression (OCR + Transcription).
-3. Run cloud bounded regression with the same commit.
-4. Validate logs contain expected identifiers and stage transitions for this item.
+1. API:
+   - `cd /Users/arpitjain/PycharmProjects/doc-transcribe-api && .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"`
+2. Worker:
+   - `cd /Users/arpitjain/PycharmProjects/doc-transcribe-worker && .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"`
+3. UI:
+   - `cd /Users/arpitjain/VSProjects/doc-transcribe-ui && npm test`
+4. Then run bounded local/cloud regression scripts before moving to `Completed (Tested)`.
 
 **Exit criteria for marking status**
-- `Completed (Code)`: code and docs updated in scoped repos.
-- `Completed (Tested)`: local + cloud regression green and backlog/test/release docs updated.
+- `Completed (Code Complete)`: unit suites added and passing in all three repos.
+- `Completed (Tested)`: local + cloud bounded regressions also pass and docs are updated.
 
 
 ### PRS-032 - Add integration tests for e2e job lifecycle
 
 **Purpose**
-- Add integration tests for e2e job lifecycle to strengthen quality.
+- Ensure end-to-end lifecycle behavior is explicitly asserted (not only eventual completion), with reproducible evidence artifacts for each run.
 
 **Why this is in Phase 9**
-- Sequenced in Phase 9 per dependency and rollout risk in the backlog.
+- Phase 9 formalizes quality gates after architecture and observability baselines are in place.
 
 **Repo touchpoints**
-- Scope: `All`.
-- Implementation must preserve canonical contract, logging standards, and backward compatibility.
+- Scope: `All` through integration runners and cross-layer lifecycle checks.
+- Implemented in UI repo scripts used to validate API + Worker behavior:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+- Added:
+  - lifecycle sequence assertions (`QUEUED/PROCESSING` progression to `COMPLETED`)
+  - machine-readable integration evidence files (`integration-local-*.jsonl`, `integration-cloud-*.jsonl`)
 
 **Functional requirement served**
-- Quality
+- Quality and release confidence through explicit e2e lifecycle certification.
 
 **User benefit**
-- Confidence before deploy
+- Fewer “false green” regressions because lifecycle transitions and evidence are validated every run.
 
 **Implementation outline**
-1. Add/adjust modules in listed repos for this capability.
-2. Add stage-level logs for start/completed/failed transitions with identifiers (`job_id`, `request_id` when available).
-3. Keep API payloads backward compatible; add feature flags where rollout risk exists.
-4. Update docs (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `RELEASE_NOTES.md`) with traceable changes.
+1. Extend local/cloud regression pollers to capture unique status sequences per job.
+2. Assert lifecycle integrity before passing each OCR/TRANSCRIPTION scenario.
+3. Emit integration report entries including `scenario`, `job_id`, `request_id`, `status_sequence`, `duration_sec`, `result`.
+4. Surface report path in console logs for traceable handoff.
 
 **Detailed test plan**
-1. Run mandatory functional suite from `FUNCTIONAL_REGRESSION_TESTS.md`.
-2. Run local bounded regression (OCR + Transcription).
-3. Run cloud bounded regression with the same commit.
-4. Validate logs contain expected identifiers and stage transitions for this item.
+1. Run local: `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+2. Confirm output includes:
+   - lifecycle certified trace lines
+   - `Integration report written: ...integration-local-*.jsonl`
+3. Run cloud: `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+4. Confirm output includes:
+   - lifecycle certified trace lines
+   - `Integration report written: ...integration-cloud-*.jsonl`
 
 **Exit criteria for marking status**
 - `Completed (Code)`: code and docs updated in scoped repos.

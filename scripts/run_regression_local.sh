@@ -7,6 +7,9 @@ set -euo pipefail
 # - Polls with hard deadlines (no indefinite wait)
 
 API_BASE="${API_BASE:-http://127.0.0.1:8090}"
+API_REPO_DIR="${API_REPO_DIR:-/Users/arpitjain/PycharmProjects/doc-transcribe-api}"
+WORKER_REPO_DIR="${WORKER_REPO_DIR:-/Users/arpitjain/PycharmProjects/doc-transcribe-worker}"
+UI_REPO_DIR="${UI_REPO_DIR:-/Users/arpitjain/VSProjects/doc-transcribe-ui}"
 REDIS_PING_CMD="${REDIS_PING_CMD:-redis-cli -u redis://localhost:6379/0 ping}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
 LOG_DIR="${LOG_DIR:-/tmp/doc_transcribe_logs}"
@@ -14,6 +17,7 @@ API_LOG="${API_LOG:-${LOG_DIR}/api.log}"
 WORKER_LOG="${WORKER_LOG:-${LOG_DIR}/worker.log}"
 UI_LOG="${UI_LOG:-${LOG_DIR}/ui.log}"
 REGRESSION_LOG_FILE="${REGRESSION_LOG_FILE:-${LOG_DIR}/regression-local-$(date +%Y%m%d-%H%M%S).log}"
+INTEGRATION_REPORT_FILE="${INTEGRATION_REPORT_FILE:-${LOG_DIR}/integration-local-$(date +%Y%m%d-%H%M%S).jsonl}"
 REDIS_URL="${REDIS_URL:-redis://localhost:6379/0}"
 QUEUE_NAME="${QUEUE_NAME:-doc_jobs_local}"
 DLQ_NAME="${DLQ_NAME:-doc_jobs_dead}"
@@ -22,6 +26,7 @@ REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 EXPECT_WORKER_BOTH_QUEUES="${EXPECT_WORKER_BOTH_QUEUES:-1}"
 REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
 REQUIRE_API_LOG_CORRELATION="${REQUIRE_API_LOG_CORRELATION:-0}"
+RUN_UNIT_TESTS="${RUN_UNIT_TESTS:-1}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -78,6 +83,7 @@ print_log_paths() {
   echo "WORKER_LOG=${WORKER_LOG}"
   echo "UI_LOG=${UI_LOG}"
   echo "REGRESSION_LOG=${REGRESSION_LOG_FILE}"
+  echo "INTEGRATION_REPORT=${INTEGRATION_REPORT_FILE}"
 }
 
 STEP_NAME=""
@@ -261,9 +267,129 @@ fail() {
   exit 1
 }
 
+run_unit_tests() {
+  if [[ "$RUN_UNIT_TESTS" != "1" ]]; then
+    icon_info "Unit tests skipped (RUN_UNIT_TESTS=${RUN_UNIT_TESTS})"
+    return 0
+  fi
+
+  begin_step "Unit tests"
+
+  [[ -d "$API_REPO_DIR" ]] || fail "API_REPO_DIR not found: ${API_REPO_DIR}"
+  [[ -d "$WORKER_REPO_DIR" ]] || fail "WORKER_REPO_DIR not found: ${WORKER_REPO_DIR}"
+  [[ -d "$UI_REPO_DIR" ]] || fail "UI_REPO_DIR not found: ${UI_REPO_DIR}"
+
+  echo "UNIT_TEST_REPOS:"
+  echo "  API_REPO_DIR=${API_REPO_DIR}"
+  echo "  WORKER_REPO_DIR=${WORKER_REPO_DIR}"
+  echo "  UI_REPO_DIR=${UI_REPO_DIR}"
+
+  icon_info "Running API unit tests"
+  if (
+    cd "$API_REPO_DIR"
+    .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"
+  ); then
+    icon_ok "UNIT_API=PASS"
+  else
+    icon_fail "UNIT_API=FAIL"
+    fail "API unit tests failed"
+  fi
+
+  icon_info "Running Worker unit tests"
+  if (
+    cd "$WORKER_REPO_DIR"
+    .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"
+  ); then
+    icon_ok "UNIT_WORKER=PASS"
+  else
+    icon_fail "UNIT_WORKER=FAIL"
+    fail "Worker unit tests failed"
+  fi
+
+  icon_info "Running UI unit tests"
+  if (
+    cd "$UI_REPO_DIR"
+    npm run -s test
+  ); then
+    icon_ok "UNIT_UI=PASS"
+  else
+    icon_fail "UNIT_UI=FAIL"
+    fail "UI unit tests failed"
+  fi
+
+  icon_ok "UNIT_SUMMARY API=PASS WORKER=PASS UI=PASS"
+
+  end_step_ok
+}
+
 trace() {
   [[ "$TRACE_FLOW" == "1" ]] || return 0
   echo "[TRACE] $1"
+}
+
+append_status_sequence() {
+  local current="$1"
+  local next_status="$2"
+  if [[ -z "$next_status" ]]; then
+    echo "$current"
+    return 0
+  fi
+  if [[ -z "$current" ]]; then
+    echo "$next_status"
+    return 0
+  fi
+  local last="${current##*,}"
+  if [[ "$last" == "$next_status" ]]; then
+    echo "$current"
+    return 0
+  fi
+  echo "${current},${next_status}"
+}
+
+assert_lifecycle_sequence() {
+  local label="$1"
+  local sequence="$2"
+  local terminal="$3"
+  [[ -n "$sequence" ]] || fail "${label} lifecycle sequence is empty"
+  [[ "$sequence" == *"$terminal"* ]] || fail "${label} lifecycle missing terminal status ${terminal}: ${sequence}"
+  if [[ "$sequence" == *"FAILED"* && "$terminal" != "FAILED" ]]; then
+    fail "${label} lifecycle contains FAILED before success path: ${sequence}"
+  fi
+  if [[ "$sequence" == *"CANCELLED"* && "$terminal" != "CANCELLED" ]]; then
+    fail "${label} lifecycle contains CANCELLED before success path: ${sequence}"
+  fi
+  if [[ "$sequence" != *"QUEUED"* && "$sequence" != *"PROCESSING"* && "$sequence" != "COMPLETED" ]]; then
+    fail "${label} lifecycle does not show expected processing states: ${sequence}"
+  fi
+  trace "${label}: lifecycle certified sequence=${sequence}"
+}
+
+append_integration_report() {
+  local scenario="$1"
+  local job_id="$2"
+  local request_id="$3"
+  local sequence="$4"
+  local duration_sec="$5"
+  local result="$6"
+  python3 - "$INTEGRATION_REPORT_FILE" "$scenario" "$job_id" "$request_id" "$sequence" "$duration_sec" "$result" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+report_file, scenario, job_id, request_id, sequence, duration_sec, result = sys.argv[1:]
+entry = {
+    "ts_utc": datetime.now(timezone.utc).isoformat(),
+    "env": "local",
+    "scenario": scenario,
+    "job_id": job_id,
+    "request_id": request_id,
+    "status_sequence": sequence.split(",") if sequence else [],
+    "duration_sec": int(float(duration_sec or 0)),
+    "result": result,
+}
+with open(report_file, "a", encoding="utf-8") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+PY
 }
 
 print_token_meta() {
@@ -561,6 +687,7 @@ poll_job() {
   local seen_processing="0"
   local seen_completed="0"
   local queued_warned="0"
+  local status_sequence=""
 
   while true; do
     local now
@@ -595,6 +722,7 @@ poll_job() {
       last_log_at="$now"
       last_status="$status"
     fi
+    status_sequence="$(append_status_sequence "$status_sequence" "$status")"
 
     if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
       trace "${label}: API accepted upload and queued job in Redis"
@@ -626,6 +754,9 @@ poll_job() {
       echo "Job ${job_id} completed"
       certify_api_log_correlation "$job_id" "$expected_request_id"
       certify_worker_log_correlation "$job_id" "$expected_request_id"
+      assert_lifecycle_sequence "$label" "$status_sequence" "COMPLETED"
+      LAST_STATUS_SEQUENCE="$status_sequence"
+      LAST_JOB_DURATION_SEC="$elapsed"
       print_component_trace_local "$job_id"
       return 0
     fi
@@ -645,8 +776,10 @@ poll_job() {
 
 main() {
   setup_script_logging
+  : > "$INTEGRATION_REPORT_FILE"
   load_auth_token
   rebuild_auth_header
+  run_unit_tests
 
   local auth_set="no"
   if [[ -n "$AUTH_BEARER_TOKEN" ]]; then
@@ -686,6 +819,7 @@ main() {
   assert_request_id_match "upload(OCR)" "$ocr_req_id" "$(extract_request_id "$ocr_resp")"
   trace "OCR flow: UI -> API /upload -> job_id=${ocr_job} request_id=${ocr_req_id}"
   poll_job "$ocr_job" "OCR" "$ocr_req_id"
+  append_integration_report "OCR" "$ocr_job" "$ocr_req_id" "${LAST_STATUS_SEQUENCE:-}" "${LAST_JOB_DURATION_SEC:-0}" "PASS"
   icon_ok "OCR regression step passed."
   end_step_ok
 
@@ -700,10 +834,12 @@ main() {
   assert_request_id_match "upload(TRANSCRIPTION)" "$tr_req_id" "$(extract_request_id "$tr_resp")"
   trace "Transcription flow: UI -> API /upload -> job_id=${tr_job} request_id=${tr_req_id}"
   poll_job "$tr_job" "TRANSCRIPTION" "$tr_req_id"
+  append_integration_report "TRANSCRIPTION" "$tr_job" "$tr_req_id" "${LAST_STATUS_SEQUENCE:-}" "${LAST_JOB_DURATION_SEC:-0}" "PASS"
   icon_ok "Transcription regression step passed."
   end_step_ok
 
   icon_ok "PASS: Local bounded regression completed"
+  icon_ok "Integration report written: ${INTEGRATION_REPORT_FILE}"
   print_run_timing
 }
 

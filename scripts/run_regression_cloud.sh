@@ -13,6 +13,7 @@ API_LOG="${API_LOG:-${LOG_DIR}/api.log}"
 WORKER_LOG="${WORKER_LOG:-/tmp/doc_transcribe_logs/worker.log}"
 UI_LOG="${UI_LOG:-${LOG_DIR}/ui.log}"
 REGRESSION_LOG_FILE="${REGRESSION_LOG_FILE:-${LOG_DIR}/regression-cloud-$(date +%Y%m%d-%H%M%S).log}"
+INTEGRATION_REPORT_FILE="${INTEGRATION_REPORT_FILE:-${LOG_DIR}/integration-cloud-$(date +%Y%m%d-%H%M%S).jsonl}"
 CLOUD_QUEUE_NAME="${CLOUD_QUEUE_NAME:-doc_jobs}"
 REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
@@ -69,6 +70,7 @@ print_log_paths() {
   echo "WORKER_LOG=${WORKER_LOG}"
   echo "UI_LOG=${UI_LOG}"
   echo "REGRESSION_LOG=${REGRESSION_LOG_FILE}"
+  echo "INTEGRATION_REPORT=${INTEGRATION_REPORT_FILE}"
 }
 
 STEP_NAME=""
@@ -203,6 +205,71 @@ fail() {
 trace() {
   [[ "$TRACE_FLOW" == "1" ]] || return 0
   echo "[TRACE] $1"
+}
+
+append_status_sequence() {
+  local current="$1"
+  local next_status="$2"
+  if [[ -z "$next_status" ]]; then
+    echo "$current"
+    return 0
+  fi
+  if [[ -z "$current" ]]; then
+    echo "$next_status"
+    return 0
+  fi
+  local last="${current##*,}"
+  if [[ "$last" == "$next_status" ]]; then
+    echo "$current"
+    return 0
+  fi
+  echo "${current},${next_status}"
+}
+
+assert_lifecycle_sequence() {
+  local label="$1"
+  local sequence="$2"
+  local terminal="$3"
+  [[ -n "$sequence" ]] || fail "${label} lifecycle sequence is empty"
+  [[ "$sequence" == *"$terminal"* ]] || fail "${label} lifecycle missing terminal status ${terminal}: ${sequence}"
+  if [[ "$sequence" == *"FAILED"* && "$terminal" != "FAILED" ]]; then
+    fail "${label} lifecycle contains FAILED before success path: ${sequence}"
+  fi
+  if [[ "$sequence" == *"CANCELLED"* && "$terminal" != "CANCELLED" ]]; then
+    fail "${label} lifecycle contains CANCELLED before success path: ${sequence}"
+  fi
+  if [[ "$sequence" != *"QUEUED"* && "$sequence" != *"PROCESSING"* && "$sequence" != "COMPLETED" ]]; then
+    fail "${label} lifecycle does not show expected processing states: ${sequence}"
+  fi
+  trace "${label}: lifecycle certified sequence=${sequence}"
+}
+
+append_integration_report() {
+  local scenario="$1"
+  local job_id="$2"
+  local request_id="$3"
+  local sequence="$4"
+  local duration_sec="$5"
+  local result="$6"
+  python3 - "$INTEGRATION_REPORT_FILE" "$scenario" "$job_id" "$request_id" "$sequence" "$duration_sec" "$result" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+report_file, scenario, job_id, request_id, sequence, duration_sec, result = sys.argv[1:]
+entry = {
+    "ts_utc": datetime.now(timezone.utc).isoformat(),
+    "env": "cloud",
+    "scenario": scenario,
+    "job_id": job_id,
+    "request_id": request_id,
+    "status_sequence": sequence.split(",") if sequence else [],
+    "duration_sec": int(float(duration_sec or 0)),
+    "result": result,
+}
+with open(report_file, "a", encoding="utf-8") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+PY
 }
 
 print_local_worker_diag() {
@@ -566,6 +633,7 @@ poll_job() {
   local seen_processing="0"
   local seen_completed="0"
   local queued_warned="0"
+  local status_sequence=""
 
   while true; do
     local now
@@ -600,6 +668,7 @@ poll_job() {
       last_log_at="$now"
       last_status="$status"
     fi
+    status_sequence="$(append_status_sequence "$status_sequence" "$status")"
 
     if [[ "$status" == "QUEUED" && "$seen_queued" == "0" ]]; then
       trace "${label}: API accepted and queued job"
@@ -623,6 +692,9 @@ poll_job() {
       fi
       echo "Job ${job_id} completed"
       certify_worker_log_correlation "$job_id" "$expected_request_id"
+      assert_lifecycle_sequence "$label" "$status_sequence" "COMPLETED"
+      LAST_STATUS_SEQUENCE="$status_sequence"
+      LAST_JOB_DURATION_SEC="$elapsed"
       print_component_trace_cloud "$job_id"
       return 0
     fi
@@ -642,6 +714,7 @@ poll_job() {
 
 main() {
   setup_script_logging
+  : > "$INTEGRATION_REPORT_FILE"
   load_auth_token
   rebuild_auth_header
 
@@ -681,6 +754,7 @@ main() {
   assert_request_id_match "upload(OCR)" "$ocr_req_id" "$(extract_request_id "$ocr_resp")"
   trace "OCR flow: UI -> API /upload -> job_id=${ocr_job} request_id=${ocr_req_id}"
   poll_job "$ocr_job" "OCR" "$ocr_req_id"
+  append_integration_report "OCR" "$ocr_job" "$ocr_req_id" "${LAST_STATUS_SEQUENCE:-}" "${LAST_JOB_DURATION_SEC:-0}" "PASS"
   icon_ok "OCR regression step passed."
   end_step_ok
 
@@ -695,10 +769,12 @@ main() {
   assert_request_id_match "upload(TRANSCRIPTION)" "$tr_req_id" "$(extract_request_id "$tr_resp")"
   trace "Transcription flow: UI -> API /upload -> job_id=${tr_job} request_id=${tr_req_id}"
   poll_job "$tr_job" "TRANSCRIPTION" "$tr_req_id"
+  append_integration_report "TRANSCRIPTION" "$tr_job" "$tr_req_id" "${LAST_STATUS_SEQUENCE:-}" "${LAST_JOB_DURATION_SEC:-0}" "PASS"
   icon_ok "Transcription regression step passed."
   end_step_ok
 
   icon_ok "PASS: Cloud bounded regression completed"
+  icon_ok "Integration report written: ${INTEGRATION_REPORT_FILE}"
   print_run_timing
 }
 

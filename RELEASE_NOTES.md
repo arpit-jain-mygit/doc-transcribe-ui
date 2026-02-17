@@ -458,3 +458,45 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - UI: `53f5a7b`
 - Status: `Completed (Tested)`
+
+### PRS-031
+- Backlog ID: `PRS-031`
+- Backlog Link: [PRS-031](./PRODUCTION_READINESS_BACKLOG.md#prs-031)
+- Gap Link: [G-16](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-16)
+- Type: `NFR` + `Quality`
+- Summary: Added unit-test coverage for core logic/formatters in all three repos without changing runtime behavior.
+- Why: Catch logic regressions early and make refactors safer.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_upload_orchestrator_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_status_machine_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_error_catalog_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/job-contract.test.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/utils-formatters.test.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/package.json`
+- Validation:
+  - API unit tests passed via `.venv/bin/python -m unittest discover -s tests -p \"test_*_unit.py\"`.
+  - Worker unit tests passed via `.venv/bin/python -m unittest discover -s tests -p \"test_*_unit.py\"`.
+  - UI unit tests passed via `npm run test`.
+  - Local/cloud bounded regression: pending user run.
+- Commit:
+  - Pending commit after regression validation.
+- Status: `Completed (Code Complete, Regression Pending)`
+
+### PRS-032
+- Backlog ID: `PRS-032`
+- Backlog Link: [PRS-032](./PRODUCTION_READINESS_BACKLOG.md#prs-032)
+- Gap Link: [G-16](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-16)
+- Type: `NFR` + `Quality`
+- Summary: Added lifecycle-aware integration assertions for OCR/TRANSCRIPTION flows in local/cloud regression and generated machine-readable test evidence.
+- Why: Avoid false-green e2e runs by validating lifecycle transitions, not only terminal completion.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/PRODUCTION_READINESS_BACKLOG.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/FUNCTIONAL_REGRESSION_TESTS.md`
+- Validation:
+  - Script syntax checks pass for local/cloud regression runners.
+  - Local/cloud bounded regression: pending user run.
+- Commit:
+  - Pending commit after regression validation.
+- Status: `Completed (Code Complete, Regression Pending)`
