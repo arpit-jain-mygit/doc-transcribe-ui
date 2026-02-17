@@ -395,3 +395,20 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - Worker: `ecd757d`
 - Status: `Completed (Tested)`
+
+### PRS-028
+- Backlog ID: `PRS-028`
+- Backlog Link: [PRS-028](./PRODUCTION_READINESS_BACKLOG.md#prs-028)
+- Gap Link: [G-21](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-21)
+- Type: `NFR` + `Maintainability`
+- Summary: Refactored API upload endpoint into layered modules by moving heavy orchestration/business flow from route layer to service layer.
+- Why: Reduce route complexity and align API architecture boundary (`routes` as adapters, `services` as orchestration logic).
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/upload.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/upload_orchestrator.py`
+- Validation:
+  - Python compile checks passed for touched API files.
+  - Local/cloud regression pending.
+- Commit:
+  - API: `e8a9b4f`
+- Status: `Completed (Code)`
