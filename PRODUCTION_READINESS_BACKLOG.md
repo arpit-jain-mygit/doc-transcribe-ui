@@ -37,7 +37,7 @@ Status values:
 | PRS-014 | 3 | Environment-based strict CORS allowlist | API | Security | Fewer CORS/auth surprises | Completed (Tested) | Completed (Local + Cloud Regression) | API: strict env-driven CORS allowlist (`CORS_ALLOW_ORIGINS`) with startup validation; optional regex only when explicitly configured (`CORS_ALLOW_ORIGIN_REGEX`) in `app.py` and `startup_env.py`. UI scripts: local stack now injects safe default `CORS_ALLOW_ORIGINS` for API startup. |
 | PRS-015 | 3 | Server-side MIME/extension/size validation | API | Security and validation | Clear rejection of unsupported files | Completed (Tested) | Completed (Local + Cloud Regression) | API: upload validation enforces allowed extensions/MIME prefixes and max-size per job type (`MAX_OCR_FILE_SIZE_MB`, `MAX_TRANSCRIPTION_FILE_SIZE_MB`) with stable error codes (`UNSUPPORTED_FILE_TYPE`, `UNSUPPORTED_MIME_TYPE`, `FILE_TOO_LARGE`) in `routes/upload.py`. |
 | PRS-016 | 4 | Optimize `/jobs` pagination and counts path | API | Performance | Faster history loading | Completed (Code) | Not Tested | API: optimized `/jobs` with unfiltered fast-path pagination (slice-only read), avoided full metadata prefetch when `include_counts=false`, and added stage/metric observability (`total_user_jobs`, `scanned_count`, `matched_total`, `fast_path`) in `routes/jobs.py`. |
-| PRS-017 | 4 | Reduce polling overhead and duplicate pollers | UI | Performance | Smoother app under load | Planned | Not Tested | Pending implementation |
+| PRS-017 | 4 | Reduce polling overhead and duplicate pollers | UI | Performance | Smoother app under load | Completed (Tested) | Completed (Local + Cloud Regression) | UI: single-flight status polling loop (no overlap), duplicate-start guard on session restore, visibility-aware polling backoff, and history last-refreshed ticker scoped to active history view (`<pending-commit>`). |
 | PRS-018 | 4 | Make worker chunk/page strategy configurable | Worker | Performance | Better throughput and tuning flexibility | Planned | Not Tested | Pending implementation |
 | PRS-019 | 5 | Queue partitioning by workload (OCR vs A/V) | API, Worker | Scalability | Reduced queue contention | Planned | Not Tested | Pending implementation |
 | PRS-020 | 5 | Worker concurrency controls by queue/type | Worker | Scalability | Better concurrent user support | Planned | Not Tested | Pending implementation |
@@ -113,6 +113,7 @@ Status values:
 - 2026-02-17: PRS-014 completed and regression-validated (local + cloud) with strict environment-based CORS allowlist and local startup default wiring.
 - 2026-02-17: PRS-015 completed and regression-validated (local + cloud) with strict server-side MIME/extension/size validation.
 - 2026-02-17: PRS-016 implementation completed at code level in API (`routes/jobs.py`); regression pending.
+- 2026-02-17: PRS-017 completed and regression-validated (local + cloud) in UI with single-flight poller guards, visibility-aware polling cadence, and history ticker lifecycle controls.
 
 ## Detailed Item Specifications
 

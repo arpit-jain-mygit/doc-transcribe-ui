@@ -90,6 +90,12 @@ window.setWorkspaceView = function setWorkspaceView(view, options = {}) {
   if (next === "history" && loadHistory && typeof ensureHistoryLoaded === "function") {
     ensureHistoryLoaded();
   }
+
+  window.dispatchEvent(
+    new CustomEvent("workspace:view-changed", {
+      detail: { view: next },
+    })
+  );
 };
 
 window.initWorkspaceView = function initWorkspaceView() {

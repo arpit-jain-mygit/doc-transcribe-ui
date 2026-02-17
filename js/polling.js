@@ -3,8 +3,27 @@
    ========================================================= */
 
 let POLL_INTERVAL = null;
+let POLL_IN_FLIGHT = false;
+let POLL_SESSION_ID = 0;
+let ACTIVE_POLLED_JOB_ID = null;
 let lastProgress = 0;
 let CANCEL_REQUESTED = false;
+const POLL_INTERVAL_ACTIVE_MS = 3000;
+const POLL_INTERVAL_BACKGROUND_MS = 10000;
+const POLL_INTERVAL_RETRY_MS = 5000;
+
+function currentPollDelayMs() {
+  return document.hidden ? POLL_INTERVAL_BACKGROUND_MS : POLL_INTERVAL_ACTIVE_MS;
+}
+
+function scheduleNextPoll(sessionId, delayMs) {
+  if (!window.POLLING_ACTIVE || !JOB_ID || sessionId !== POLL_SESSION_ID) return;
+  if (POLL_INTERVAL) clearTimeout(POLL_INTERVAL);
+  const nextDelay = Number.isFinite(delayMs) ? Math.max(0, delayMs) : currentPollDelayMs();
+  POLL_INTERVAL = setTimeout(() => {
+    pollStatus(sessionId);
+  }, nextDelay);
+}
 function updateProcessingMetrics({ progressValue }) {
   const pctEl = document.getElementById("progressPct");
   if (!pctEl) return;
@@ -145,9 +164,19 @@ window.cancelCurrentJob = async function cancelCurrentJob() {
 
 function startPolling() {
   if (!JOB_ID) return;
+  if (
+    window.POLLING_ACTIVE &&
+    ACTIVE_POLLED_JOB_ID === JOB_ID &&
+    (POLL_IN_FLIGHT || POLL_INTERVAL)
+  ) {
+    return;
+  }
 
   stopPolling();
   window.POLLING_ACTIVE = true;
+  POLL_SESSION_ID += 1;
+  const sessionId = POLL_SESSION_ID;
+  ACTIVE_POLLED_JOB_ID = JOB_ID;
 
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.style.display = "block";
@@ -165,21 +194,25 @@ function startPolling() {
 
   updateProcessingMetrics({ progressValue: lastProgress });
 
-  pollStatus();
-  POLL_INTERVAL = setInterval(pollStatus, 3000);
+  pollStatus(sessionId);
 }
 
 function stopPolling() {
   if (POLL_INTERVAL) {
-    clearInterval(POLL_INTERVAL);
+    clearTimeout(POLL_INTERVAL);
     POLL_INTERVAL = null;
   }
+  POLL_IN_FLIGHT = false;
+  ACTIVE_POLLED_JOB_ID = null;
 }
 
-async function pollStatus() {
+async function pollStatus(sessionId = POLL_SESSION_ID) {
+  if (sessionId !== POLL_SESSION_ID) return;
   if (!JOB_ID || !ID_TOKEN) return;
+  if (POLL_IN_FLIGHT) return;
 
   let res;
+  POLL_IN_FLIGHT = true;
   try {
     const reqHeaders = authHeadersWithRequestId({
       requestId: window.ACTIVE_REQUEST_ID || "",
@@ -189,18 +222,29 @@ async function pollStatus() {
       headers: reqHeaders
     });
   } catch {
+    POLL_IN_FLIGHT = false;
+    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
     return;
   }
 
   if (res.status === 401) {
+    POLL_IN_FLIGHT = false;
     logout();
     return;
   }
 
-  if (!res.ok) return;
+  if (!res.ok) {
+    POLL_IN_FLIGHT = false;
+    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
+    return;
+  }
 
   const data = await safeJson(res);
-  if (!data || data._nonJson) return;
+  if (!data || data._nonJson) {
+    POLL_IN_FLIGHT = false;
+    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
+    return;
+  }
   if (data.request_id) {
     window.ACTIVE_REQUEST_ID = String(data.request_id).trim();
   }
@@ -213,6 +257,9 @@ async function pollStatus() {
     handleJobFailed(data);
   } else if (data.status === "CANCELLED") {
     handleJobCancelled(data);
+  } else {
+    POLL_IN_FLIGHT = false;
+    scheduleNextPoll(sessionId);
   }
 }
 
@@ -351,9 +398,23 @@ function handleJobCancelled(data) {
 document.addEventListener("partials:loaded", () => {
   const savedJobId = localStorage.getItem("active_job_id");
   if (savedJobId && ID_TOKEN) {
+    if (window.POLLING_ACTIVE && JOB_ID === savedJobId) return;
     JOB_ID = savedJobId;
     window.POLLING_ACTIVE = true;
     document.body.classList.add("processing-active");
     startPolling();
   }
 });
+
+if (!window.__POLLING_VISIBILITY_WIRED__) {
+  document.addEventListener("visibilitychange", () => {
+    if (!window.POLLING_ACTIVE || !JOB_ID) return;
+    const currentSession = POLL_SESSION_ID;
+    if (!document.hidden && !POLL_IN_FLIGHT) {
+      scheduleNextPoll(currentSession, 250);
+      return;
+    }
+    scheduleNextPoll(currentSession);
+  });
+  window.__POLLING_VISIBILITY_WIRED__ = true;
+}

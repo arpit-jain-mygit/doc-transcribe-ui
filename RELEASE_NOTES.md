@@ -356,3 +356,22 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - API: `e645e78`
 - Status: `Completed (Code)`
+
+### PRS-017
+- Backlog ID: `PRS-017`
+- Backlog Link: [PRS-017](./PRODUCTION_READINESS_BACKLOG.md#prs-017)
+- Gap Link: [G-15](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-15)
+- Type: `NFR` + `Performance`
+- Summary: Reduced UI polling overhead by enforcing single-flight status polling, avoiding duplicate poll start, and throttling polling cadence in background tabs.
+- Why: Prevent overlapping status requests and unnecessary timer activity, especially under weak networks or repeated restore paths.
+- Files:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/polling.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/ui.js`
+- Validation:
+  - JavaScript syntax check passed for touched files via `node --check`.
+  - Local bounded regression passed.
+  - Cloud bounded regression passed.
+- Commit:
+  - UI: `<pending-commit>`
+- Status: `Completed (Tested)`

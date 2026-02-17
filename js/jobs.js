@@ -319,9 +319,31 @@ function updateLastRefreshedUi() {
   el.textContent = formatLastRefreshedLabel(JOBS_LAST_REFRESH_AT);
 }
 
+function isHistoryVisibleForTicker() {
+  const historyView = document.getElementById("workspaceHistoryView");
+  if (!historyView) return false;
+  const style = window.getComputedStyle(historyView);
+  const isShown = style.display !== "none" && style.visibility !== "hidden";
+  return isShown && !document.hidden;
+}
+
 function ensureLastRefreshedTicker() {
   if (JOBS_LAST_REFRESH_TIMER) return;
   JOBS_LAST_REFRESH_TIMER = setInterval(updateLastRefreshedUi, 10000);
+}
+
+function stopLastRefreshedTicker() {
+  if (!JOBS_LAST_REFRESH_TIMER) return;
+  clearInterval(JOBS_LAST_REFRESH_TIMER);
+  JOBS_LAST_REFRESH_TIMER = null;
+}
+
+function syncLastRefreshedTicker() {
+  if (isHistoryVisibleForTicker() && JOBS_LAST_REFRESH_AT) {
+    ensureLastRefreshedTicker();
+    return;
+  }
+  stopLastRefreshedTicker();
 }
 
 async function retryJobById(jobId) {
@@ -548,6 +570,9 @@ function resetJobsTabState() {
   JOBS_STATUS_COUNTS_BY_TYPE.TRANSCRIPTION = null;
   JOBS_STATUS_COUNTS_BY_TYPE.OCR = null;
   clearHistoryCountsUi();
+  JOBS_LAST_REFRESH_AT = null;
+  updateLastRefreshedUi();
+  syncLastRefreshedTicker();
 }
 
 async function loadJobs({ reset = false, append = false } = {}) {
@@ -623,7 +648,7 @@ async function loadJobs({ reset = false, append = false } = {}) {
       renderFilteredJobs();
       JOBS_LAST_REFRESH_AT = new Date();
       updateLastRefreshedUi();
-      ensureLastRefreshedTicker();
+      syncLastRefreshedTicker();
       return;
     }
 
@@ -653,7 +678,7 @@ async function loadJobs({ reset = false, append = false } = {}) {
     renderFilteredJobs();
     JOBS_LAST_REFRESH_AT = new Date();
     updateLastRefreshedUi();
-    ensureLastRefreshedTicker();
+    syncLastRefreshedTicker();
   } finally {
     if (loadingEl) loadingEl.style.display = "none";
     box.style.display = "block";
@@ -723,6 +748,12 @@ window.loadMoreJobs = function loadMoreJobs() {
   if (!state || !state.hasMore || JOBS_LOADING) return;
   loadJobs({ append: true });
 };
+
+if (!window.__JOBS_TICKER_VISIBILITY_WIRED__) {
+  document.addEventListener("visibilitychange", syncLastRefreshedTicker);
+  window.addEventListener("workspace:view-changed", syncLastRefreshedTicker);
+  window.__JOBS_TICKER_VISIBILITY_WIRED__ = true;
+}
 
 function renderJob(job) {
   const row = document.createElement("div");
