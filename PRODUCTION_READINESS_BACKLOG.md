@@ -31,7 +31,7 @@ Status values:
 | PRS-008 | 2 | Enforce job status transition state machine | API, Worker | Reliability | Predictable job lifecycle behavior | Completed (Tested) | Completed (Local + Cloud Regression) | API: guarded status transitions for upload/cancel + transition helper (`d2f8afb`). Worker: guarded transitions across loop/OCR/transcribe/dispatcher + helper (`021542f`). |
 | PRS-009 | 2 | Add idempotent upload key and duplicate job reuse | API, UI | Reliability | No duplicate jobs on retry/network glitches | Completed (Tested) | Completed (Local + Cloud Regression) | UI: upload idempotency key generation + header propagation (`74c1ec1`). API: idempotent key handling + duplicate reuse + enqueue-once guard (`ab5f3cb`). Worker: contract version alignment for rollout (`7b0d273`). |
 | PRS-010 | 2 | Typed retry policy with backoff + jitter | Worker | Reliability | Better success under transient failures | Completed (Tested) | Completed (Local + Cloud Regression) | Worker: typed retry utility with exponential backoff + jitter, integrated into Redis cancel checks, status writes, and GCS I/O retries (`edaf8c8`). |
-| PRS-011 | 2 | DLQ enrichment (`error_code`, `attempts`, stage) | Worker | Recoverability | Easier failed-job replay and diagnosis | Planned | Not Tested | Pending implementation |
+| PRS-011 | 2 | DLQ enrichment (`error_code`, `attempts`, stage) | Worker | Recoverability | Easier failed-job replay and diagnosis | Completed (Code) | Not Tested | Worker: enriched DLQ envelope with `error_code/error_type`, `attempts/max_attempts`, failed stage, queue/source/request_id, worker_id, and original payload for replay (`dead_letter.py`, `worker_loop.py`). |
 | PRS-012 | 2 | Global exception mapping to stable API payloads | API | Error consistency | Less confusing UI errors | Planned | Not Tested | Pending implementation |
 | PRS-013 | 3 | Tighten token validation (`iss`, `aud`, expiry) | API | Security | Stronger auth correctness | Planned | Not Tested | Pending implementation |
 | PRS-014 | 3 | Environment-based strict CORS allowlist | API | Security | Fewer CORS/auth surprises | Planned | Not Tested | Pending implementation |
@@ -107,6 +107,7 @@ Status values:
 - 2026-02-16: PRS-003 completed and regression-validated (local + cloud) across UI/API/Worker/scripts.
 - 2026-02-16: PRS-004 completed and regression-validated (local + cloud) across API/Worker, with UI regression precheck hardening.
 - 2026-02-17: PRS-010 completed and regression-validated (local + cloud) with typed retry/backoff + jitter integration in Worker.
+- 2026-02-17: PRS-011 implemented at code level in Worker (DLQ enrichment); local/cloud regression pending.
 
 ## Detailed Item Specifications
 

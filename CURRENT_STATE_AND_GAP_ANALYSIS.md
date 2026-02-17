@@ -167,6 +167,11 @@ Legend:
 ### G-11: DLQ payload lacks full diagnostic envelope
 - Severity: Medium
 - Impact: Replay and root-cause analysis need manual digging.
+- Status: Closed (Code).
+- Implemented artifacts:
+  - Worker: `worker/dead_letter.py` (DLQ envelope builder)
+  - Worker: `worker/worker_loop.py` (DLQ push now stores enriched JSON instead of raw payload only)
+  - DLQ envelope fields include: `error_code`, `error_type`, `attempts`, `max_attempts`, `failed_stage`, `queue_name`, `queue_source`, `worker_id`, and original `payload`
 - Fix backlog:
   - [PRS-011](./PRODUCTION_READINESS_BACKLOG.md#prs-011)
 

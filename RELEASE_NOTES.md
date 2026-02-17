@@ -229,3 +229,21 @@ This file tracks release-level changes with backlog traceability.
 - Commit:
   - Worker: `edaf8c8`
 - Status: `Completed (Tested)`
+
+### PRS-011
+- Backlog ID: `PRS-011`
+- Backlog Link: [PRS-011](./PRODUCTION_READINESS_BACKLOG.md#prs-011)
+- Gap Link: [G-11](./CURRENT_STATE_AND_GAP_ANALYSIS.md#g-11)
+- Type: `NFR` + `Recoverability`
+- Summary: Enriched DLQ payload with replay/debug metadata (`error_code`, `attempts`, failed stage, queue/source, worker identity).
+- Why: Make failed-job diagnosis and replay deterministic without manual log correlation.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/dead_letter.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+- Risk: `Low`
+- Validation:
+  - Python compile checks passed for touched worker modules.
+  - Local/cloud regression pending.
+- Commit:
+  - Worker: `TO_BE_FILLED_AFTER_COMMIT`
+- Status: `Completed (Code)`
