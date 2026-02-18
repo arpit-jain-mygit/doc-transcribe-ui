@@ -98,6 +98,17 @@
     return Number.isFinite(n) && n > 0 ? n : NaN;
   }
 
+  // User value: keeps intake fields consistent so users get stable pre-upload guidance.
+  function resolveIntakePrecheck(raw) {
+    return {
+      detectedJobType: String(raw?.detected_job_type || "UNKNOWN").toUpperCase(),
+      warnings: Array.isArray(raw?.warnings) ? raw.warnings : [],
+      etaSec: Number.isFinite(Number(raw?.eta_sec)) ? Number(raw.eta_sec) : null,
+      confidence: Number.isFinite(Number(raw?.confidence)) ? Number(raw.confidence) : 0,
+      reasons: Array.isArray(raw?.reasons) ? raw.reasons : [],
+    };
+  }
+
   window.JOB_CONTRACT = Object.freeze({
     CONTRACT_VERSION,
     JOB_TYPES,
@@ -114,5 +125,6 @@
     resolveDownloadUrl,
     resolveDurationSec,
     resolveTotalPages,
+    resolveIntakePrecheck,
   });
 })();
