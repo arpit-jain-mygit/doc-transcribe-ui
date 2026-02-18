@@ -61,6 +61,41 @@ Important:
 **Test**
 - Unit test schema serialization and required/optional fields.
 
+**Story 1 testcases (run now)**
+1. API unit tests
+- Command:
+  - `cd /Users/arpitjain/PycharmProjects/doc-transcribe-api && .venv/bin/python -m unittest discover -s tests -p "test_*_unit.py"`
+- Expected:
+  - `test_intake_contract_unit.py` executes and passes.
+
+2. API schema sanity check
+- Command:
+  - `cd /Users/arpitjain/PycharmProjects/doc-transcribe-api && .venv/bin/python - <<'PY'`
+  - `from schemas.requests import IntakePrecheckRequest`
+  - `from schemas.responses import IntakePrecheckResponse`
+  - `r = IntakePrecheckRequest(filename="sample.pdf")`
+  - `o = IntakePrecheckResponse(detected_job_type="OCR")`
+  - `print(r.filename, o.detected_job_type, o.warnings, o.reasons, o.confidence)`
+  - `PY`
+- Expected:
+  - Output includes: `sample.pdf OCR [] [] 0.0`
+
+3. UI unit regression
+- Command:
+  - `cd /Users/arpitjain/VSProjects/doc-transcribe-ui && npm test`
+- Expected:
+  - Existing UI tests pass with no regression.
+
+4. Optional browser-console mapping check
+- Command (browser console):
+  - `window.JOB_CONTRACT.resolveIntakePrecheck({ detected_job_type: "TRANSCRIPTION", warnings: [{ code: "LARGE_FILE", message: "Large file", severity: "WARN" }], eta_sec: 120, confidence: 0.85, reasons: ["mime=audio/mpeg"] })`
+- Expected:
+  - Returns object with keys: `detectedJobType`, `warnings`, `etaSec`, `confidence`, `reasons`.
+
+5. Not expected in Story 1
+- No intake precheck API endpoint yet.
+- No pre-upload UI panel yet.
+
 **Implementation evidence (Story 1)**
 - Status: `Completed (Code)` and unit tests passing.
 - Commits:
