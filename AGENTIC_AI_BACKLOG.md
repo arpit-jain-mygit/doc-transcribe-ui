@@ -275,6 +275,18 @@ Important:
 **Test**
 - Unit tests for ETA output with/without historical data.
 
+**Implementation evidence (Story 5)**
+- Status: `Planned`
+- Changes summary:
+  - Add deterministic ETA estimator service with conservative buckets.
+  - Support optional historical fallback (median by type/size band) without blocking request.
+  - Return stable `eta_sec` or bounded range for pre-upload guidance.
+- Call hierarchy:
+  - Planned API flow: `POST /intake/precheck` -> `routes/intake.py:precheck()` -> `estimate_eta(...)`.
+  - `estimate_eta(...)` -> static rule path (always available).
+  - Event trigger: if historical data source is enabled/available, estimator also reads historical median.
+  - Output path: estimator result merged into intake response payload.
+
 ---
 
 <a id="agent-1-story-6"></a>
@@ -299,6 +311,19 @@ Important:
 
 **Test**
 - API integration test for sample inputs and response shape.
+
+**Implementation evidence (Story 6)**
+- Status: `Planned`
+- Changes summary:
+  - Add new intake endpoint for pre-upload decisioning.
+  - Orchestrate route detection + warning generation + ETA in one API call.
+  - Keep endpoint side-effect free (no queue push, no job creation).
+- Call hierarchy:
+  - `POST /intake/precheck` -> `routes/intake.py:precheck()`.
+  - `precheck()` -> `detect_route_from_metadata(...)` (Story 3).
+  - `precheck()` -> `build_precheck_warnings(...)` (Story 4).
+  - `precheck()` -> `estimate_eta(...)` (Story 5).
+  - `precheck()` -> response mapping to `IntakePrecheckResponse`.
 
 ---
 
@@ -326,6 +351,18 @@ Important:
 **Test**
 - Manual UI test with `sample.pdf` and `sample.mp3`.
 
+**Implementation evidence (Story 7)**
+- Status: `Planned`
+- Changes summary:
+  - Add API client method for intake precheck call.
+  - Trigger precheck on file select/drop before upload submit.
+  - Render compact route/warnings/ETA preview in upload area.
+- Call hierarchy:
+  - Trigger event: file selected or dropped in UI.
+  - Event handler in `js/upload.js` -> `js/api-client.js:precheckIntake(...)`.
+  - UI render path: precheck response -> upload preview component in `partials/upload-grid.html`.
+  - Event trigger: preview refreshes each time user changes selected file.
+
 ---
 
 <a id="agent-1-story-8"></a>
@@ -349,6 +386,18 @@ Important:
 
 **Test**
 - Compare behavior with `FEATURE_SMART_INTAKE=0` vs `1`.
+
+**Implementation evidence (Story 8)**
+- Status: `Planned`
+- Changes summary:
+  - Enforce strict flag behavior in API endpoint and UI invocation.
+  - With flag OFF, keep complete legacy flow unchanged.
+  - With flag ON, enable precheck call and pre-upload preview.
+- Call hierarchy:
+  - Trigger event: UI startup/capability fetch sets smart intake capability.
+  - UI path: `isSmartIntakeEnabled()` gate -> call or skip `precheckIntake(...)`.
+  - API path: intake route checks `is_smart_intake_enabled()` and returns gated response if disabled.
+  - Event trigger: runtime flag toggle in environment changes behavior after redeploy/restart.
 
 ---
 
@@ -376,6 +425,18 @@ Important:
 **Test**
 - Verify logs/metrics fields exist and are consistent.
 
+**Implementation evidence (Story 9)**
+- Status: `Planned`
+- Changes summary:
+  - Add stage logs for intake decisions with `request_id`, route, confidence, warning_count.
+  - Add metrics for route distribution, warning rates, ETA buckets.
+  - Keep telemetry deterministic and safe (no token/PII leakage).
+- Call hierarchy:
+  - `POST /intake/precheck` -> decision computation (Stories 3/4/5).
+  - Decision output -> `log_stage(stage="INTAKE_PRECHECK_DECISION", ...)`.
+  - Decision output -> `incr(...)` / `observe(...)` metric updates.
+  - Event trigger: each precheck request emits one telemetry record set.
+
 ---
 
 <a id="agent-1-story-10"></a>
@@ -401,6 +462,17 @@ Important:
 
 **Test**
 - Local + cloud regression pass with Smart Intake on/off.
+
+**Implementation evidence (Story 10)**
+- Status: `Planned`
+- Changes summary:
+  - Extend local/cloud regression scripts with optional precheck assertions.
+  - Validate both flag modes: disabled (no precheck effect) and enabled (precheck fields present).
+  - Keep bounded timeouts and concise failure diagnostics.
+- Call hierarchy:
+  - Regression runner start -> precheck step (conditional by test mode).
+  - Precheck assertion step -> upload step -> status polling (existing flow).
+  - Event trigger: `SMART_INTAKE_TEST_MODE=on|off` (or equivalent) controls assertion branch.
 
 ---
 
@@ -431,6 +503,17 @@ Important:
 **Test**
 - Dry-run toggle procedure in staging/local.
 
+**Implementation evidence (Story 11)**
+- Status: `Planned`
+- Changes summary:
+  - Document phased rollout (shadow/visible/full) and rollback runbook.
+  - Define operator checklist, guardrails, and expected telemetry per phase.
+  - Add release-note template entries for Smart Intake changes.
+- Call hierarchy:
+  - Trigger event: deployment planning/release review references runbook.
+  - Operator action path: set flag -> deploy/restart -> verify health/contract/metrics -> proceed or rollback.
+  - Event trigger: incident or metric regression invokes rollback procedure.
+
 ---
 
 <a id="agent-1-story-12"></a>
@@ -454,6 +537,17 @@ Important:
 
 **Test**
 - Verify table, test column, and change summary are updated.
+
+**Implementation evidence (Story 12)**
+- Status: `Planned`
+- Changes summary:
+  - Update backlog status transitions (`Completed (Code)` then `Completed (Tested)`).
+  - Add commit IDs, repo-wise summary, and test evidence links.
+  - Update gap-analysis alignment to reflect closure of PRS-035.
+- Call hierarchy:
+  - Trigger event: Story implementation merge -> backlog row update.
+  - Trigger event: local+cloud pass -> test column update to `Completed`.
+  - Trigger event: final closure -> release notes and gap analysis synchronization.
 
 ---
 
