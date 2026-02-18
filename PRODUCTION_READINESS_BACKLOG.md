@@ -58,7 +58,7 @@ Status values:
 | PRS-032 | 9 | Add integration tests for e2e job lifecycle | All | Quality | Confidence before deploy | Baseline readiness item: improves reliability/maintainability; see User Benefit and Repo-wise summary. | Completed (Tested) | Completed (Local + Cloud Regression) | UI/scripts: upgraded local/cloud regression runners to certify lifecycle status sequences (`QUEUED/PROCESSING->COMPLETED`), and emit machine-readable integration reports (`integration-local*.jsonl`, `integration-cloud*.jsonl`) with scenario/job/request/duration/result. |
 | PRS-033 | 9 | Add CI gates (`lint`, tests, contract checks) | All | Quality governance | Stable releases | Baseline readiness item: improves reliability/maintainability; see User Benefit and Repo-wise summary. | Completed (Tested) | Completed (Local + Cloud Regression) | Added repo CI workflows: API/Worker run unit tests + contract sanity checks; UI runs unit tests + regression script syntax gates in GitHub Actions. |
 | PRS-034 | 8 | Add user-centric file and method comments across code/config files | All | Maintainability and supportability | Faster developer/tester/support understanding of OCR/transcription flow | Baseline readiness item: improves reliability/maintainability; see User Benefit and Repo-wise summary. | Completed (Code) | Pending (Run Local + Cloud Regression) | UI/API/Worker: added crisp user-centric comments at file top and method/function level (where applicable) across `.js`, `.html`, `.css`, `.py`, `.yaml`, `.yml` tracked files. |
-| PRS-035 | 10 | Smart Intake Agent (auto-routing + prechecks + ETA) | UI, API | Intelligent intake and routing | Faster first response and fewer bad uploads | Users: smarter file guidance; Dev: fewer bad-input bugs; Ops: lower avoidable failures; Product: better conversion at upload start. | Planned | Pending | Test criteria: verify routing decisions, precheck hints, and ETA accuracy against sampled OCR/A-V files. |
+| PRS-035 | 10 | Smart Intake Agent (auto-routing + prechecks + ETA) | UI, API | Intelligent intake and routing | Faster first response and fewer bad uploads | Users: smarter file guidance; Dev: fewer bad-input bugs; Ops: lower avoidable failures; Product: better conversion at upload start. | Completed (Tested) | Completed (Local + Cloud Regression) | UI: precheck contract mapping + pre-upload guidance + regression precheck assertions + rollout docs (`f444f9d`,`2e73840`,`fd1e787`). API: intake precheck endpoint with deterministic routing/warnings/ETA + stage telemetry + decision metrics (`952d12b`). |
 | PRS-036 | 10 | OCR Quality Agent (confidence scoring + page-level guidance) | Worker, API, UI | OCR quality assurance | Better text quality with actionable remediation | Users: better OCR output quality; Dev: measurable quality signals; Ops: early poor-scan detection; Product: quality KPI visibility. | Planned | Pending | Test criteria: validate low-confidence detection, page-level quality signals, and UI guidance on poor scans. |
 | PRS-037 | 10 | Transcription Quality Agent (segment confidence + noise/speaker hints) | Worker, API, UI | Transcription quality assurance | More reliable transcripts with targeted fixes | Users: stronger transcript reliability; Dev: segment-level confidence data; Ops: quicker noisy-audio diagnosis; Product: trust improvements. | Planned | Pending | Test criteria: verify segment confidence output, noisy-audio flags, and recommended reprocessing strategies. |
 | PRS-038 | 10 | Retry & Recovery Agent (policy-driven recovery orchestration) | Worker, API | Autonomous failure recovery | Higher completion rate during transient failures | Users: higher completion on transient issues; Dev: policy-driven recovery paths; Ops: reduced manual reprocessing; Product: stability gains. | Planned | Pending | Test criteria: inject transient/provider failures and confirm bounded retry, recovery action, and DLQ traceability. |
@@ -1577,6 +1577,9 @@ What changes when using agents vs non-agent logic:
 **Purpose**
 - Automatically choose the best OCR/transcription path before enqueue to reduce avoidable failures and improve perceived speed.
 
+**Status**
+- `Completed (Tested)` (local + cloud regression passed with Smart Intake precheck assertions enabled).
+
 **Why this is in Phase 10**
 - Built after core reliability and observability so routing decisions can be measured and safely rolled out.
 
@@ -1587,6 +1590,12 @@ What changes when using agents vs non-agent logic:
 1. Submit mixed file types and verify correct route selection.
 2. Validate precheck warning quality (size/type/page/duration guidance).
 3. Compare ETA estimates vs actual completion distribution.
+
+**Implementation summary**
+1. Added Smart Intake contract + feature flag + deterministic routing + precheck warnings + ETA estimator.
+2. Added `/intake/precheck` endpoint and UI pre-upload guidance integration.
+3. Added intake observability (stage telemetry and decision metrics).
+4. Added local/cloud regression precheck assertions and rollout/rollback runbook coverage.
 
 ### PRS-036 - OCR Quality Agent (confidence scoring + page-level guidance)
 

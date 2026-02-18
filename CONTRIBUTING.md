@@ -11,6 +11,7 @@ Follow `/ARCHITECTURE.md` layer boundaries before creating/modifying files.
 - Add both positive and negative tests for each new/changed behavior.
 - Add test notes (what positive/negative paths were verified locally and in cloud regression when required).
 - Add a crisp user-centric comment at file top and at method/function level for every new/modified code file.
+- For agent backlog story docs, add `Before`, `After`, and one user-centric example in `/AGENTIC_AI_STORY_BEFORE_AFTER.md`.
 
 ## Logging minimum
 - Include `job_id` where available.

@@ -4,6 +4,10 @@
 - `FEATURE_SMART_INTAKE`
   - `1`: enables Smart Intake precheck capability exposure.
   - `0` (default): disabled; upload behavior stays unchanged.
+  - Rollout phases:
+    - `shadow`: endpoint live, guidance hidden from users.
+    - `visible`: endpoint + guidance visible, upload flow unchanged.
+    - `full`: endpoint + guidance + regression assertions enabled.
 - `FEATURE_QUEUE_PARTITIONING`
   - `1`: route OCR and TRANSCRIPTION to dedicated queues.
 - `FEATURE_UPLOAD_QUOTAS`
@@ -29,3 +33,4 @@
 1. Deploy with feature flags OFF.
 2. Enable per environment and monitor metrics/logs.
 3. Keep quick rollback path by toggling flag to OFF.
+4. For Smart Intake, verify `/intake/precheck` and regression precheck assertions before enabling full mode.

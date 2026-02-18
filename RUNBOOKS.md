@@ -45,3 +45,15 @@
   - `WORKER_MAX_INFLIGHT_TRANSCRIPTION`
 - If throttling observed, increase limits carefully and monitor failure rate + queue depth.
 
+## 6) Smart Intake rollout / rollback
+- Shadow mode:
+  - Keep `FEATURE_SMART_INTAKE=1` only in API capability checks, but do not surface UI guidance.
+  - Verify API `/intake/precheck` returns deterministic `detected_job_type`, `warnings`, `eta_sec`, `confidence`.
+- Visible mode:
+  - Enable Smart Intake UI hints.
+  - Confirm uploads still use existing `/upload` behavior (guidance only, no forced route overrides).
+- Full mode:
+  - Keep Smart Intake visible and run local/cloud regression with precheck assertions enabled.
+- Rollback:
+  - Set `FEATURE_SMART_INTAKE=0` in API/UI config and redeploy.
+  - Validate `/intake/precheck` returns feature-disabled and upload flow continues normally.

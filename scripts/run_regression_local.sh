@@ -23,6 +23,7 @@ REQUIRE_LOCAL_WORKER="${REQUIRE_LOCAL_WORKER:-1}"
 EXPECT_WORKER_BOTH_QUEUES="${EXPECT_WORKER_BOTH_QUEUES:-1}"
 REQUIRE_WORKER_LOG_CORRELATION="${REQUIRE_WORKER_LOG_CORRELATION:-0}"
 REQUIRE_API_LOG_CORRELATION="${REQUIRE_API_LOG_CORRELATION:-0}"
+RUN_INTAKE_PRECHECK_ASSERT="${RUN_INTAKE_PRECHECK_ASSERT:-1}"
 
 # Optional auth:
 # export AUTH_BEARER_TOKEN="..."
@@ -496,6 +497,60 @@ PY
   echo "$rid"
 }
 
+# User value: verifies Smart Intake precheck guidance before upload so users get early routing/ETA clarity.
+run_intake_precheck_assertion() {
+  local file_path="$1"
+  local expected_job_type="$2"
+  local req_id="$3"
+  [[ "$RUN_INTAKE_PRECHECK_ASSERT" == "1" ]] || return 0
+
+  local mime_type filename payload result code body actual_job
+  filename="$(basename "$file_path")"
+  case "${filename##*.}" in
+    pdf|PDF) mime_type="application/pdf" ;;
+    mp3|MP3) mime_type="audio/mpeg" ;;
+    *) mime_type="application/octet-stream" ;;
+  esac
+  payload="$(python3 - "$filename" "$mime_type" <<'PY'
+import json, sys
+print(json.dumps({
+  "filename": sys.argv[1],
+  "mime_type": sys.argv[2],
+}))
+PY
+)"
+
+  if [[ -n "${AUTH_HEADER_FLAG[0]}" ]]; then
+    result="$(http_call POST "${API_BASE}/intake/precheck" \
+      "${AUTH_HEADER_FLAG[@]}" \
+      -H "X-Request-ID: ${req_id}" \
+      -H "Content-Type: application/json" \
+      -d "$payload")"
+  else
+    result="$(http_call POST "${API_BASE}/intake/precheck" \
+      -H "X-Request-ID: ${req_id}" \
+      -H "Content-Type: application/json" \
+      -d "$payload")"
+  fi
+  code="$(echo "$result" | sed -n '1p')"
+  body="$(echo "$result" | sed -n '2,$p')"
+
+  if [[ "$code" == "404" ]]; then
+    trace "Intake precheck skipped: feature disabled on API"
+    return 0
+  fi
+  if [[ ! "$code" =~ ^2 ]]; then
+    fail "Intake precheck assertion failed (HTTP ${code}): ${body}"
+  fi
+
+  actual_job="$(echo "$body" | jq -r '.detected_job_type // empty')"
+  [[ -n "$actual_job" ]] || fail "Intake precheck missing detected_job_type: ${body}"
+  [[ "$actual_job" == "$expected_job_type" ]] || fail "Intake route mismatch: expected=${expected_job_type} actual=${actual_job}"
+  echo "$body" | jq -e '.warnings and .reasons and (.eta_sec | type == "number") and (.confidence | type == "number")' >/dev/null \
+    || fail "Intake precheck payload missing expected fields: ${body}"
+  trace "Intake precheck certified route=${actual_job} eta_sec=$(echo "$body" | jq -r '.eta_sec') warnings=$(echo "$body" | jq -r '.warnings | length')"
+}
+
 submit_job() {
   local file_path="$1"
   local job_type="$2"
@@ -780,6 +835,7 @@ main() {
   local ocr_req_id=""
   ocr_req_id="$(generate_request_id "OCR")"
   require_non_empty "${ocr_req_id:-}" "ocr_req_id"
+  run_intake_precheck_assertion "$SAMPLE_PDF" "OCR" "$ocr_req_id"
   ocr_resp="$(submit_job "$SAMPLE_PDF" "OCR" "$ocr_req_id")"
   echo "OCR response: $ocr_resp"
   ocr_job="$(extract_job_id "$ocr_resp")"
@@ -795,6 +851,7 @@ main() {
   local tr_req_id=""
   tr_req_id="$(generate_request_id "TRANSCRIPTION")"
   require_non_empty "${tr_req_id:-}" "tr_req_id"
+  run_intake_precheck_assertion "$SAMPLE_MP3" "TRANSCRIPTION" "$tr_req_id"
   tr_resp="$(submit_job "$SAMPLE_MP3" "TRANSCRIPTION" "$tr_req_id")"
   echo "Transcription response: $tr_resp"
   tr_job="$(extract_job_id "$tr_resp")"

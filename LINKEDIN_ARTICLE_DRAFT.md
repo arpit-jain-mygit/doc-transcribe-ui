@@ -70,6 +70,7 @@ flowchart TB
   W["Worker Repo (Python)\nQueue Consumer, OCR/Transcription,\nRetry, DLQ, State Updates"]:::repo
   GCS["Google Cloud Storage (GCS)\nInput/Output artifacts"]:::ext
   VX["Vertex AI / Gemini\nOCR + Transcription processing"]:::ext
+  PIL["Local Quality Heuristics (Pillow)\ncontrast/blur/text-density scoring"]:::ext
   DLQ["DLQ Queue (Redis List)\nFailed payloads + diagnostics"]:::ext
   GH["GitHub Actions CI\nUnit/Contract Gates"]:::ext
 
@@ -82,6 +83,7 @@ flowchart TB
   API --> GCS
   W --> GCS
   W --> VX
+  W --> PIL
   W --> DLQ
   GH --> UI
   GH --> API
@@ -130,6 +132,7 @@ flowchart LR
     APIAPP["doc-transcribe-api\nFastAPI Service"]:::app
     REDIS["Redis Key-Value + Queue"]:::app
     WORKER["doc-transcribe-worker\nBackground Worker Service"]:::app
+    PILLSCORE["Pillow Quality Scoring\n(local deterministic heuristics)"]:::app
   end
 
   subgraph GCP["Google Cloud"]
@@ -151,6 +154,7 @@ flowchart LR
   APIAPP --> GCSSVC
   WORKER --> GCSSVC
   WORKER --> VERTEX
+  WORKER --> PILLSCORE
   GHCI --> UIAPP
   GHCI --> APIAPP
   GHCI --> WORKER
@@ -198,6 +202,7 @@ sequenceDiagram
   participant Worker as Worker
   participant GCS as Cloud Storage
   participant Vertex as Vertex/Gemini
+  participant Pillow as Pillow Scoring
 
   User->>UI: Select file
   UI->>API: POST /intake/precheck (A1)
@@ -220,10 +225,11 @@ sequenceDiagram
   Worker->>Redis: BRPOP job
   Worker->>GCS: Fetch input
   Worker->>Vertex: OCR/Transcription
+  Worker->>Pillow: Compute local quality scores (A2/A3)
   Worker->>GCS: Write output text
   Worker->>Redis: Update COMPLETED/FAILED + metadata
 
-  Note over Worker,Redis: A2/A3 quality scoring enriches metadata
+  Note over Worker,Redis: A2/A3 quality scoring enriches metadata (local Pillow heuristics)
   Note over Worker,Redis: A4 retry policy + DLQ on fatal failures
   Note over API,Redis: A5 quota/cost guardrails
   Note over Worker,Redis: A6 queue balancing + concurrency controls
@@ -251,6 +257,10 @@ sequenceDiagram
 5. **Regression as a product capability**
 - Local and cloud bounded regression reduced release risk materially.
 
+6. **Quality scoring kept local-first (non-LLM)**
+- OCR/transcription quality scores are designed to be computed locally via Pillow/text heuristics for fast, cheap, stable behavior.
+- LLM-based quality scoring remains an optional future enhancement, not a current dependency.
+
 ---
 
 ## 8) User impact summary
@@ -267,6 +277,19 @@ What improved for engineering/ops/product:
 - predictable rollout/rollback,
 - stronger confidence in release quality.
 
+Sample quality payload (local deterministic scoring):
+```json
+{
+  "ocr_quality_score": 0.78,
+  "low_confidence_pages": [2, 5],
+  "quality_hints": [
+    "Page 2: low contrast detected",
+    "Page 5: image appears blurry"
+  ],
+  "quality_method": "pillow_local_heuristics_v1"
+}
+```
+
 ---
 
 ## 9) What’s next
@@ -274,6 +297,7 @@ What improved for engineering/ops/product:
 Near term:
 - complete remaining agent stories for `PRS-035` to `PRS-044`.
 - operationalize quality, triage, and certification agents.
+- keep quality scoring deterministic first (Pillow-based), then optionally add LLM scoring as an enrichment layer.
 
 Strategic:
 - move to `PRS-045`: Digambar Jainism GPT using RAG, reusing this reliability and observability foundation.
@@ -286,4 +310,3 @@ If you need PNG/SVG assets for LinkedIn carousel:
 1. Render Mermaid blocks from this markdown in VS Code/Markdown preview.
 2. Export each diagram as PNG/SVG.
 3. Optionally annotate in Figma/Excalidraw for publication-ready branding.
-

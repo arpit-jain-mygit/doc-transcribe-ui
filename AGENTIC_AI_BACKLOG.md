@@ -8,6 +8,16 @@ It is written for beginners. It explains:
 2. Who benefits (Users / Dev / Ops / Product).
 3. How to implement the first agent (`PRS-035`) in tiny stories (file-by-file, no full code dump).
 
+Companion references:
+- Story-level before/after + user-centric examples for all agents:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/AGENTIC_AI_STORY_BEFORE_AFTER.md`
+
+Mandatory story documentation standard (for all future updates):
+- Every new/updated story must include:
+  1. Before (what pain existed)
+  2. After (what improves)
+  3. User-centric example (JSON payload/UI artifact/ops signal)
+
 ## 1) Agent Catalog (What + Who benefits)
 
 | Agent # | PRS Ref | Agent | What it does | Users | Dev | Ops | Product | Stories |
@@ -426,15 +436,15 @@ Important:
 - Verify logs/metrics fields exist and are consistent.
 
 **Implementation evidence (Story 9)**
-- Status: `Planned`
+- Status: `Completed (Code + Tested)`
 - Changes summary:
-  - Add stage logs for intake decisions with `request_id`, route, confidence, warning_count.
-  - Add metrics for route distribution, warning rates, ETA buckets.
-  - Keep telemetry deterministic and safe (no token/PII leakage).
+  - Added stage logs for intake decisions with `request_id`, route, confidence, warning_count, and ETA bucket.
+  - Added metrics for route distribution, warning rates, and ETA buckets in precheck endpoint.
+  - Kept telemetry deterministic and safe (no token/PII leakage).
 - Call hierarchy:
   - `POST /intake/precheck` -> decision computation (Stories 3/4/5).
   - Decision output -> `log_stage(stage="INTAKE_PRECHECK_DECISION", ...)`.
-  - Decision output -> `incr(...)` / `observe(...)` metric updates.
+  - Decision output -> `incr(...)` metric updates.
   - Event trigger: each precheck request emits one telemetry record set.
 
 ---
@@ -464,11 +474,11 @@ Important:
 - Local + cloud regression pass with Smart Intake on/off.
 
 **Implementation evidence (Story 10)**
-- Status: `Planned`
+- Status: `Completed (Code + Tested)`
 - Changes summary:
-  - Extend local/cloud regression scripts with optional precheck assertions.
-  - Validate both flag modes: disabled (no precheck effect) and enabled (precheck fields present).
-  - Keep bounded timeouts and concise failure diagnostics.
+  - Extended local/cloud regression scripts with optional precheck assertions before upload.
+  - Validated both flag modes: disabled (precheck skip) and enabled (precheck payload + route assertions).
+  - Kept bounded timeouts and concise failure diagnostics.
 - Call hierarchy:
   - Regression runner start -> precheck step (conditional by test mode).
   - Precheck assertion step -> upload step -> status polling (existing flow).
@@ -504,11 +514,11 @@ Important:
 - Dry-run toggle procedure in staging/local.
 
 **Implementation evidence (Story 11)**
-- Status: `Planned`
+- Status: `Completed (Code + Tested)`
 - Changes summary:
-  - Document phased rollout (shadow/visible/full) and rollback runbook.
-  - Define operator checklist, guardrails, and expected telemetry per phase.
-  - Add release-note template entries for Smart Intake changes.
+  - Documented phased rollout (shadow/visible/full) and rollback runbook for Smart Intake.
+  - Defined operator checklist, guardrails, and expected telemetry per phase.
+  - Added release-note entry for Smart Intake rollout and verification.
 - Call hierarchy:
   - Trigger event: deployment planning/release review references runbook.
   - Operator action path: set flag -> deploy/restart -> verify health/contract/metrics -> proceed or rollback.
@@ -539,11 +549,11 @@ Important:
 - Verify table, test column, and change summary are updated.
 
 **Implementation evidence (Story 12)**
-- Status: `Planned`
+- Status: `Completed (Code + Tested)`
 - Changes summary:
-  - Update backlog status transitions (`Completed (Code)` then `Completed (Tested)`).
-  - Add commit IDs, repo-wise summary, and test evidence links.
-  - Update gap-analysis alignment to reflect closure of PRS-035.
+  - Updated backlog status for PRS-035 to tested closure with repo-wise summary.
+  - Added release-note traceability for PRS-035.
+  - Updated gap-analysis alignment to reflect Smart Intake closure.
 - Call hierarchy:
   - Trigger event: Story implementation merge -> backlog row update.
   - Trigger event: local+cloud pass -> test column update to `Completed`.

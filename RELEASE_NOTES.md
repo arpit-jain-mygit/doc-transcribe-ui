@@ -16,6 +16,30 @@ This file tracks release-level changes with backlog traceability.
 
 ## Unreleased
 
+### PRS-035
+- Backlog ID: `PRS-035`
+- Backlog Link: [PRS-035](./PRODUCTION_READINESS_BACKLOG.md#prs-035)
+- Type: `Feature` + `Operability`
+- Summary: Closed Smart Intake Agent stories with pre-upload routing guidance, observability, regression assertions, and rollout runbook.
+- Why: Reduce avoidable upload failures while giving users early route/warning/ETA feedback.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/intake.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_intake_endpoint_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/AGENTIC_AI_BACKLOG.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/PRODUCTION_READINESS_BACKLOG.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/CURRENT_STATE_AND_GAP_ANALYSIS.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/RUNBOOKS.md`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/FEATURE_FLAGS.md`
+- Risk: `Medium`
+- Validation:
+  - API unit tests include precheck endpoint behavior and observability hook invocation.
+  - Local regression script now asserts intake precheck payload and route before upload.
+  - Cloud regression script now asserts intake precheck payload and route before upload.
+  - Existing OCR/transcription bounded regressions continue unchanged after precheck step.
+- Status: `Completed (Tested)`
+
 ### PRS-001
 - Backlog ID: `PRS-001`
 - Backlog Link: [PRS-001](./PRODUCTION_READINESS_BACKLOG.md#prs-001)

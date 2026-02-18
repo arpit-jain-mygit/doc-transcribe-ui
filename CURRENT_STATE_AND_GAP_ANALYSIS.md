@@ -70,6 +70,18 @@ Legend:
 - Severity: `High`, `Medium`, `Low`
 - Fix link points to backlog file section.
 
+<a id="g-35"></a>
+### G-35: No pre-upload smart-intake guidance for route/warnings/ETA
+- Severity: Medium
+- Impact: Users start uploads without early hints, causing avoidable retries and support noise.
+- Status: Closed (Tested).
+- Implemented artifacts:
+  - UI: pre-upload guidance integration + Smart Intake flag wiring (`js/upload.js`, `js/config.js`).
+  - API: deterministic precheck endpoint with route/warnings/ETA + intake observability (`routes/intake.py`).
+  - UI scripts: local/cloud regression now assert precheck payload before upload (`scripts/run_regression_local.sh`, `scripts/run_regression_cloud.sh`).
+- Fix backlog:
+  - [PRS-035](./PRODUCTION_READINESS_BACKLOG.md#prs-035)
+
 <a id="g-01"></a>
 ### G-01: No formal architecture boundary docs across all repos
 - Severity: High

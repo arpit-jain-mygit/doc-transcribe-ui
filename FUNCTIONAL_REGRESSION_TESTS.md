@@ -57,6 +57,7 @@ Note:
 Behavior:
 - Hard bounded polling (no indefinite waits).
 - Fails fast with explicit reason.
+- Asserts Smart Intake precheck contract (when enabled): route + warnings + ETA + confidence.
 - Covers OCR and transcription success paths.
 - Emits lifecycle integration evidence:
   - Local: `/tmp/doc_transcribe_logs/integration-local-*.jsonl`
@@ -95,6 +96,7 @@ Behavior:
 2. Wait for completion.
 3. Download output.
 - Expected result:
+  - Smart Intake precheck (if enabled) returns `detected_job_type=OCR` with guidance fields.
   - Job status: `COMPLETED`.
   - History row appears with metadata.
   - Downloaded file opens correctly.
@@ -108,6 +110,7 @@ Behavior:
 2. Wait for completion.
 3. Download output.
 - Expected result:
+  - Smart Intake precheck (if enabled) returns `detected_job_type=TRANSCRIPTION` with guidance fields.
   - Job status: `COMPLETED`.
   - Duration + processing metadata visible.
   - Output text is readable Unicode.
