@@ -313,11 +313,11 @@ Important:
 - API integration test for sample inputs and response shape.
 
 **Implementation evidence (Story 6)**
-- Status: `Planned`
+- Status: `Completed (Code)`
 - Changes summary:
-  - Add new intake endpoint for pre-upload decisioning.
-  - Orchestrate route detection + warning generation + ETA in one API call.
-  - Keep endpoint side-effect free (no queue push, no job creation).
+  - Added `/intake/precheck` endpoint for pre-upload decisioning.
+  - Endpoint now orchestrates route detection + warning generation + ETA in one response.
+  - Endpoint remains side-effect free (no queue push, no job creation).
 - Call hierarchy:
   - `POST /intake/precheck` -> `routes/intake.py:precheck()`.
   - `precheck()` -> `detect_route_from_metadata(...)` (Story 3).
@@ -352,11 +352,11 @@ Important:
 - Manual UI test with `sample.pdf` and `sample.mp3`.
 
 **Implementation evidence (Story 7)**
-- Status: `Planned`
+- Status: `Completed (Code)`
 - Changes summary:
-  - Add API client method for intake precheck call.
-  - Trigger precheck on file select/drop before upload submit.
-  - Render compact route/warnings/ETA preview in upload area.
+  - Added API client method for intake precheck call.
+  - Triggered precheck on file select/drop before upload submit.
+  - Added compact route/warnings/ETA preview in upload area.
 - Call hierarchy:
   - Trigger event: file selected or dropped in UI.
   - Event handler in `js/upload.js` -> `js/api-client.js:precheckIntake(...)`.
@@ -388,11 +388,11 @@ Important:
 - Compare behavior with `FEATURE_SMART_INTAKE=0` vs `1`.
 
 **Implementation evidence (Story 8)**
-- Status: `Planned`
+- Status: `Completed (Code)`
 - Changes summary:
-  - Enforce strict flag behavior in API endpoint and UI invocation.
-  - With flag OFF, keep complete legacy flow unchanged.
-  - With flag ON, enable precheck call and pre-upload preview.
+  - Enforced strict flag behavior in API endpoint and UI invocation.
+  - With flag OFF, legacy upload flow remains unchanged.
+  - With flag ON, precheck call + preview are enabled.
 - Call hierarchy:
   - Trigger event: UI startup/capability fetch sets smart intake capability.
   - UI path: `isSmartIntakeEnabled()` gate -> call or skip `precheckIntake(...)`.

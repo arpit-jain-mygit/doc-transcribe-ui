@@ -7,6 +7,9 @@ async function uploadFrom(type, inputId) {
   }
   const picked = input.files[0];
   try {
+    if (typeof runIntakePrecheckForFile === "function") {
+      await runIntakePrecheckForFile(type, picked);
+    }
     await upload(type, picked);
   } finally {
     clearUploadInputState(inputId);
@@ -53,6 +56,7 @@ function clearUploadInputState(inputId = "unifiedFile") {
 
   const name = document.getElementById("unifiedFilename");
   if (name) name.textContent = "";
+  if (typeof clearIntakePrecheckView === "function") clearIntakePrecheckView();
 }
 
 window.clearUploadInputState = clearUploadInputState;
@@ -123,6 +127,74 @@ function estimateProcessingHint(type, file, mediaDurationSec = null) {
   }
   const bands = sizeMb <= 2 ? "1-2" : sizeMb <= 10 ? "2-4" : "4-8";
   return `अनुमानित समय: PDF/Image के लिए लगभग ${bands} मिनट (गुणवत्ता/पेज पर निर्भर)।`;
+}
+
+// User value: clears pre-upload precheck hints so users always see relevant guidance for current file.
+function clearIntakePrecheckView() {
+  const box = document.getElementById("intakePrecheckBox");
+  const summary = document.getElementById("intakePrecheckSummary");
+  const warnings = document.getElementById("intakePrecheckWarnings");
+  if (summary) summary.textContent = "";
+  if (warnings) warnings.innerHTML = "";
+  if (box) box.style.display = "none";
+}
+
+// User value: renders route/warning/ETA hints before upload so users can make better submission decisions.
+function renderIntakePrecheckView(precheck) {
+  const box = document.getElementById("intakePrecheckBox");
+  const summary = document.getElementById("intakePrecheckSummary");
+  const warnings = document.getElementById("intakePrecheckWarnings");
+  if (!box || !summary || !warnings) return;
+
+  const detected = String(precheck?.detected_job_type || "UNKNOWN");
+  const etaSec = Number(precheck?.eta_sec || 0);
+  const etaMin = etaSec > 0 ? Math.max(1, Math.round(etaSec / 60)) : null;
+  summary.textContent = etaMin
+    ? `सुझाव: ${detected} • अनुमानित समय: लगभग ${etaMin} मिनट`
+    : `सुझाव: ${detected}`;
+
+  warnings.innerHTML = "";
+  const items = Array.isArray(precheck?.warnings) ? precheck.warnings : [];
+  items.forEach((w) => {
+    const li = document.createElement("li");
+    li.textContent = String(w?.message || "");
+    warnings.appendChild(li);
+  });
+
+  box.style.display = (summary.textContent || items.length) ? "block" : "none";
+}
+
+// User value: runs precheck safely before upload so users get guidance without blocking current upload flow.
+async function runIntakePrecheckForFile(type, file) {
+  clearIntakePrecheckView();
+  if (!window.ApiClient || typeof window.ApiClient.precheckIntake !== "function") return;
+  if (typeof window.isSmartIntakeEnabled === "function" && !window.isSmartIntakeEnabled()) {
+    if (typeof window.ApiClient.refreshSmartIntakeCapability === "function") {
+      try {
+        await window.ApiClient.refreshSmartIntakeCapability();
+      } catch {}
+    }
+    if (!window.isSmartIntakeEnabled()) return;
+  }
+
+  const mediaDurationSec = await getMediaDurationSec(file);
+  const payload = {
+    filename: String(file?.name || ""),
+    mime_type: String(file?.type || ""),
+    file_size_bytes: Number(file?.size || 0),
+    media_duration_sec: Number.isFinite(mediaDurationSec) ? Math.round(mediaDurationSec) : null,
+    pdf_page_count: null,
+  };
+
+  try {
+    const { res, data } = await window.ApiClient.precheckIntake(payload, {
+      requestId: window.ACTIVE_REQUEST_ID || "",
+    });
+    if (!res || !res.ok || !data || data._nonJson) return;
+    renderIntakePrecheckView(data);
+  } catch {
+    // Best-effort UX enhancement; upload flow should not be blocked on precheck.
+  }
 }
 
 // User value: shows clear processing timing so users can set expectations.

@@ -63,4 +63,28 @@ window.ApiClient = {
       requestId,
     });
   },
+  precheckIntake(payload, { requestId = "" } = {}) {
+    return apiClientFetchJson("/intake/precheck", {
+      method: "POST",
+      includeAuth: true,
+      requestId,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+  },
+  async refreshSmartIntakeCapability() {
+    try {
+      const { data } = await apiClientFetchJson("/contract/job-status", {
+        method: "GET",
+        includeAuth: false,
+      });
+      const enabled = Boolean(data && data.capabilities && data.capabilities.smart_intake_enabled);
+      if (typeof window.setSmartIntakeCapability === "function") {
+        window.setSmartIntakeCapability(enabled);
+      }
+      return enabled;
+    } catch {
+      return false;
+    }
+  },
 };

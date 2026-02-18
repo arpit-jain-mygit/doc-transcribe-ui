@@ -130,6 +130,9 @@ function onGoogleSignIn(resp) {
   toggleAuthOnly(true);
   hidePending();
   scheduleTokenExpiryLogout(ID_TOKEN);
+  if (window.ApiClient && typeof window.ApiClient.refreshSmartIntakeCapability === "function") {
+    window.ApiClient.refreshSmartIntakeCapability();
+  }
 
   toast("Signed in successfully", "success");
 }
@@ -212,6 +215,9 @@ function restoreSession() {
     showLoggedInUI();
     toggleAuthOnly(true);
     scheduleTokenExpiryLogout(ID_TOKEN);
+    if (window.ApiClient && typeof window.ApiClient.refreshSmartIntakeCapability === "function") {
+      window.ApiClient.refreshSmartIntakeCapability();
+    }
 
     const job = localStorage.getItem("active_job_id");
     if (job) {
