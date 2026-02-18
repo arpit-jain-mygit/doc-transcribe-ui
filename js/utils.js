@@ -48,13 +48,27 @@ function formatStatus(status) {
 }
 
 // User value: supports safeJson so the OCR/transcription journey stays clear and reliable.
+const SAFE_JSON_CACHE = new WeakMap();
+
+// User value: supports safeJson so the OCR/transcription journey stays clear and reliable.
 async function safeJson(res) {
+  if (!res) return null;
+  if (SAFE_JSON_CACHE.has(res)) {
+    return SAFE_JSON_CACHE.get(res);
+  }
   const raw = await res.text();
-  if (!raw) return null;
+  if (!raw) {
+    SAFE_JSON_CACHE.set(res, null);
+    return null;
+  }
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    SAFE_JSON_CACHE.set(res, parsed);
+    return parsed;
   } catch {
-    return { _nonJson: true, _raw: raw };
+    const parsed = { _nonJson: true, _raw: raw };
+    SAFE_JSON_CACHE.set(res, parsed);
+    return parsed;
   }
 }
 

@@ -217,51 +217,58 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
   if (POLL_IN_FLIGHT) return;
 
   let res;
+  let data;
   POLL_IN_FLIGHT = true;
   try {
-    const { res: statusRes } = await window.ApiClient.getStatus(JOB_ID, {
+    const { res: statusRes, data: statusData } = await window.ApiClient.getStatus(JOB_ID, {
       requestId: window.ACTIVE_REQUEST_ID || "",
     });
     res = statusRes;
+    data = statusData;
   } catch {
     POLL_IN_FLIGHT = false;
     scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
     return;
   }
 
-  if (res.status === 401) {
-    POLL_IN_FLIGHT = false;
-    logout();
-    return;
-  }
+  try {
+    if (res.status === 401) {
+      logout();
+      return;
+    }
 
-  if (!res.ok) {
-    POLL_IN_FLIGHT = false;
-    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
-    return;
-  }
+    if (!res.ok) {
+      scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
+      return;
+    }
 
-  const data = await safeJson(res);
-  if (!data || data._nonJson) {
-    POLL_IN_FLIGHT = false;
-    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
-    return;
-  }
-  if (data.request_id) {
-    window.ACTIVE_REQUEST_ID = String(data.request_id).trim();
-  }
+    if (!data || data._nonJson) {
+      scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
+      return;
+    }
+    if (data.request_id) {
+      window.ACTIVE_REQUEST_ID = String(data.request_id).trim();
+    }
 
-  updateProcessingUI(data);
+    updateProcessingUI(data);
 
-  if (data.status === "COMPLETED") {
-    handleJobCompleted(data);
-  } else if (data.status === "FAILED") {
-    handleJobFailed(data);
-  } else if (data.status === "CANCELLED") {
-    handleJobCancelled(data);
-  } else {
-    POLL_IN_FLIGHT = false;
+    if (data.status === "COMPLETED") {
+      handleJobCompleted(data);
+      return;
+    }
+    if (data.status === "FAILED") {
+      handleJobFailed(data);
+      return;
+    }
+    if (data.status === "CANCELLED") {
+      handleJobCancelled(data);
+      return;
+    }
     scheduleNextPoll(sessionId);
+  } catch {
+    scheduleNextPoll(sessionId, POLL_INTERVAL_RETRY_MS);
+  } finally {
+    POLL_IN_FLIGHT = false;
   }
 }
 
