@@ -1,6 +1,7 @@
 # Production Readiness & Scalability Backlog
 Companion impact guide: [Production Readiness Impact Guide](./PRODUCTION_READINESS_IMPACT_GUIDE.md)
 Companion agent guide: [Agentic AI Implementation Guide](./AGENTIC_AI_IMPLEMENTATION_GUIDE.md)
+Benefit testcases reference: [Agentic AI Implementation Guide - Plain-English Benefit Testcases](./AGENTIC_AI_IMPLEMENTATION_GUIDE.md#5-plain-english-benefit-testcases-before-vs-after-agents)
 
 Status values:
 - `Planned`

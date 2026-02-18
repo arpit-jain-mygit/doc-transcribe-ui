@@ -459,3 +459,99 @@ Use this structure for every agent story and design review.
 - Define responsibilities together in a joint design doc:
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
+
+---
+
+## 5) Plain-English Benefit Testcases (Before vs After Agents)
+
+Important baseline note:
+- Your current platform already has strong checks/balances (validation, quotas, retries, status guards, correlation, regressions).
+- So many “before” cases are not hard failures; they are mostly guidance/precision/operability gaps.
+- This section focuses on measurable deltas agents should improve.
+
+### PRS-035 Smart Intake Agent (detailed)
+
+1. Ambiguous upload route
+- Before: User selects a file with confusing extension/MIME and only sees failure/retry later.
+- After: Precheck clearly says “will process as OCR/TRANSCRIPTION”, with reason and confidence.
+
+2. Large file with high processing risk
+- Before: Upload is accepted, but user has no early warning about long wait or likely timeout risk.
+- After: Precheck warns before enqueue and suggests action (compress/split/shorter input).
+
+3. Long media job expectation mismatch
+- Before: User sees only generic progress and may think system is stuck.
+- After: ETA/range shown before start; user has realistic expectation.
+
+4. Wrong file chosen accidentally
+- Before: Validation may reject later, after user action path.
+- After: Intake warns immediately on select/drop with clear next step.
+
+5. Support asks “why was this routed this way?”
+- Before: Route reason is implicit.
+- After: Decision reason and confidence are logged and auditable.
+
+6. Product asks “did precheck help?”
+- Before: No explicit intake conversion metric.
+- After: Metrics show warn rate, proceed rate, and post-warning completion rate.
+
+7. Cloud queue spike scenario
+- Before: User cannot distinguish queue delay vs processing delay at start.
+- After: Intake ETA + route hints reduce false “stuck” perception.
+
+8. Low-confidence detection behavior
+- Before: No explicit confidence surfaced.
+- After: Low confidence requires clearer warning and optional user override.
+
+9. Feature rollout safety
+- Before: Any intake change directly impacts all users.
+- After: `FEATURE_SMART_INTAKE` allows shadow mode -> gradual rollout -> rollback.
+
+10. Regression traceability
+- Before: Intake behavior not explicitly tested.
+- After: Regression scripts assert precheck response shape and route decision consistency.
+
+### PRS-036 OCR Quality Agent
+1. Blurry scanned page
+- Before: Job may complete with poor text but no quality explanation.
+- After: Low-confidence page is flagged with remediation guidance.
+
+### PRS-037 Transcription Quality Agent
+1. Noisy audio segment
+- Before: Transcript quality drops silently.
+- After: Weak segments are identified with confidence and retry recommendation.
+
+### PRS-038 Retry & Recovery Agent
+1. Transient provider/network failure
+- Before: Generic retry path may be suboptimal.
+- After: Policy-based recovery path improves completion and reduces waste.
+
+### PRS-039 Cost Guardrail Agent
+1. User submits expensive workload near limit
+- Before: Cost/limit impact is visible late.
+- After: Early estimate and policy decision are shown before expensive processing.
+
+### PRS-040 Queue Orchestration Agent
+1. Mixed OCR + A/V burst traffic
+- Before: One workload can dominate queue wait.
+- After: Dynamic balancing reduces starvation and improves p95 wait.
+
+### PRS-041 User Assist Agent
+1. User sees failure toast
+- Before: Error may be correct but next action is unclear.
+- After: Contextual next-best action appears immediately.
+
+### PRS-042 Incident Triage Agent
+1. Production incident ticket
+- Before: Support/dev manually correlate UI/API/Worker logs.
+- After: Agent provides probable root cause + runbook steps with evidence links.
+
+### PRS-043 Regression Certification Agent
+1. Release readiness decision
+- Before: Teams manually combine CI + local/cloud evidence.
+- After: Agent emits a single certification verdict with reasoned pass/fail gates.
+
+### PRS-044 Product Insights Agent
+1. Roadmap prioritization meeting
+- Before: Decisions depend on fragmented anecdotes.
+- After: Agent provides trend-backed priority recommendations (usage, failures, drop-offs).
