@@ -1,4 +1,4 @@
-# Agentic AI Implementation Guide
+# Agentic AI Backlog
 
 This document is the dedicated implementation guide for agent backlog items:
 - `PRS-035` to `PRS-044`
