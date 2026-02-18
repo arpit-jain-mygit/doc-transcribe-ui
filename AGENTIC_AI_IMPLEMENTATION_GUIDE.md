@@ -34,6 +34,12 @@ Important:
 
 ### Story 1: Add intake contract (data shape only)
 
+**Stage**
+- Contract and schema foundation (pre-upload)
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Define what Smart Intake returns.
 
@@ -57,6 +63,12 @@ Important:
 
 ### Story 2: Add feature flag wiring (off by default)
 
+**Stage**
+- Rollout control foundation (pre-upload)
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Deploy safely with zero behavior change.
 
@@ -78,6 +90,12 @@ Important:
 
 ### Story 3: Build deterministic route detector service
 
+**Stage**
+- Pre-upload route decision
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Decide OCR vs TRANSCRIPTION from file metadata.
 
@@ -95,6 +113,12 @@ Important:
 ---
 
 ### Story 4: Build precheck warning service
+
+**Stage**
+- Pre-upload risk guidance
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
 
 **Goal**
 - Return soft warnings before processing.
@@ -117,6 +141,12 @@ Important:
 
 ### Story 5: Add simple ETA estimator service
 
+**Stage**
+- Pre-upload expectation setting
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Give rough expected completion time.
 
@@ -135,6 +165,12 @@ Important:
 
 ### Story 6: Add intake precheck API endpoint
 
+**Stage**
+- Pre-upload API exposure
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Expose agent decision before upload submit.
 
@@ -152,6 +188,12 @@ Important:
 ---
 
 ### Story 7: UI precheck call on file selection
+
+**Stage**
+- UI pre-upload interaction
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
 
 **Goal**
 - Show decision before enqueue.
@@ -172,6 +214,12 @@ Important:
 
 ### Story 8: Respect feature flag in UI/API
 
+**Stage**
+- Controlled pre-upload rollout
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Keep old behavior when disabled.
 
@@ -188,6 +236,12 @@ Important:
 ---
 
 ### Story 9: Add observability for intake decisions
+
+**Stage**
+- Pre-upload observability
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
 
 **Goal**
 - Make decisions auditable.
@@ -208,6 +262,12 @@ Important:
 
 ### Story 10: Add regression checks for precheck
 
+**Stage**
+- Pre-upload quality gate
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
+
 **Goal**
 - Prevent regressions in intake behavior.
 
@@ -226,6 +286,12 @@ Important:
 ---
 
 ### Story 11: Document rollout and rollback
+
+**Stage**
+- Operational rollout
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
 
 **Goal**
 - Safe production adoption.
@@ -248,6 +314,12 @@ Important:
 ---
 
 ### Story 12: Backlog and closure updates
+
+**Stage**
+- Governance and closure
+
+**Agent used**
+- Smart Intake Agent (PRS-035)
 
 **Goal**
 - Maintain traceability.
@@ -299,6 +371,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-036 OCR Quality Agent
+
+**Stage**
+- During OCR execution and post-page quality evaluation
+
+**Agent used**
+- PRS-036 OCR Quality Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -317,6 +395,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-037 Transcription Quality Agent
+
+**Stage**
+- During transcription execution and segment quality evaluation
+
+**Agent used**
+- PRS-037 Transcription Quality Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -335,6 +419,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-038 Retry & Recovery Agent
+
+**Stage**
+- During failure handling/recovery after upload is queued
+
+**Agent used**
+- PRS-038 Retry & Recovery Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -353,6 +443,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-039 Cost Guardrail Agent
+
+**Stage**
+- Pre-upload policy decision and upload gating
+
+**Agent used**
+- PRS-039 Cost Guardrail Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -371,6 +467,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-040 Queue Orchestration Agent
+
+**Stage**
+- Queue scheduling and worker dispatch runtime
+
+**Agent used**
+- PRS-040 Queue Orchestration Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -389,6 +491,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-041 User Assist Agent
+
+**Stage**
+- UI interaction layer (pre-upload, in-progress, failure states)
+
+**Agent used**
+- PRS-041 User Assist Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -407,6 +515,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-042 Incident Triage Agent
+
+**Stage**
+- Post-failure operations and support triage
+
+**Agent used**
+- PRS-042 Incident Triage Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -425,6 +539,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-043 Regression Certification Agent
+
+**Stage**
+- Pre-release validation and release gate stage
+
+**Agent used**
+- PRS-043 Regression Certification Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -443,6 +563,12 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 ### PRS-044 Product Insights Agent
+
+**Stage**
+- Post-run analytics and product planning stage
+
+**Agent used**
+- PRS-044 Product Insights Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
