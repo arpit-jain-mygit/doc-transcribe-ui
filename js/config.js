@@ -34,3 +34,14 @@ const GOOGLE_CLIENT_ID="320763587900-18ptqosdb8b5esc8845oc82ul4qf8m9k.apps.googl
 
 // Feature flags (UI-side guarded rollouts)
 window.FEATURE_COST_HINTS = true;
+window.FEATURE_SMART_INTAKE = false;
+
+// User value: supports setSmartIntakeCapability so users get a safe, controlled rollout of intake guidance.
+window.setSmartIntakeCapability = function setSmartIntakeCapability(enabled) {
+  window.FEATURE_SMART_INTAKE = Boolean(enabled);
+};
+
+// User value: supports isSmartIntakeEnabled so users only see intake behavior when explicitly enabled.
+window.isSmartIntakeEnabled = function isSmartIntakeEnabled() {
+  return Boolean(window.FEATURE_SMART_INTAKE);
+};

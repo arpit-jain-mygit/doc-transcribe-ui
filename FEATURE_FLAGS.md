@@ -1,6 +1,9 @@
 # Feature Flags
 
 ## API flags
+- `FEATURE_SMART_INTAKE`
+  - `1`: enables Smart Intake precheck capability exposure.
+  - `0` (default): disabled; upload behavior stays unchanged.
 - `FEATURE_QUEUE_PARTITIONING`
   - `1`: route OCR and TRANSCRIPTION to dedicated queues.
 - `FEATURE_UPLOAD_QUOTAS`
@@ -19,6 +22,8 @@
 ## UI flags
 - `window.FEATURE_COST_HINTS` (in `js/config.js`)
   - enables pre-upload effort/cost hint toasts.
+- `window.FEATURE_SMART_INTAKE` (in `js/config.js`)
+  - default `false`; enable only when API capability indicates support.
 
 ## Rollout pattern
 1. Deploy with feature flags OFF.

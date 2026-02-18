@@ -136,6 +136,14 @@ Important:
 - API starts with flag on/off.
 - Existing upload flow unchanged when off.
 
+**Implementation evidence (Story 2)**
+- Status: `Completed (Code)` with zero behavior change by default.
+- Scope:
+  - API: `FEATURE_SMART_INTAKE` flag wiring, startup env validation, and contract capability exposure.
+  - UI: smart-intake capability wiring with safe default `false`.
+  - Docs: API/UI feature-flag docs updated for rollout/rollback.
+- Commits/files will be added after local + cloud regression pass.
+
 ---
 
 <a id="agent-1-story-3"></a>
