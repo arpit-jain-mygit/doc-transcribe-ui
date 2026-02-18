@@ -10,21 +10,22 @@ It is written for beginners. It explains:
 
 ## 1) Agent Catalog (What + Who benefits)
 
-| PRS | Agent | What it does | Users | Dev | Ops | Product |
-|---|---|---|---|---|---|---|
-| PRS-035 | Smart Intake Agent | Auto-route + prechecks + ETA before enqueue | Fewer bad uploads | Fewer edge-case bugs | Less avoidable failure load | Better upload conversion |
-| PRS-036 | OCR Quality Agent | OCR confidence + low-quality page hints | Better OCR quality | Better quality signals | Earlier quality issue detection | Quality KPI tracking |
-| PRS-037 | Transcription Quality Agent | Segment confidence + noise/speaker hints | Better transcripts | Better diagnostics | Faster noisy-audio triage | Trust improvements |
-| PRS-038 | Retry & Recovery Agent | Policy-based recovery actions | Higher completion | Cleaner recovery logic | Lower manual retries | Stability gains |
-| PRS-039 | Cost Guardrail Agent | Cost/limit prediction + enforcement | Clear limits | Safer controls | Cost/load control | Better unit economics |
-| PRS-040 | Queue Orchestration Agent | Dynamic balancing and prioritization | Lower waits | Better scheduler logic | Less contention | Better peak UX |
-| PRS-041 | User Assist Agent | Next-best-action guidance in UI | Clearer journey | Reusable guidance patterns | Fewer support tickets | Lower drop-off |
-| PRS-042 | Incident Triage Agent | Cross-layer root-cause helper | Faster resolution | Faster debugging | Lower MTTR | Reliability confidence |
-| PRS-043 | Regression Certification Agent | Auto certify release readiness | Fewer regressions | Faster release checks | Predictable deploy quality | Safer release cadence |
-| PRS-044 | Product Insights Agent | Usage/failure trend analysis | Better UX over time | Data-backed prioritization | Trend visibility | Better roadmap decisions |
+| Agent # | PRS Ref | Agent | What it does | Users | Dev | Ops | Product | Stories |
+|---|---|---|---|---|---|---|---|---|
+| 1 | PRS-035 | Smart Intake Agent | Auto-route + prechecks + ETA before enqueue | Fewer bad uploads | Fewer edge-case bugs | Less avoidable failure load | Better upload conversion | [S1](#agent-1-story-1), [S2](#agent-1-story-2), [S3](#agent-1-story-3), [S4](#agent-1-story-4), [S5](#agent-1-story-5), [S6](#agent-1-story-6), [S7](#agent-1-story-7), [S8](#agent-1-story-8), [S9](#agent-1-story-9), [S10](#agent-1-story-10), [S11](#agent-1-story-11), [S12](#agent-1-story-12) |
+| 2 | PRS-036 | OCR Quality Agent | OCR confidence + low-quality page hints | Better OCR quality | Better quality signals | Earlier quality issue detection | Quality KPI tracking | [S1](#agent-2-story-1), [S2](#agent-2-story-2), [S3](#agent-2-story-3) |
+| 3 | PRS-037 | Transcription Quality Agent | Segment confidence + noise/speaker hints | Better transcripts | Better diagnostics | Faster noisy-audio triage | Trust improvements | [S1](#agent-3-story-1), [S2](#agent-3-story-2), [S3](#agent-3-story-3) |
+| 4 | PRS-038 | Retry & Recovery Agent | Policy-based recovery actions | Higher completion | Cleaner recovery logic | Lower manual retries | Stability gains | [S1](#agent-4-story-1), [S2](#agent-4-story-2), [S3](#agent-4-story-3) |
+| 5 | PRS-039 | Cost Guardrail Agent | Cost/limit prediction + enforcement | Clear limits | Safer controls | Cost/load control | Better unit economics | [S1](#agent-5-story-1), [S2](#agent-5-story-2), [S3](#agent-5-story-3) |
+| 6 | PRS-040 | Queue Orchestration Agent | Dynamic balancing and prioritization | Lower waits | Better scheduler logic | Less contention | Better peak UX | [S1](#agent-6-story-1), [S2](#agent-6-story-2), [S3](#agent-6-story-3) |
+| 7 | PRS-041 | User Assist Agent | Next-best-action guidance in UI | Clearer journey | Reusable guidance patterns | Fewer support tickets | Lower drop-off | [S1](#agent-7-story-1), [S2](#agent-7-story-2), [S3](#agent-7-story-3) |
+| 8 | PRS-042 | Incident Triage Agent | Cross-layer root-cause helper | Faster resolution | Faster debugging | Lower MTTR | Reliability confidence | [S1](#agent-8-story-1), [S2](#agent-8-story-2), [S3](#agent-8-story-3) |
+| 9 | PRS-043 | Regression Certification Agent | Auto certify release readiness | Fewer regressions | Faster release checks | Predictable deploy quality | Safer release cadence | [S1](#agent-9-story-1), [S2](#agent-9-story-2), [S3](#agent-9-story-3) |
+| 10 | PRS-044 | Product Insights Agent | Usage/failure trend analysis | Better UX over time | Data-backed prioritization | Trend visibility | Better roadmap decisions | [S1](#agent-10-story-1), [S2](#agent-10-story-2), [S3](#agent-10-story-3) |
 
 ---
 
+<a id="agent-1-stories"></a>
 ## 2) PRS-035 Smart Intake Agent (Tiny Stories)
 
 Important:
@@ -32,6 +33,7 @@ Important:
 - Keep each story small and independently testable.
 - Do not change user behavior abruptly: use feature flags.
 
+<a id="agent-1-story-1"></a>
 ### Story 1: Add intake contract (data shape only)
 
 **Stage**
@@ -61,6 +63,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-2"></a>
 ### Story 2: Add feature flag wiring (off by default)
 
 **Stage**
@@ -88,6 +91,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-3"></a>
 ### Story 3: Build deterministic route detector service
 
 **Stage**
@@ -112,6 +116,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-4"></a>
 ### Story 4: Build precheck warning service
 
 **Stage**
@@ -139,6 +144,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-5"></a>
 ### Story 5: Add simple ETA estimator service
 
 **Stage**
@@ -163,6 +169,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-6"></a>
 ### Story 6: Add intake precheck API endpoint
 
 **Stage**
@@ -187,6 +194,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-7"></a>
 ### Story 7: UI precheck call on file selection
 
 **Stage**
@@ -212,6 +220,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-8"></a>
 ### Story 8: Respect feature flag in UI/API
 
 **Stage**
@@ -235,6 +244,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-9"></a>
 ### Story 9: Add observability for intake decisions
 
 **Stage**
@@ -260,6 +270,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-10"></a>
 ### Story 10: Add regression checks for precheck
 
 **Stage**
@@ -285,6 +296,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-11"></a>
 ### Story 11: Document rollout and rollback
 
 **Stage**
@@ -313,6 +325,7 @@ Important:
 
 ---
 
+<a id="agent-1-story-12"></a>
 ### Story 12: Backlog and closure updates
 
 **Stage**
@@ -370,6 +383,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-2-stories"></a>
 ### PRS-036 OCR Quality Agent
 
 **Stage**
@@ -394,6 +408,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-3-stories"></a>
 ### PRS-037 Transcription Quality Agent
 
 **Stage**
@@ -418,6 +433,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-4-stories"></a>
 ### PRS-038 Retry & Recovery Agent
 
 **Stage**
@@ -442,6 +458,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-5-stories"></a>
 ### PRS-039 Cost Guardrail Agent
 
 **Stage**
@@ -466,6 +483,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-6-stories"></a>
 ### PRS-040 Queue Orchestration Agent
 
 **Stage**
@@ -490,6 +508,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-7-stories"></a>
 ### PRS-041 User Assist Agent
 
 **Stage**
@@ -514,6 +533,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-8-stories"></a>
 ### PRS-042 Incident Triage Agent
 
 **Stage**
@@ -538,6 +558,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-9-stories"></a>
 ### PRS-043 Regression Certification Agent
 
 **Stage**
@@ -562,6 +583,7 @@ Use this structure for every agent story and design review.
   - Product: intent, scope, guardrails
   - Engineering: execution model, failure handling, controls
 
+<a id="agent-10-stories"></a>
 ### PRS-044 Product Insights Agent
 
 **Stage**
@@ -692,6 +714,7 @@ Note:
 
 ### PRS-036 OCR Quality Agent
 
+<a id="agent-10-story-1"></a>
 #### Story 1: Define OCR quality contract
 **Stage**
 - During OCR execution and post-page quality evaluation
@@ -707,6 +730,7 @@ Note:
 **Test**
 - Unit test schema serialization and backward compatibility.
 
+<a id="agent-10-story-2"></a>
 #### Story 2: Emit quality metadata from worker OCR path
 **Stage**
 - During OCR page processing
@@ -722,6 +746,7 @@ Note:
 **Test**
 - OCR sample test confirms quality fields are persisted.
 
+<a id="agent-10-story-3"></a>
 #### Story 3: Show OCR quality guidance in UI
 **Stage**
 - Post-processing review in UI/history
