@@ -18,6 +18,7 @@ Status values:
   - [Current State and Gap Analysis](./CURRENT_STATE_AND_GAP_ANALYSIS.md)
 - Mandatory policy for all backlog items: every fix must include required logging updates for new/changed execution paths.
 - Mandatory policy for all backlog items: execute the required set from [Functional Regression Test Suite](./FUNCTIONAL_REGRESSION_TESTS.md).
+- Mandatory policy for all backlog items: include both positive and negative test coverage for each new/changed behavior.
 
 ## Backlog
 

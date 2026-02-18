@@ -7,6 +7,7 @@ Run this suite after every backlog item fix to prevent breakages.
   - Run all `SMOKE` tests.
   - Run all tests tagged with changed repo(s): `UI`, `API`, `Worker`.
   - Run all tests tagged with changed feature(s): `Auth`, `Upload`, `History`, `Cancel`, `Download`, `Queue`.
+- For every new/changed behavior, define and execute at least one positive test and one negative test.
 
 ## Environments
 - Local E2E: local UI + local API + local worker + Redis.
