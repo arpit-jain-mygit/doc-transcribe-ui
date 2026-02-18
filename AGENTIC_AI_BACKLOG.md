@@ -61,6 +61,18 @@ Important:
 **Test**
 - Unit test schema serialization and required/optional fields.
 
+**Implementation evidence (Story 1)**
+- Status: `Completed (Code)` and unit tests passing.
+- Commits:
+  - API: `952d12b` (`PRS-035 Story1: add intake precheck schemas, contract fields, and unit tests`)
+  - UI: `f444f9d` (`PRS-035 Story1: add intake precheck contract resolver placeholder in UI`)
+- Files changed:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/requests.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_intake_contract_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/job-contract.js`
+
 ---
 
 <a id="agent-1-story-2"></a>
