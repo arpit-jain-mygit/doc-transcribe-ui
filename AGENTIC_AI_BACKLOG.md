@@ -98,6 +98,14 @@ Important:
 
 **Implementation evidence (Story 1)**
 - Status: `Completed (Code)` and unit tests passing.
+- Changes summary:
+  - Added intake request/response schema models and contract fields.
+  - Added UI contract resolver placeholder for intake payload mapping.
+  - Added unit tests for schema validity and invalid cases.
+- Call hierarchy:
+  - Trigger event: API import/startup and request validation lifecycle loads `schemas/requests.py` and `schemas/responses.py`.
+  - Trigger event: Any endpoint returning/validating intake payload uses the schema contract.
+  - Trigger event: UI script load attaches `window.JOB_CONTRACT.resolveIntakePrecheck(...)`.
 - Commits:
   - API: `952d12b` (`PRS-035 Story1: add intake precheck schemas, contract fields, and unit tests`)
   - UI: `f444f9d` (`PRS-035 Story1: add intake precheck contract resolver placeholder in UI`)
@@ -142,6 +150,16 @@ Important:
   - API: `FEATURE_SMART_INTAKE` flag wiring, startup env validation, and contract capability exposure.
   - UI: smart-intake capability wiring with safe default `false`.
   - Docs: API/UI feature-flag docs updated for rollout/rollback.
+- Changes summary:
+  - Added API flag constant/helper and startup validation for allowed values.
+  - Exposed capability on `/contract/job-status`.
+  - Added UI helper methods to set/read smart-intake capability.
+  - Added +ive/−ive unit tests for API/UI flag behavior.
+- Call hierarchy:
+  - Trigger event: API startup -> `validate_startup_env()` -> `_validate_bool_flag_env("FEATURE_SMART_INTAKE", ...)`.
+  - `GET /contract/job-status` -> `routes/contract.py:job_status_contract()` -> `is_smart_intake_enabled()`.
+  - Trigger event: UI script load (`js/config.js`) initializes `window.FEATURE_SMART_INTAKE=false`.
+  - Future/consumer call path: `window.setSmartIntakeCapability(...)` -> `window.isSmartIntakeEnabled()`.
 - Commits/files will be added after local + cloud regression pass.
 
 ---
@@ -168,6 +186,23 @@ Important:
 
 **Test**
 - Unit test with pdf/png/jpg/mp3/mp4/ambiguous extensions.
+
+**Implementation evidence (Story 3)**
+- Status: `Completed (Code)` with deterministic route service and strict unknown fallback.
+- Scope:
+  - API: new pure route detector service (`filename` + `mime` -> `detected_job_type` + `confidence` + `reasons`).
+  - API: upload orchestration now logs route-detection result (`UPLOAD_ROUTE_DETECT`) for observability.
+  - Tests: added positive + negative unit tests for OCR/transcription/mismatch/unknown paths.
+- Changes summary:
+  - Added pure metadata route detector service.
+  - Reused centralized extension/MIME constants in upload orchestrator.
+  - Added route-detection stage logging before upload validation.
+- Call hierarchy:
+  - `POST /upload` -> `routes/upload.py:upload()` -> `submit_upload_job(...)`.
+  - `submit_upload_job(...)` -> `detect_route_from_metadata(file.filename, file.content_type)`.
+  - `detect_route_from_metadata(...)` -> `_route_from_extension(...)` and `_route_from_mime(...)`.
+  - `submit_upload_job(...)` -> `log_stage(stage="UPLOAD_ROUTE_DETECT", ...)`.
+- Commits/files will be added after local + cloud regression pass.
 
 ---
 
@@ -196,6 +231,24 @@ Important:
 
 **Test**
 - Unit tests for warning thresholds and warning text determinism.
+
+**Implementation evidence (Story 4)**
+- Status: `Completed (Code)` with deterministic warning generation and no user-flow break.
+- Scope:
+  - API: added `intake_precheck` warning service for large file, long media, high page count, and metadata uncertainty.
+  - API: upload orchestration emits `UPLOAD_PRECHECK_WARNINGS` stage logs when warnings are detected.
+  - Tests: added positive + negative unit tests for warning presence/absence and uncertain metadata.
+- Changes summary:
+  - Added precheck warning builder service with deterministic thresholds/rules.
+  - Added warning detection path in upload orchestration (log-only, no rejection behavior).
+  - Added +ive/−ive unit tests for each warning type and clean/no-warning path.
+- Call hierarchy:
+  - `POST /upload` -> `routes/upload.py:upload()` -> `submit_upload_job(...)`.
+  - `submit_upload_job(...)` -> `build_precheck_warnings(...)`.
+  - `build_precheck_warnings(...)` -> `_size_warnings(...)`, `_duration_warnings(...)`, `_page_warnings(...)`, `_metadata_warnings(...)`.
+  - `_metadata_warnings(...)` -> `detect_route_from_metadata(...)` (Story 3 service reuse).
+  - Event trigger: if warnings exist, `submit_upload_job(...)` emits `log_stage(stage="UPLOAD_PRECHECK_WARNINGS", ...)`.
+- Commits/files will be added after local + cloud regression pass.
 
 ---
 
