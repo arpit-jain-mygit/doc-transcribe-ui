@@ -681,3 +681,444 @@ Important baseline note:
 1. Roadmap prioritization meeting
 - Before: Decisions depend on fragmented anecdotes.
 - After: Agent provides trend-backed priority recommendations (usage, failures, drop-offs).
+
+---
+
+## 6) Tiny Stories for All Remaining Agents (`PRS-036` to `PRS-044`)
+
+Note:
+- Story format is intentionally small for novice-friendly execution.
+- Each story below includes: `Stage`, `Agent used`, `Goal`, `Files`, `Change`, `Test`.
+
+### PRS-036 OCR Quality Agent
+
+#### Story 1: Define OCR quality contract
+**Stage**
+- During OCR execution and post-page quality evaluation
+**Agent used**
+- OCR Quality Agent (PRS-036)
+**Goal**
+- Add stable response fields for page confidence and quality hints.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+**Change**
+- Add `ocr_quality_score`, `low_confidence_pages`, `quality_hints[]`.
+**Test**
+- Unit test schema serialization and backward compatibility.
+
+#### Story 2: Emit quality metadata from worker OCR path
+**Stage**
+- During OCR page processing
+**Agent used**
+- OCR Quality Agent (PRS-036)
+**Goal**
+- Compute and publish page-level quality signals.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/adapters/status_store.py`
+**Change**
+- Capture per-page confidence and update status payload.
+**Test**
+- OCR sample test confirms quality fields are persisted.
+
+#### Story 3: Show OCR quality guidance in UI
+**Stage**
+- Post-processing review in UI/history
+**Agent used**
+- OCR Quality Agent (PRS-036)
+**Goal**
+- Surface quality warnings and suggestions to users.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/partials/history.html`
+**Change**
+- Add a compact quality badge/warning message for low-confidence outputs.
+**Test**
+- UI manual test with low-quality sample pages.
+
+---
+
+### PRS-037 Transcription Quality Agent
+
+#### Story 1: Define transcript-quality contract
+**Stage**
+- During transcription and segment analysis
+**Agent used**
+- Transcription Quality Agent (PRS-037)
+**Goal**
+- Add stable fields for segment confidence and quality flags.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+**Change**
+- Add `transcription_quality_score`, `low_confidence_segments`, `audio_quality_hints[]`.
+**Test**
+- Unit test validates field presence and type.
+
+#### Story 2: Emit quality metadata from transcription pipeline
+**Stage**
+- During chunk transcription
+**Agent used**
+- Transcription Quality Agent (PRS-037)
+**Goal**
+- Store segment-level confidence and issue hints.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/adapters/status_store.py`
+**Change**
+- Publish confidence summaries in status payload.
+**Test**
+- Audio sample test verifies quality metadata updates.
+
+#### Story 3: Render transcript-quality hints in UI
+**Stage**
+- Post-completion result review
+**Agent used**
+- Transcription Quality Agent (PRS-037)
+**Goal**
+- Show “quality may be low” hints with next actions.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/partials/completion-card.html`
+**Change**
+- Add quality hint block for completed transcription jobs.
+**Test**
+- Manual UI test with noisy-audio sample.
+
+---
+
+### PRS-038 Retry & Recovery Agent
+
+#### Story 1: Define recovery decision contract
+**Stage**
+- Failure handling after processing starts
+**Agent used**
+- Retry & Recovery Agent (PRS-038)
+**Goal**
+- Standardize recovery action payload fields.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/error_catalog.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/dead_letter.py`
+**Change**
+- Add `recovery_action`, `recovery_reason`, `recovery_attempt`.
+**Test**
+- Unit test maps errors to expected recovery actions.
+
+#### Story 2: Implement policy-based recovery orchestration
+**Stage**
+- Retry/requeue decision point
+**Agent used**
+- Retry & Recovery Agent (PRS-038)
+**Goal**
+- Select action based on error class and budget.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/utils/retry_policy.py`
+**Change**
+- Add action selector: retry, requeue-delay, fail-fast, DLQ.
+**Test**
+- Failure injection test for transient/media/fatal categories.
+
+#### Story 3: Expose recovery trace in API status
+**Stage**
+- Post-failure visibility
+**Agent used**
+- Retry & Recovery Agent (PRS-038)
+**Goal**
+- Help support understand what was attempted.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/status.py`
+**Change**
+- Surface recovery fields in failed status payload.
+**Test**
+- Regression check validates recovery fields for failed jobs.
+
+---
+
+### PRS-039 Cost Guardrail Agent
+
+#### Story 1: Add cost prediction contract
+**Stage**
+- Pre-upload policy and quota check
+**Agent used**
+- Cost Guardrail Agent (PRS-039)
+**Goal**
+- Define response shape for predicted effort/cost.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+**Change**
+- Add `estimated_effort`, `estimated_cost_band`, `policy_decision`.
+**Test**
+- Unit test validates policy response fields.
+
+#### Story 2: Implement policy evaluator service
+**Stage**
+- Pre-enqueue decision
+**Agent used**
+- Cost Guardrail Agent (PRS-039)
+**Goal**
+- Evaluate size/pages/duration/usage against thresholds.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/quota.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/intake_precheck.py`
+**Change**
+- Add cost/effort projection and decision (`ALLOW/WARN/BLOCK`).
+**Test**
+- Unit test across boundary values.
+
+#### Story 3: Show estimate and policy message in UI
+**Stage**
+- Pre-upload user decision
+**Agent used**
+- Cost Guardrail Agent (PRS-039)
+**Goal**
+- Show cost/effort estimate before submit.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/upload.js`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/partials/upload-grid.html`
+**Change**
+- Add estimate text + policy warning area.
+**Test**
+- Manual UI test with small vs large file.
+
+---
+
+### PRS-040 Queue Orchestration Agent
+
+#### Story 1: Add scheduling policy config contract
+**Stage**
+- Worker runtime scheduling
+**Agent used**
+- Queue Orchestration Agent (PRS-040)
+**Goal**
+- Define configurable scheduling strategy (fairness/priority).
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/startup_env.py`
+**Change**
+- Add env knobs for scheduling mode and priorities.
+**Test**
+- Startup validation tests for config values.
+
+#### Story 2: Implement adaptive dequeue logic
+**Stage**
+- Queue consumption
+**Agent used**
+- Queue Orchestration Agent (PRS-040)
+**Goal**
+- Reduce starvation between OCR and A/V workloads.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+**Change**
+- Weighted/fair dequeue based on queue pressure.
+**Test**
+- Load-test simulation with mixed traffic verifies fairness.
+
+#### Story 3: Expose queue-health metrics for tuning
+**Stage**
+- Ops monitoring
+**Agent used**
+- Queue Orchestration Agent (PRS-040)
+**Goal**
+- Provide visibility for scheduling decisions.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/metrics.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/readiness.py`
+**Change**
+- Publish queue lag and pickup metrics.
+**Test**
+- Verify metrics update under synthetic queue load.
+
+---
+
+### PRS-041 User Assist Agent
+
+#### Story 1: Define assist-message contract
+**Stage**
+- UI guidance layer
+**Agent used**
+- User Assist Agent (PRS-041)
+**Goal**
+- Standardize “next-best-action” payload.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+**Change**
+- Add `assist_message`, `assist_actions[]`, `assist_severity`.
+**Test**
+- Unit test for assist payload schema.
+
+#### Story 2: Map status/error to assist actions
+**Stage**
+- API status processing
+**Agent used**
+- User Assist Agent (PRS-041)
+**Goal**
+- Generate context-specific guidance from status/error codes.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/status.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/feature_flags.py`
+**Change**
+- Add rules for queued, failed, cancelled, retryable states.
+**Test**
+- API test checks message/action mapping per error code.
+
+#### Story 3: Render assist panel in UI
+**Stage**
+- In-progress and failure UI
+**Agent used**
+- User Assist Agent (PRS-041)
+**Goal**
+- Show actionable suggestions, not only error toasts.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/polling.js`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/partials/processing-panel.html`
+**Change**
+- Add assist panel with top 1-2 actions.
+**Test**
+- Manual test for failed and queued long-wait scenarios.
+
+---
+
+### PRS-042 Incident Triage Agent
+
+#### Story 1: Define triage report schema
+**Stage**
+- Incident analysis
+**Agent used**
+- Incident Triage Agent (PRS-042)
+**Goal**
+- Standardize incident report output.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/` (new report schema doc or json schema)
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+**Change**
+- Define fields: `root_cause_guess`, `evidence[]`, `runbook_steps[]`.
+**Test**
+- Schema validation test.
+
+#### Story 2: Build correlation collector across logs
+**Stage**
+- Ops/debug tooling
+**Agent used**
+- Incident Triage Agent (PRS-042)
+**Goal**
+- Collect API/Worker traces by `request_id/job_id`.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+**Change**
+- Add triage extraction command path and evidence summary.
+**Test**
+- Simulated failure run produces triage evidence output.
+
+#### Story 3: Generate runbook suggestion output
+**Stage**
+- Post-failure remediation
+**Agent used**
+- Incident Triage Agent (PRS-042)
+**Goal**
+- Suggest top remediation steps automatically.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/RUNBOOKS.md`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/` (triage helper)
+**Change**
+- Map common failure signatures to runbook links/actions.
+**Test**
+- Validate known failures map to correct runbook section.
+
+---
+
+### PRS-043 Regression Certification Agent
+
+#### Story 1: Define certification output contract
+**Stage**
+- Pre-release gate
+**Agent used**
+- Regression Certification Agent (PRS-043)
+**Goal**
+- Standardize certification result document.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/FUNCTIONAL_REGRESSION_TESTS.md`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/` (report format note)
+**Change**
+- Define fields: `checks`, `evidence`, `verdict`, `blockers`.
+**Test**
+- Schema/format validation check.
+
+#### Story 2: Aggregate CI + local + cloud evidence
+**Stage**
+- Release evidence collection
+**Agent used**
+- Regression Certification Agent (PRS-043)
+**Goal**
+- Build one consolidated release-readiness artifact.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_local.sh`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/scripts/run_regression_cloud.sh`
+**Change**
+- Emit cert-friendly summary file with pass/fail gates.
+**Test**
+- Validate artifact includes all required checks.
+
+#### Story 3: Gate release decision
+**Stage**
+- Go/No-Go
+**Agent used**
+- Regression Certification Agent (PRS-043)
+**Goal**
+- Enforce fail-fast if critical checks fail.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/RELEASE_NOTES.md`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/.github/workflows/ci.yml` (if needed for summary sync)
+**Change**
+- Add documented certification gate criteria.
+**Test**
+- Force one check fail and verify verdict is blocked.
+
+---
+
+### PRS-044 Product Insights Agent
+
+#### Story 1: Define product-metric contract
+**Stage**
+- Analytics model definition
+**Agent used**
+- Product Insights Agent (PRS-044)
+**Goal**
+- Define stable KPI schema for usage/outcome insights.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+**Change**
+- Add KPI fields for adoption, completion, drop-off, turnaround.
+**Test**
+- Unit test for analytics response shape.
+
+#### Story 2: Build analytics aggregation endpoint
+**Stage**
+- Data aggregation
+**Agent used**
+- Product Insights Agent (PRS-044)
+**Goal**
+- Expose filtered product metrics by time window and job type.
+**Files**
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/jobs.py`
+- `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/jobs.py`
+**Change**
+- Add lightweight aggregation path for dashboard/reporting.
+**Test**
+- API tests verify metric math with fixture data.
+
+#### Story 3: Surface insights for prioritization
+**Stage**
+- Product planning
+**Agent used**
+- Product Insights Agent (PRS-044)
+**Goal**
+- Produce plain-language top pain points and trend summary.
+**Files**
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/PRODUCTION_READINESS_BACKLOG.md`
+- `/Users/arpitjain/VSProjects/doc-transcribe-ui/RELEASE_NOTES.md`
+**Change**
+- Add recurring insight summary format tied to roadmap decisions.
+**Test**
+- Validate summary accuracy against known sample metrics.
