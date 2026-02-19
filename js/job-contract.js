@@ -106,6 +106,11 @@
       etaSec: Number.isFinite(Number(raw?.eta_sec)) ? Number(raw.eta_sec) : null,
       confidence: Number.isFinite(Number(raw?.confidence)) ? Number(raw.confidence) : 0,
       reasons: Array.isArray(raw?.reasons) ? raw.reasons : [],
+      estimatedEffort: String(raw?.estimated_effort || "LOW").toUpperCase(),
+      estimatedCostBand: String(raw?.estimated_cost_band || "LOW").toUpperCase(),
+      policyDecision: String(raw?.policy_decision || "ALLOW").toUpperCase(),
+      policyReason: String(raw?.policy_reason || ""),
+      projectedCostUsd: Number.isFinite(Number(raw?.projected_cost_usd)) ? Number(raw.projected_cost_usd) : null,
     };
   }
 

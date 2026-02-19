@@ -113,6 +113,34 @@ This file tracks release-level changes with backlog traceability.
   - `node --test tests/jobs-quality.test.js` passed (UI).
 - Status: `Completed (Code + Unit Tested)`
 
+### PRS-039 (Stories 1-3)
+- Backlog ID: `PRS-039`
+- Backlog Link: [PRS-039](./PRODUCTION_READINESS_BACKLOG.md#prs-039)
+- Type: `Feature` + `Cost Governance`
+- Summary: Added deterministic cost projection + policy decisions (`ALLOW/WARN/BLOCK`) in intake and upload paths with UI pre-upload cost messaging.
+- Why: Prevent surprise expensive jobs and provide transparent effort/cost guidance before enqueue.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/cost_guardrail.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/intake.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/upload_orchestrator.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/services/feature_flags.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_cost_guardrail_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_intake_contract_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_intake_endpoint_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/upload.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/job-contract.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/partials/upload-grid.html`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/css/components/cards.css`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/job-contract.test.js`
+- Risk: `Medium`
+- Validation:
+  - `python -m unittest tests.test_cost_guardrail_unit tests.test_intake_contract_unit tests.test_intake_endpoint_unit tests.test_feature_flags_unit -v` passed.
+  - `node --test tests/job-contract.test.js` passed.
+  - Local bounded regression blocked by expired token and missing default sample PDF path in environment.
+- Status: `Completed (Code + Unit Tested)`
+
 ### PRS-001
 - Backlog ID: `PRS-001`
 - Backlog Link: [PRS-001](./PRODUCTION_READINESS_BACKLOG.md#prs-001)

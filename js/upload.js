@@ -201,8 +201,13 @@ function estimateProcessingHint(type, file, mediaDurationSec = null) {
 function clearIntakePrecheckView() {
   const box = document.getElementById("intakePrecheckBox");
   const summary = document.getElementById("intakePrecheckSummary");
+  const cost = document.getElementById("intakeCostPolicy");
   const warnings = document.getElementById("intakePrecheckWarnings");
   if (summary) summary.textContent = "";
+  if (cost) {
+    cost.textContent = "";
+    cost.className = "intake-cost-policy";
+  }
   if (warnings) warnings.innerHTML = "";
   if (box) box.style.display = "none";
 }
@@ -211,15 +216,26 @@ function clearIntakePrecheckView() {
 function renderIntakePrecheckView(precheck) {
   const box = document.getElementById("intakePrecheckBox");
   const summary = document.getElementById("intakePrecheckSummary");
+  const cost = document.getElementById("intakeCostPolicy");
   const warnings = document.getElementById("intakePrecheckWarnings");
-  if (!box || !summary || !warnings) return;
+  if (!box || !summary || !cost || !warnings) return;
 
   const detected = String(precheck?.detected_job_type || "UNKNOWN");
   const etaSec = Number(precheck?.eta_sec || 0);
   const etaMin = etaSec > 0 ? Math.max(1, Math.round(etaSec / 60)) : null;
+  const decision = String(precheck?.policy_decision || "ALLOW").toUpperCase();
+  const effort = String(precheck?.estimated_effort || "LOW").toUpperCase();
+  const band = String(precheck?.estimated_cost_band || "LOW").toUpperCase();
+  const reason = String(precheck?.policy_reason || "").trim();
+  const projected = Number(precheck?.projected_cost_usd);
+  const projectedText = Number.isFinite(projected) ? `~$${projected.toFixed(2)}` : "N/A";
+
   summary.textContent = etaMin
     ? `सुझाव: ${detected} • अनुमानित समय: लगभग ${etaMin} मिनट`
     : `सुझाव: ${detected}`;
+
+  cost.className = `intake-cost-policy policy-${decision.toLowerCase()}`;
+  cost.textContent = `Cost: ${projectedText} • Effort: ${effort} • Band: ${band} • Policy: ${decision}${reason ? ` (${reason})` : ""}`;
 
   warnings.innerHTML = "";
   const items = Array.isArray(precheck?.warnings) ? precheck.warnings : [];

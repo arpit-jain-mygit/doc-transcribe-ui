@@ -192,6 +192,25 @@
   color: #1e3a8a;
 }
 
+.intake-cost-policy {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.intake-cost-policy.policy-allow {
+  color: #166534;
+}
+
+.intake-cost-policy.policy-warn {
+  color: #92400e;
+}
+
+.intake-cost-policy.policy-block {
+  color: #b91c1c;
+}
+
 .intake-precheck-warnings {
   margin: 6px 0 0 16px;
   padding: 0;

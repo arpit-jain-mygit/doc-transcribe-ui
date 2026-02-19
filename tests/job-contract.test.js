@@ -26,3 +26,21 @@ test("JOB_CONTRACT resolves duration from fallback candidates", () => {
   assert.equal(contract.resolveDurationSec({ input_duration_sec: "51" }), 51);
   assert.ok(Number.isNaN(contract.resolveDurationSec({ duration_sec: "x" })));
 });
+
+test("JOB_CONTRACT normalizes intake cost guardrail fields", () => {
+  const contract = loadJobContract();
+  const normalized = contract.resolveIntakePrecheck({
+    detected_job_type: "ocr",
+    estimated_effort: "medium",
+    estimated_cost_band: "high",
+    policy_decision: "warn",
+    policy_reason: "Projected cost is high",
+    projected_cost_usd: "0.91",
+  });
+  assert.equal(normalized.detectedJobType, "OCR");
+  assert.equal(normalized.estimatedEffort, "MEDIUM");
+  assert.equal(normalized.estimatedCostBand, "HIGH");
+  assert.equal(normalized.policyDecision, "WARN");
+  assert.equal(normalized.policyReason, "Projected cost is high");
+  assert.equal(normalized.projectedCostUsd, 0.91);
+});
