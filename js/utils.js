@@ -107,6 +107,29 @@ window.generateRequestId = generateRequestId;
 window.resolveRequestId = resolveRequestId;
 window.authHeadersWithRequestId = authHeadersWithRequestId;
 
+// User value: extracts clear nested API error text so users never see raw [object Object] toasts.
+function extractApiErrorMessage(payload) {
+  if (payload === null || payload === undefined) return "";
+  if (typeof payload === "string") return payload.trim();
+  if (typeof payload !== "object") return String(payload).trim();
+
+  const fields = [
+    payload.error_message,
+    payload.message,
+    payload.error,
+    payload.detail,
+  ];
+  for (const value of fields) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+
+  if (payload.detail && typeof payload.detail === "object") {
+    const nested = extractApiErrorMessage(payload.detail);
+    if (nested) return nested;
+  }
+  return "";
+}
+
 // User value: supports responseErrorMessage so the OCR/transcription journey stays clear and reliable.
 function responseErrorMessage(res, payload, fallback) {
   // User value: protects user access before OCR/transcription actions are allowed.
@@ -119,7 +142,7 @@ function responseErrorMessage(res, payload, fallback) {
   };
 
   if (payload && typeof payload === "object" && !payload._nonJson) {
-    const message = payload.detail || payload.error || payload.message || fallback;
+    const message = extractApiErrorMessage(payload) || fallback;
     return normalizeAuthError(message) || fallback;
   }
   if (payload && payload._nonJson) {

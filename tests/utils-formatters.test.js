@@ -41,3 +41,18 @@ test("getJobFailureMessage prefers specific messages", () => {
     "Custom message"
   );
 });
+
+test("responseErrorMessage unwraps nested detail objects", () => {
+  const s = loadUtils();
+  const message = s.responseErrorMessage(
+    { status: 429 },
+    {
+      detail: {
+        error_code: "COST_GUARDRAIL_BLOCKED",
+        error_message: "Projected cost exceeds configured block threshold",
+      },
+    },
+    "Upload failed"
+  );
+  assert.equal(message, "Projected cost exceeds configured block threshold");
+});
