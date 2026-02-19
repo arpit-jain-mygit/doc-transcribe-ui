@@ -87,6 +87,32 @@ This file tracks release-level changes with backlog traceability.
   - `node --test tests/jobs-quality.test.js` passed.
 - Status: `Completed (Code + Unit Tested)`
 
+### PRS-038 (Stories 1-3)
+- Backlog ID: `PRS-038`
+- Backlog Link: [PRS-038](./PRODUCTION_READINESS_BACKLOG.md#prs-038)
+- Type: `Feature` + `Reliability`
+- Summary: Added policy-driven retry and recovery traces across worker, API contract, and UI history.
+- Why: Improve completion under transient failures and make recovery decisions auditable for users and ops.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/recovery_policy.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/worker_loop.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/dead_letter.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_recovery_policy_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/status.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/routes/jobs.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_recovery_contract_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/css/features/jobs.css`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/jobs-quality.test.js`
+- Risk: `Medium`
+- Validation:
+  - `python -m unittest tests.test_recovery_policy_unit -v` passed (Worker).
+  - `python -m unittest tests.test_recovery_contract_unit -v` passed (API).
+  - `node --test tests/jobs-quality.test.js` passed (UI).
+- Status: `Completed (Code + Unit Tested)`
+
 ### PRS-001
 - Backlog ID: `PRS-001`
 - Backlog Link: [PRS-001](./PRODUCTION_READINESS_BACKLOG.md#prs-001)

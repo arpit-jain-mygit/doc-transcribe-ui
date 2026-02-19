@@ -61,7 +61,7 @@ Status values:
 | PRS-035 | 10 | Smart Intake Agent (auto-routing + prechecks + ETA) | UI, API | Intelligent intake and routing | Faster first response and fewer bad uploads | Users: smarter file guidance; Dev: fewer bad-input bugs; Ops: lower avoidable failures; Product: better conversion at upload start. | Completed (Tested) | Completed (Local + Cloud Regression) | UI: precheck contract mapping + pre-upload guidance + regression precheck assertions + rollout docs (`f444f9d`,`2e73840`,`fd1e787`). API: intake precheck endpoint with deterministic routing/warnings/ETA + stage telemetry + decision metrics (`952d12b`). |
 | PRS-036 | 10 | OCR Quality Agent (confidence scoring + page-level guidance) | Worker, API, UI | OCR quality assurance | Better text quality with actionable remediation | Users: better OCR output quality; Dev: measurable quality signals; Ops: early poor-scan detection; Product: quality KPI visibility. | Completed (Code) | Completed (Unit Tests) | API: added OCR quality contract fields in status schema + canonical contract + positive/negative unit tests (`schemas/responses.py`, `schemas/job_contract.py`, `tests/test_ocr_quality_contract_unit.py`). Worker: Pillow/text-heuristic scoring + status persistence (`worker/quality/ocr_quality.py`, `worker/ocr.py`, `tests/test_ocr_quality_unit.py`). UI: OCR quality badge rendering + unit tests (`js/jobs.js`, `css/features/jobs.css`, `tests/jobs-quality.test.js`). |
 | PRS-037 | 10 | Transcription Quality Agent (segment confidence + noise/speaker hints) | Worker, API, UI | Transcription quality assurance | More reliable transcripts with targeted fixes | Users: stronger transcript reliability; Dev: segment-level confidence data; Ops: quicker noisy-audio diagnosis; Product: trust improvements. | Completed (Code) | Completed (Unit Tests) | API: added transcription quality contract fields (`transcript_quality_score`, `low_confidence_segments`, `segment_quality`, `transcript_quality_hints`) in schema + canonical contract (`schemas/responses.py`, `schemas/job_contract.py`) with positive/negative unit tests (`tests/test_transcription_quality_contract_unit.py`). Worker: added deterministic segment scoring + summary hints persistence in final status (`worker/quality/transcription_quality.py`, `worker/transcribe.py`) with unit tests (`tests/test_transcription_quality_unit.py`). UI: added transcription quality badges in history + completed views with tests (`js/jobs.js`, `js/ui.js`, `tests/jobs-quality.test.js`). |
-| PRS-038 | 10 | Retry & Recovery Agent (policy-driven recovery orchestration) | Worker, API | Autonomous failure recovery | Higher completion rate during transient failures | Users: higher completion on transient issues; Dev: policy-driven recovery paths; Ops: reduced manual reprocessing; Product: stability gains. | Planned | Pending | Test criteria: inject transient/provider failures and confirm bounded retry, recovery action, and DLQ traceability. |
+| PRS-038 | 10 | Retry & Recovery Agent (policy-driven recovery orchestration) | Worker, API, UI | Autonomous failure recovery | Higher completion rate during transient failures | Users: higher completion on transient issues; Dev: policy-driven recovery paths; Ops: reduced manual reprocessing; Product: stability gains. | Completed (Code) | Completed (Unit Tests) | Worker: added policy decision engine with bounded recovery actions + recovery trace persistence (`worker/recovery_policy.py`, `worker/worker_loop.py`, `worker/dead_letter.py`, `tests/test_recovery_policy_unit.py`); API: extended contract/response with recovery fields + trace normalization (`schemas/job_contract.py`, `schemas/responses.py`, `routes/status.py`, `routes/jobs.py`, `tests/test_recovery_contract_unit.py`); UI: rendered recovery trace in history (`js/jobs.js`, `css/features/jobs.css`, `tests/jobs-quality.test.js`). |
 | PRS-039 | 10 | Cost Guardrail Agent (quota/cost prediction + enforcement) | API, UI | Cost governance | Predictable usage and reduced surprise failures | Users: transparent limits/cost expectations; Dev: safer policy controls; Ops: predictable load/cost; Product: controlled spend vs growth. | Planned | Pending | Test criteria: validate projected-cost hints, quota threshold behavior, and controlled rejection paths. |
 | PRS-040 | 10 | Queue Orchestration Agent (dynamic balancing/prioritization) | Worker, API | Throughput and fairness optimization | Lower wait time under mixed OCR/A-V load | Users: reduced wait under mixed load; Dev: adaptive orchestration hooks; Ops: lower queue contention; Product: better peak-time UX. | Planned | Pending | Test criteria: load-test mixed jobs and confirm adaptive queue balancing improves p95 queue wait. |
 | PRS-041 | 10 | User Assist Agent (in-flow guidance + next-best action) | UI, API | UX assistance | Clearer guidance during wait/failure/retry states | Users: actionable next steps in real time; Dev: consistent guidance patterns; Ops: fewer repetitive tickets; Product: lower drop-off. | Planned | Pending | Test criteria: verify contextual guidance appears for queued/failed/cancelled scenarios and improves task completion. |
@@ -1641,16 +1641,25 @@ What changes when using agents vs non-agent logic:
 **Purpose**
 - Move from static retries to context-aware recovery actions per error class.
 
+**Status**
+- `Completed (Code + Unit Tested)`
+
 **Why this is in Phase 10**
 - Depends on typed error catalog and retry budget foundations.
 
 **Repo touchpoints**
-- `Worker`, `API`
+- `Worker`, `API`, `UI`
 
 **Detailed test plan**
 1. Inject transient provider/network failures.
 2. Confirm recovery path chosen by policy and bounded attempts.
 3. Validate DLQ contains recovery decision trace.
+
+**Implementation summary**
+1. Added a policy-based recovery decision engine (`retry_with_backoff` vs `fail_fast_dlq`) by error class and retry budget.
+2. Persisted recovery metadata (`recovery_action`, `recovery_reason`, `recovery_attempt`, `recovery_max_attempts`, `recovery_trace`) in status + DLQ payloads.
+3. Extended API job/status contract and normalization so recovery trace is returned as structured JSON.
+4. Added UI history rendering for recovery trace so users/ops can see what recovery action was applied.
 
 ### PRS-039 - Cost Guardrail Agent (quota/cost prediction + enforcement)
 

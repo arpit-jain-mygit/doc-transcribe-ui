@@ -486,6 +486,7 @@ function renderJobsList(jobs) {
     const statusDotHtml = buildStatusDotHtml(j.status);
     const rowStatusClass = String(j.status || "").toUpperCase();
     const qualityBadgeHtml = buildQualityBadgeHtml(j);
+    const recoveryTraceHtml = buildRecoveryTraceHtml(j);
 
     let actionHtml = "";
     const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
@@ -522,6 +523,7 @@ function renderJobsList(jobs) {
           ${buildHistoryMetaIconHtml("When")}
           <span class="job-time">${formatRelativeTime(j.updated_at)}</span>
         </span>
+        ${recoveryTraceHtml}
         <span class="job-actions">${actionHtml}</span>
       </div>
     </div>
@@ -652,6 +654,43 @@ function parseQualityList(raw) {
   } catch {
     return [];
   }
+}
+
+// User value: parses recovery trace safely so users and ops can view retry decisions consistently.
+function parseRecoveryTrace(raw) {
+  if (Array.isArray(raw)) return raw;
+  const text = String(raw || "").trim();
+  if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+// User value: shows compact recovery trace for failed/retried jobs so next action is clearer.
+function buildRecoveryTraceHtml(job) {
+  const action = String(job?.recovery_action || "").trim();
+  const reason = String(job?.recovery_reason || "").trim();
+  const attempt = Number(job?.recovery_attempt);
+  const maxAttempts = Number(job?.recovery_max_attempts);
+  const trace = parseRecoveryTrace(job?.recovery_trace);
+  if (!action && !reason && trace.length === 0) return "";
+
+  const attemptText = Number.isFinite(attempt) && Number.isFinite(maxAttempts) && maxAttempts > 0
+    ? ` (${attempt}/${maxAttempts})`
+    : "";
+  const base = action || "recovery";
+  const caption = `${base}${attemptText}`;
+  const detail = reason ? `${reason}` : "";
+  const title = detail ? `${base}${attemptText} • ${detail}` : `${base}${attemptText}`;
+  return (
+    `<span class="history-recovery-trace" title="${escapeHtml(title)}">` +
+      `<span class="history-recovery-icon" aria-hidden="true">↺</span>` +
+      `<span>${escapeHtml(caption)}</span>` +
+    `</span>`
+  );
 }
 
 // User value: normalizes OCR quality fields so users get clear trust signals regardless of payload format.

@@ -74,6 +74,24 @@ test('buildQualityBadgeHtml returns transcription NA badge when quality fields a
   assert.match(html, /history-quality-badge-na/);
 });
 
+test('buildRecoveryTraceHtml renders recovery action and attempt', () => {
+  const mod = loadJobsModule();
+  const html = mod.buildRecoveryTraceHtml({
+    recovery_action: 'retry_with_backoff',
+    recovery_reason: 'TRANSIENT_INFRA',
+    recovery_attempt: 1,
+    recovery_max_attempts: 2,
+  });
+  assert.match(html, /retry_with_backoff/);
+  assert.match(html, /1\/2/);
+});
+
+test('buildRecoveryTraceHtml returns empty when no recovery fields exist', () => {
+  const mod = loadJobsModule();
+  const html = mod.buildRecoveryTraceHtml({});
+  assert.equal(html, '');
+});
+
 test('buildOcrQualityBadgeHtml keeps high score green when only a few pages are low', () => {
   const mod = loadJobsModule();
   const html = mod.buildOcrQualityBadgeHtml({
