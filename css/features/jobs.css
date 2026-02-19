@@ -170,18 +170,24 @@
   height: 14px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
+  background: #d7e3f3;
+  color: #0f172a;
   font-size: 8px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #b9cbe4;
 }
 
 .history-kind-tab.active .history-kind-count {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.26);
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.34);
 }
 
 @media (max-width: 760px) {
