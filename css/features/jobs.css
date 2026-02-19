@@ -170,7 +170,7 @@
   height: 14px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #d7e3f3;
+  background: #e3f2ff;
   color: #0f172a;
   font-size: 8px;
   font-weight: 800;
@@ -181,13 +181,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #b9cbe4;
+  border: 1px solid #bfd8f3;
 }
 
 .history-kind-tab.active .history-kind-count {
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.34);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.34);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 760px) {
