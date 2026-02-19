@@ -389,7 +389,6 @@
   --history-inline-gap: 6px;
   --history-meta-key-size: 12px;
   --history-meta-value-size: 12px;
-  --history-meta-col-width: 124px;
   flex: 1;
   display: flex;
   align-items: center;
@@ -427,25 +426,25 @@
   display: inline-flex;
   align-items: center;
   gap: var(--history-inline-gap);
-  min-width: var(--history-meta-col-width);
+  min-width: 0;
   flex: 0 0 auto;
   justify-content: flex-start;
 }
 
 .history-meta-item.item-key-file-size {
-  min-width: var(--history-meta-col-width);
+  min-width: 96px;
 }
 
 .history-meta-item.item-key-pages {
-  min-width: var(--history-meta-col-width);
+  min-width: 68px;
 }
 
 .history-meta-item.item-key-duration {
-  min-width: var(--history-meta-col-width);
+  min-width: 86px;
 }
 
 .history-meta-item.item-key-processing-time {
-  min-width: var(--history-meta-col-width);
+  min-width: 78px;
 }
 
 .history-meta-item.is-placeholder {
@@ -493,7 +492,7 @@
 .history-meta-sep {
   color: #94a3b8;
   font-weight: 600;
-  margin: 0 var(--history-inline-gap);
+  margin: 0 4px;
 }
 
 .job-filename {
@@ -512,7 +511,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-width: var(--history-meta-col-width);
+  min-width: 88px;
+  max-width: 98px;
   justify-content: center;
   border-radius: 999px;
   border: 1px solid #dbe3ee;
@@ -560,7 +560,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-width: 124px;
+  min-width: 114px;
   justify-content: flex-start;
   margin-right: 4px;
 }
