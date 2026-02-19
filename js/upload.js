@@ -30,6 +30,7 @@ const IDEMPOTENCY_CACHE = Object.create(null);
 const INPUT_FILE_DOWNLOAD_CACHE = Object.create(null);
 const INPUT_FILE_CACHE_ORDER = [];
 const INPUT_FILE_CACHE_MAX = 30;
+window.ACTIVE_INTAKE_PRECHECK = null;
 
 // User value: keeps original uploads available for in-session filename download.
 function cacheUploadedInputFile(jobId, file) {
@@ -210,6 +211,7 @@ function clearIntakePrecheckView() {
   }
   if (warnings) warnings.innerHTML = "";
   if (box) box.style.display = "none";
+  window.ACTIVE_INTAKE_PRECHECK = null;
 }
 
 // User value: renders route/warning/ETA hints before upload so users can make better submission decisions.
@@ -229,6 +231,13 @@ function renderIntakePrecheckView(precheck) {
   const reason = String(precheck?.policy_reason || "").trim();
   const projected = Number(precheck?.projected_cost_usd);
   const projectedText = Number.isFinite(projected) ? `~$${projected.toFixed(2)}` : "N/A";
+  window.ACTIVE_INTAKE_PRECHECK = {
+    policyDecision: decision,
+    policyReason: reason,
+    estimatedEffort: effort,
+    estimatedCostBand: band,
+    projectedCostUsd: Number.isFinite(projected) ? projected : null,
+  };
 
   summary.textContent = etaMin
     ? `सुझाव: ${detected} • अनुमानित समय: लगभग ${etaMin} मिनट`
@@ -275,7 +284,10 @@ async function runIntakePrecheckForFile(type, file) {
       requestId: window.ACTIVE_REQUEST_ID || "",
     });
     if (!res || !res.ok || !data || data._nonJson) return;
-    renderIntakePrecheckView(data);
+    const normalized = (window.JOB_CONTRACT && typeof window.JOB_CONTRACT.resolveIntakePrecheck === "function")
+      ? window.JOB_CONTRACT.resolveIntakePrecheck(data)
+      : data;
+    renderIntakePrecheckView(normalized);
   } catch {
     // Best-effort UX enhancement; upload flow should not be blocked on precheck.
   }
@@ -435,7 +447,11 @@ async function upload(type, file) {
   }
 
   const header = document.getElementById("processingHeader");
-  if (header) header.textContent = `PROCESSING ${file.name}`;
+  if (typeof updateProcessingHeader === "function") {
+    updateProcessingHeader({ input_filename: file.name });
+  } else if (header) {
+    header.textContent = `PROCESSING ${file.name}`;
+  }
 
   let res;
   const preferXhrPrimary = isMobileBrowser() && !isLikelyInAppBrowser();

@@ -340,6 +340,7 @@ function completeAndResetUI() {
   JOB_ID = null;
   window.ACTIVE_JOB_TYPE = null;
   window.ACTIVE_REQUEST_ID = null;
+  window.ACTIVE_INTAKE_PRECHECK = null;
   localStorage.removeItem("active_job_id");
   CANCEL_REQUESTED = false;
 

@@ -206,11 +206,31 @@
 .processing-head-label {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   color: #64748b;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.processing-policy-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.processing-policy-badge-warn {
+  color: #92400e;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
 }
 
 .processing-head-name {

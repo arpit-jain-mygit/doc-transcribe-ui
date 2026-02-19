@@ -618,6 +618,16 @@ function updateProcessingHeader(job) {
   label.className = "processing-head-label";
   label.textContent = "Processing";
 
+  const intake = window.ACTIVE_INTAKE_PRECHECK || null;
+  const decision = String(intake?.policyDecision || "").toUpperCase();
+  if (decision === "WARN") {
+    const badge = document.createElement("span");
+    badge.className = "processing-policy-badge processing-policy-badge-warn";
+    badge.textContent = "Policy: WARN";
+    badge.title = String(intake?.policyReason || "Cost guardrail warning");
+    label.appendChild(badge);
+  }
+
   const name = document.createElement("span");
   name.className = "processing-head-name";
   name.textContent = fileName;
