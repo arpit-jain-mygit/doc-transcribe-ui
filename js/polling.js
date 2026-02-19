@@ -296,7 +296,7 @@ function updateProcessingUI(data) {
       if (target < 10) {
         pulseSpeed = 4.4; // slower warm-up phase
       } else if (target <= 90) {
-        pulseSpeed = 1.5; // fast: active processing phase
+        pulseSpeed = 1.1; // faster: active processing phase
       } else {
         pulseSpeed = 4.2; // slower finalization phase
       }
