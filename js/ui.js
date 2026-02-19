@@ -373,14 +373,14 @@ function getCompletionJobTypeThemeClass(job) {
 // User value: maps completion metadata labels to compact icons so users scan output details faster.
 function completionMetaIconInfo(key) {
   const normalized = String(key || "").trim().toLowerCase();
-  if (normalized === "uploaded file") return { icon: "📄", label: "Uploaded file" };
-  if (normalized === "file size") return { icon: "💾", label: "File Size" };
-  if (normalized === "processing time") return { icon: "⏱", label: "Processing Time" };
-  if (normalized === "when") return { icon: "🕒", label: "When" };
-  if (normalized === "ocr quality") return { icon: "🎯", label: "OCR Quality" };
-  if (normalized === "pages") return { icon: "📚", label: "Pages" };
-  if (normalized === "duration") return { icon: "🎵", label: "Duration" };
-  return { icon: "•", label: String(key || "") };
+  if (normalized === "uploaded file") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>', label: "Uploaded file" };
+  if (normalized === "file size") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 11h10"/><path d="M7 14h6"/></svg>', label: "File Size" };
+  if (normalized === "processing time") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/></svg>', label: "Processing Time" };
+  if (normalized === "when") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg>', label: "When" };
+  if (normalized === "ocr quality") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2"/><path d="M20 12h-2"/><path d="M12 20v-2"/><path d="M4 12h2"/></svg>', label: "OCR Quality" };
+  if (normalized === "pages") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12a2 2 0 0 1 2 2v12"/><path d="M7 6h10v14H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>', label: "Pages" };
+  if (normalized === "duration") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18V6"/><path d="M10 15V9"/><path d="M14 17V7"/><path d="M18 13v-2"/></svg>', label: "Duration" };
+  return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/></svg>', label: String(key || "") };
 }
 
 // User value: shows OCR quality on the completed card so users can quickly judge output trust.
@@ -431,9 +431,12 @@ function showCompletion(job) {
 
     const bytes = jobContract().resolveInputSizeBytes ? jobContract().resolveInputSizeBytes(job) : Number(job.input_size_bytes);
     const hasSize = Number.isFinite(bytes) && bytes > 0;
+    const sizeText = hasSize
+      ? ((typeof formatFileSize === "function" ? formatFileSize(bytes) : `${(bytes / (1024 * 1024)).toFixed(2)} MB`))
+      : "--";
     details.push({
       key: "File Size",
-      value: hasSize ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : "--",
+      value: sizeText,
       placeholder: !hasSize,
     });
 
@@ -486,7 +489,7 @@ function showCompletion(job) {
       keyEl.className = `completion-meta-key completion-meta-key-${keyToken}`;
       const iconInfo = completionMetaIconInfo(item.key);
       keyEl.classList.add("completion-meta-icon");
-      keyEl.textContent = iconInfo.icon;
+      keyEl.innerHTML = iconInfo.svg;
       keyEl.title = iconInfo.label;
       keyEl.setAttribute("aria-label", iconInfo.label);
 

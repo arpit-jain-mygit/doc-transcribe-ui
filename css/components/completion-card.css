@@ -296,9 +296,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  width: 14px;
+  height: 14px;
   line-height: 1;
   flex: 0 0 auto;
+  color: #475569;
+}
+
+.completion-meta-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .completion-filename {
