@@ -448,16 +448,16 @@ function showCompletion(job) {
   if (uploadedFileEl) {
     const uploaded = jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : (job.input_filename || job.input_file || "");
     uploadedFileEl.textContent = uploaded || LAST_UPLOADED_FILENAME || "-";
-    if (outUrl) {
-      uploadedFileEl.href = "#";
-      uploadedFileEl.onclick = (e) => {
-        e.preventDefault();
-        if (typeof forceDownload === "function") forceDownload(outUrl, outName);
-      };
-    } else {
-      uploadedFileEl.removeAttribute("href");
-      uploadedFileEl.onclick = null;
-    }
+    uploadedFileEl.href = "#";
+    uploadedFileEl.onclick = (e) => {
+      e.preventDefault();
+      const ok = (typeof window.downloadUploadedInputByJobId === "function")
+        ? window.downloadUploadedInputByJobId(job.job_id, uploaded || outName)
+        : false;
+      if (!ok) {
+        toast("Original uploaded file download is available for files uploaded in this browser session.", "info");
+      }
+    };
   }
   const uploadedFileIconEl = document.getElementById("completionUploadedFileIcon");
   if (uploadedFileIconEl) {

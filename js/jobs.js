@@ -485,9 +485,7 @@ function renderJobsList(jobs) {
     let actionHtml = "";
     const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
     const outputName = contract().resolveOutputFilename ? contract().resolveOutputFilename(j) : (j.output_filename || "transcript.txt");
-    const filenameHtml = downloadUrl
-      ? `<a href="#" class="job-filename history-filename-link" data-url="${escapeHtml(downloadUrl)}" data-name="${escapeHtml(outputName)}" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</a>`
-      : `<span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>`;
+    const filenameHtml = `<a href="#" class="job-filename history-filename-link" data-job-id="${escapeHtml(j.job_id)}" data-name="${escapeHtml(uploadedFile)}" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</a>`;
     if (downloadUrl) {
       actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(downloadUrl)}">⤓ Download output</a>`;
     } else if (j.status === "FAILED") {
@@ -538,7 +536,12 @@ function renderJobsList(jobs) {
     if (filenameLink) {
       filenameLink.onclick = (e) => {
         e.preventDefault();
-        forceDownload(downloadUrl, outputName);
+        const ok = (typeof window.downloadUploadedInputByJobId === "function")
+          ? window.downloadUploadedInputByJobId(j.job_id, uploadedFile)
+          : false;
+        if (!ok) {
+          toast("Original uploaded file download is available for files uploaded in this browser session.", "info");
+        }
       };
     }
 

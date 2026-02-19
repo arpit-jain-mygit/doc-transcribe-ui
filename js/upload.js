@@ -27,6 +27,55 @@ const DROPZONE_HINT_PARTS_HI = [
 ];
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 const IDEMPOTENCY_CACHE = Object.create(null);
+const INPUT_FILE_DOWNLOAD_CACHE = Object.create(null);
+const INPUT_FILE_CACHE_ORDER = [];
+const INPUT_FILE_CACHE_MAX = 30;
+
+// User value: keeps original uploads available for in-session filename download.
+function cacheUploadedInputFile(jobId, file) {
+  const id = String(jobId || "").trim();
+  if (!id || !file) return;
+  const existing = INPUT_FILE_DOWNLOAD_CACHE[id];
+  if (existing && existing.url) {
+    try { URL.revokeObjectURL(existing.url); } catch {}
+  }
+  INPUT_FILE_DOWNLOAD_CACHE[id] = {
+    url: URL.createObjectURL(file),
+    filename: String(file.name || "uploaded-input.bin"),
+    createdAt: Date.now(),
+  };
+  const existingIndex = INPUT_FILE_CACHE_ORDER.indexOf(id);
+  if (existingIndex >= 0) INPUT_FILE_CACHE_ORDER.splice(existingIndex, 1);
+  INPUT_FILE_CACHE_ORDER.push(id);
+  while (INPUT_FILE_CACHE_ORDER.length > INPUT_FILE_CACHE_MAX) {
+    const oldId = INPUT_FILE_CACHE_ORDER.shift();
+    const old = INPUT_FILE_DOWNLOAD_CACHE[oldId];
+    if (old && old.url) {
+      try { URL.revokeObjectURL(old.url); } catch {}
+    }
+    delete INPUT_FILE_DOWNLOAD_CACHE[oldId];
+  }
+}
+
+// User value: resolves in-session original upload file for filename click download.
+window.getUploadedInputFileDownload = function getUploadedInputFileDownload(jobId) {
+  const id = String(jobId || "").trim();
+  if (!id) return null;
+  return INPUT_FILE_DOWNLOAD_CACHE[id] || null;
+};
+
+// User value: downloads original uploaded file when still available in browser session.
+window.downloadUploadedInputByJobId = function downloadUploadedInputByJobId(jobId, fallbackFilename = "uploaded-input.bin") {
+  const rec = window.getUploadedInputFileDownload(jobId);
+  if (!rec || !rec.url) return false;
+  const a = document.createElement("a");
+  a.href = rec.url;
+  a.download = rec.filename || fallbackFilename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  return true;
+};
 
 // User value: renders a clean, centered upload hint with aligned separators for fast readability.
 function renderDropzoneHint(labelEl) {
@@ -386,6 +435,7 @@ async function upload(type, file) {
       );
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
+        cacheUploadedInputFile(JOB_ID, uploadFile);
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
         localStorage.setItem("active_job_id", JOB_ID);
         startPolling();
@@ -427,6 +477,7 @@ async function upload(type, file) {
       );
       if (xhrRes.ok && xhrRes.data && !xhrRes.data._nonJson && xhrRes.data.job_id) {
         JOB_ID = xhrRes.data.job_id;
+        cacheUploadedInputFile(JOB_ID, uploadFile);
         window.ACTIVE_REQUEST_ID = String(xhrRes.data.request_id || xhrRes.requestId || uploadRequestId || "").trim();
         localStorage.setItem("active_job_id", JOB_ID);
         startPolling();
@@ -535,6 +586,7 @@ async function upload(type, file) {
     return;
   }
   JOB_ID = data.job_id;
+  cacheUploadedInputFile(JOB_ID, uploadFile);
   window.ACTIVE_REQUEST_ID = String(data.request_id || res.headers.get("X-Request-ID") || uploadRequestId || "").trim();
   localStorage.setItem("active_job_id", JOB_ID);
 
