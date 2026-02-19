@@ -1425,7 +1425,153 @@ Note:
 
 ---
 
-## 7) Repo Role Matrix (Agent + Story)
+## 7) Plain-English Story Concepts (All Agents)
+
+Purpose:
+- Give one consistent, user-centric explanation for each story.
+- Clarify what changes in behavior users, ops, dev, and product can actually observe.
+
+### Agent #1 Smart Intake (PRS-035)
+- Story 1: Intake contract.  
+  Concept: Define one precheck response shape so UI and API speak the same intake language.  
+  User sees: Clear route, confidence, warnings, and ETA before upload.  
+  Stakeholder value: Dev gets stable contract; Product gets measurable intake funnel fields.
+- Story 2: Intake precheck API.  
+  Concept: Evaluate file metadata before enqueue to prevent avoidable failures.  
+  User sees: Early warning if file type/size/duration is risky.  
+  Stakeholder value: Ops sees fewer bad jobs entering queues.
+- Story 3: UI precheck panel.  
+  Concept: Show precheck outcome before final submit decision.  
+  User sees: “Proceed vs fix input” guidance at upload time.  
+  Stakeholder value: Product sees lower drop-off from confusing failures.
+
+### Agent #2 OCR Quality (PRS-036)
+- Story 1: OCR quality contract.  
+  Concept: Add stable fields (`ocr_quality_score`, `low_confidence_pages`, `quality_hints`).  
+  User sees: Quality percent and hints in history/completed views.  
+  Stakeholder value: Dev/Ops can debug low-quality output with structured metadata.
+- Story 2: Worker quality scoring.  
+  Concept: Compute deterministic quality from document/image/text signals after OCR.  
+  User sees: Poor scans clearly flagged even when job technically completes.  
+  Stakeholder value: Product gets a quality KPI instead of binary success/failure.
+- Story 3: UI quality rendering.  
+  Concept: Convert raw score/hints into understandable UX badges and messages.  
+  User sees: Green/amber/red-like quality cues and next actions.  
+  Stakeholder value: Support can explain output quality without reading raw logs.
+
+### Agent #3 Transcription Quality (PRS-037)
+- Story 1: Transcript quality contract.  
+  Concept: Add stable transcript-quality fields for segment confidence and hints.  
+  User sees: Quality signals for audio output reliability.  
+  Stakeholder value: Dev gets schema consistency with OCR quality design.
+- Story 2: Segment scoring in worker.  
+  Concept: Score chunk/segment quality to identify weak parts.  
+  User sees: Confidence-aware interpretation of transcript quality.  
+  Stakeholder value: Ops can isolate low-quality audio causes quickly.
+- Story 3: UI transcript hints.  
+  Concept: Surface quality summary and remediation tips in UX.  
+  User sees: Clear advice when transcript quality is weak.  
+  Stakeholder value: Product can prioritize noise/speaker enhancements using evidence.
+
+### Agent #4 Retry & Recovery (PRS-038)
+- Story 1: Recovery contract.  
+  Concept: Standardize recovery metadata fields across failure flows.  
+  User sees: Transparent “what recovery action happened” info.  
+  Stakeholder value: Support no longer guesses retry behavior from raw exceptions.
+- Story 2: Recovery policy engine.  
+  Concept: Choose `retry_with_backoff` vs `fail_fast_dlq` by error class and budget.  
+  User sees: Higher completion for transient issues, immediate fail for bad input.  
+  Stakeholder value: Ops avoids wasteful retries and manual re-runs.
+- Story 3: Recovery trace in API/UI.  
+  Concept: Expose recovery decision trace in status/history.  
+  User sees: Retry/fail-fast reason directly in failed history rows.  
+  Stakeholder value: Product gets auditability for reliability decisions.
+
+### Agent #5 Cost Guardrail (PRS-039)
+- Story 1: Cost contract.  
+  Concept: Define fields for projected effort/cost and policy decision.  
+  User sees: Expected cost/effort before expensive processing starts.  
+  Stakeholder value: Product can tune policy using explicit output fields.
+- Story 2: Policy evaluator.  
+  Concept: Decide `ALLOW/WARN/BLOCK` from size/pages/duration/quota context.  
+  User sees: Deterministic acceptance or block with clear reason.  
+  Stakeholder value: Ops gets predictable load and spend protection.
+- Story 3: UI policy message.  
+  Concept: Present projected effort and guardrail decision before submit.  
+  User sees: Informed choice to proceed/split/compress file.  
+  Stakeholder value: Fewer surprise failures and escalations.
+
+### Agent #6 Queue Orchestration (PRS-040)
+- Story 1: Scheduling config contract.  
+  Concept: Add explicit knobs for fairness/priority scheduling behavior.  
+  User sees: More consistent wait times under mixed load.  
+  Stakeholder value: Ops can tune queue policy without code churn.
+- Story 2: Adaptive dequeue logic.  
+  Concept: Prevent one workload type from starving another.  
+  User sees: Better responsiveness during traffic spikes.  
+  Stakeholder value: Product gets better p95 wait and completion consistency.
+- Story 3: Queue-health metrics.  
+  Concept: Publish lag/pickup/pressure metrics for scheduling decisions.  
+  User sees: Indirectly fewer “stuck queue” experiences.  
+  Stakeholder value: Ops can detect and correct imbalance fast.
+
+### Agent #7 User Assist (PRS-041)
+- Story 1: Assist contract.  
+  Concept: Standardize assist message/severity/actions payload.  
+  User sees: Consistent actionable help instead of generic errors.  
+  Stakeholder value: Dev can add new assist rules safely.
+- Story 2: Status-to-assist mapping.  
+  Concept: Map state/error patterns to recommended next actions.  
+  User sees: Immediate “what to do next” for queue/failure cases.  
+  Stakeholder value: Support ticket repetition drops.
+- Story 3: Assist panel UI.  
+  Concept: Render top actionable guidance inline in processing/failure views.  
+  User sees: Contextual help without leaving the screen.  
+  Stakeholder value: Product sees higher task completion after issues.
+
+### Agent #8 Incident Triage (PRS-042)
+- Story 1: Triage report schema.  
+  Concept: Define one machine-readable incident report shape.  
+  User sees: Faster support turnaround indirectly.  
+  Stakeholder value: Ops/dev share one incident language.
+- Story 2: Correlation collector.  
+  Concept: Auto-link evidence by `request_id`/`job_id` across layers.  
+  User sees: Quicker root-cause acknowledgement and fixes.  
+  Stakeholder value: MTTR drops because manual log stitching is removed.
+- Story 3: Runbook suggestion output.  
+  Concept: Suggest likely remediation steps from known signatures.  
+  User sees: Faster recovery from common incidents.  
+  Stakeholder value: Ops response becomes consistent and repeatable.
+
+### Agent #9 Regression Certification (PRS-043)
+- Story 1: Certification contract.  
+  Concept: Define pass/fail evidence artifact schema for release readiness.  
+  User sees: Safer releases with fewer regressions.  
+  Stakeholder value: Product gets objective go/no-go gates.
+- Story 2: Evidence aggregation.  
+  Concept: Combine CI + local + cloud checks into one report.  
+  User sees: Reduced post-release breakages.  
+  Stakeholder value: Dev/release teams avoid fragmented validation.
+- Story 3: Release gate enforcement.  
+  Concept: Block release when critical checks fail.  
+  User sees: Stability prioritized over risky speed.  
+  Stakeholder value: Ops avoids avoidable incidents after deploy.
+
+### Agent #10 Product Insights (PRS-044)
+- Story 1: Product metric contract.  
+  Concept: Define stable KPI schema for usage, failure, latency, drop-off.  
+  User sees: Improvements guided by real behavior over time.  
+  Stakeholder value: Product decisions become evidence-driven.
+- Story 2: Aggregation endpoint.  
+  Concept: Compute insight-ready metrics by window and job type.  
+  User sees: Better-targeted UX and reliability fixes.  
+  Stakeholder value: Dev/product can prioritize highest-impact backlog first.
+- Story 3: Insight summaries.  
+  Concept: Convert metrics into plain-language prioritization signals.  
+  User sees: Roadmap improvements aligned to actual pain points.  
+  Stakeholder value: Leadership gets clear narrative with measurable impact.
+
+## 8) Repo Role Matrix (Agent + Story)
 
 Purpose:
 - Clarify exactly which repo is the decision maker vs middle layer vs presenter for each story.
