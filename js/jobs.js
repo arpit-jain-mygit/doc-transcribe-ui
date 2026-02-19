@@ -618,8 +618,17 @@ function getOcrQualityModel(job) {
 
 // User value: shows compact OCR quality guidance so users can quickly decide whether to trust output or re-upload.
 function buildOcrQualityBadgeHtml(job) {
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type !== "OCR") return "";
   const model = getOcrQualityModel(job);
-  if (!model) return "";
+  if (!model) {
+    return (
+      `<span class="history-quality-badge history-quality-badge-na" title="OCR quality not available for this older job">` +
+        `${buildHistoryMetaIconHtml("OCR Quality", "history-quality-icon")}` +
+        `<span class="history-quality-value">NA</span>` +
+      `</span>`
+    );
+  }
   const pct = model.score === null ? "--" : `${Math.round(model.score * 100)}%`;
   const totalPagesRaw = Number(job?.total_pages);
   const totalPages = Number.isFinite(totalPagesRaw) && totalPagesRaw > 0 ? totalPagesRaw : null;

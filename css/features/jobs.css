@@ -428,7 +428,8 @@
   gap: var(--history-inline-gap);
   min-width: 0;
   flex: 0 0 auto;
-  justify-content: flex-start;
+  justify-content: center;
+  text-align: center;
 }
 
 .history-meta-item.item-key-file-size {
@@ -534,6 +535,12 @@
   color: #9a3412;
 }
 
+.history-quality-badge-na {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+}
+
 .history-quality-key {
   opacity: 0.9;
 }
@@ -561,7 +568,8 @@
   align-items: center;
   gap: 6px;
   min-width: 114px;
-  justify-content: flex-start;
+  justify-content: center;
+  text-align: center;
   margin-right: 4px;
 }
 
