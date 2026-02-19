@@ -11,6 +11,8 @@ It is written for beginners. It explains:
 Companion references:
 - Story-level before/after + user-centric examples for all agents:
   - `/Users/arpitjain/VSProjects/doc-transcribe-ui/AGENTIC_AI_STORY_BEFORE_AFTER.md`
+- Story-level full details (stage, before/after, implementation, trigger/call hierarchy, stakeholder impact, example) for all agents:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/AGENTIC_AI_STORY_DETAILS.md`
 
 Mandatory story documentation standard (for all future updates):
 - Every new/updated story must include:
