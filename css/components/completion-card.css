@@ -314,6 +314,12 @@
   stroke-linejoin: round;
 }
 
+.completion-meta-icon-pdf {
+  width: auto;
+  min-width: 20px;
+  height: 14px;
+}
+
 .completion-filename {
   flex: 0 1 250px;
   min-width: 150px;

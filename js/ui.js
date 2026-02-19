@@ -398,9 +398,10 @@ function completionUploadedFileIconInfo(job) {
   const type = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
   if (type === "OCR") {
     return {
-      svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M8.5 13h7"></path><path d="M8.5 16h5.5"></path></svg>',
+      svg: '<span class="pdf-word-icon" aria-hidden="true">PDF</span>',
       label: "PDF file",
-      color: "#dc2626",
+      color: "",
+      className: "completion-meta-icon-pdf",
     };
   }
   if (type === "TRANSCRIPTION") {
@@ -465,7 +466,8 @@ function showCompletion(job) {
     uploadedFileIconEl.innerHTML = icon.svg;
     uploadedFileIconEl.title = icon.label;
     uploadedFileIconEl.setAttribute("aria-label", icon.label);
-    uploadedFileIconEl.style.color = icon.color;
+    uploadedFileIconEl.style.color = icon.color || "";
+    uploadedFileIconEl.classList.toggle("completion-meta-icon-pdf", Boolean(icon.className));
   }
 
   const completionMetaEl = document.getElementById("completionMeta");

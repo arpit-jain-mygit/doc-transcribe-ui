@@ -105,7 +105,7 @@ function getTranscriptionMediaDuration(job) {
 // User value: formats OCR/transcription details into clear user-facing text.
 function formatJobTypeLabel(job) {
   const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
-  if (jobType === "OCR") return "📄 OCR";
+  if (jobType === "OCR") return "PDF OCR";
   if (jobType === "TRANSCRIPTION") return "🎵 Transcription";
   return job?.job_type || job?.mode || "Processing";
 }
@@ -194,8 +194,7 @@ function buildUploadedFileIconHtml(job, extraClass = "") {
   const cls = `history-meta-icon${extraClass ? ` ${extraClass}` : ""}`;
   const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
   if (type === "OCR") {
-    const svg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M8.5 13h7"></path><path d="M8.5 16h5.5"></path></svg>';
-    return `<span class="${cls}" title="PDF file" aria-label="PDF file" style="color:#dc2626">${svg}</span>`;
+    return `<span class="${cls} history-meta-icon-pdf" title="PDF file" aria-label="PDF file"><span class="pdf-word-icon" aria-hidden="true">PDF</span></span>`;
   }
   if (type === "TRANSCRIPTION") {
     const svg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18a3 3 0 1 0 0-6v8"></path><path d="M9 8.5 18 6v8"></path><path d="M18 16a3 3 0 1 0 0-6v6"></path></svg>';
@@ -947,7 +946,7 @@ function renderJob(job) {
     <div class="job-main">
       <strong>${escapeHtml(formatJobTypeLabel(job))}</strong>
       <span class="job-source">
-        📄 File
+        PDF File
       </span>
     </div>
 

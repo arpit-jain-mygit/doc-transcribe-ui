@@ -157,6 +157,19 @@
   line-height: 1;
 }
 
+.history-kind-icon-pdf {
+  min-width: 20px;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 .history-kind-sr-only {
   position: absolute;
   width: 1px;
@@ -492,6 +505,29 @@
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.history-meta-icon-pdf {
+  width: auto;
+  min-width: 20px;
+  height: 14px;
+}
+
+.pdf-word-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .history-meta-value {
