@@ -371,14 +371,6 @@ function getCompletionTranscriptionMediaDuration(job) {
   return "";
 }
 
-// User value: formats OCR/transcription details into clear user-facing text.
-function formatCompletionJobTypeLabel(job) {
-  const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
-  if (jobType === "OCR") return "PDF / Image to Hindi Text";
-  if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
-  return job?.job_type || "";
-}
-
 // User value: supports completionDetailClassToken so the OCR/transcription journey stays clear and reliable.
 function completionDetailClassToken(value) {
   return String(value || "")
@@ -386,14 +378,6 @@ function completionDetailClassToken(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
-
-// User value: loads latest OCR/transcription data so users see current status.
-function getCompletionJobTypeThemeClass(job) {
-  const jobType = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
-  if (jobType === "OCR") return "completion-job-type-ocr";
-  if (jobType === "TRANSCRIPTION") return "completion-job-type-transcription";
-  return "completion-job-type-neutral";
 }
 
 // User value: maps completion metadata labels to compact icons so users scan output details faster.
@@ -442,18 +426,6 @@ function showCompletion(job) {
   if (uploadedFileEl) {
     const uploaded = jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : (job.input_filename || job.input_file || "");
     uploadedFileEl.textContent = uploaded || LAST_UPLOADED_FILENAME || "-";
-  }
-
-  const completionJobTypeEl = document.getElementById("completionJobType");
-  if (completionJobTypeEl) {
-    completionJobTypeEl.textContent = formatCompletionJobTypeLabel(job);
-    completionJobTypeEl.classList.remove(
-      "completion-job-type-ocr",
-      "completion-job-type-transcription",
-      "completion-job-type-neutral",
-    );
-    completionJobTypeEl.classList.add(getCompletionJobTypeThemeClass(job));
-    completionJobTypeEl.style.display = completionJobTypeEl.textContent ? "inline-flex" : "none";
   }
 
   const completionMetaEl = document.getElementById("completionMeta");
