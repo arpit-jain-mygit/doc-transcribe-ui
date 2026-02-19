@@ -63,6 +63,30 @@ window.setUserProfileIdentity = function setUserProfileIdentity({ email, picture
 };
 
 window.WORKSPACE_VIEW = "conversion";
+const WORKSPACE_VIEW_STORAGE_KEY = "workspace_view";
+
+// User value: restores the user’s last chosen workspace tab after refresh.
+function resolveWorkspaceView(view) {
+  return view === "history" ? "history" : "conversion";
+}
+
+// User value: keeps the user on their preferred workspace tab across sessions.
+function getSavedWorkspaceView() {
+  try {
+    return resolveWorkspaceView(localStorage.getItem(WORKSPACE_VIEW_STORAGE_KEY));
+  } catch {
+    return "conversion";
+  }
+}
+
+// User value: remembers the current workspace tab so refresh does not reset context.
+function saveWorkspaceView(view) {
+  try {
+    localStorage.setItem(WORKSPACE_VIEW_STORAGE_KEY, resolveWorkspaceView(view));
+  } catch {
+    // best-effort persistence only
+  }
+}
 
 // User value: supports applyWorkspaceTabState so the OCR/transcription journey stays clear and reliable.
 function applyWorkspaceTabState(view) {
@@ -86,10 +110,11 @@ function applyWorkspaceTabState(view) {
 }
 
 window.setWorkspaceView = function setWorkspaceView(view, options = {}) {
-  const next = view === "history" ? "history" : "conversion";
+  const next = resolveWorkspaceView(view);
   const { loadHistory = true } = options || {};
 
   window.WORKSPACE_VIEW = next;
+  saveWorkspaceView(next);
   applyWorkspaceTabState(next);
 
   if (next === "history" && loadHistory && typeof ensureHistoryLoaded === "function") {
@@ -104,7 +129,7 @@ window.setWorkspaceView = function setWorkspaceView(view, options = {}) {
 };
 
 window.initWorkspaceView = function initWorkspaceView() {
-  window.setWorkspaceView("conversion", { loadHistory: false });
+  window.setWorkspaceView(getSavedWorkspaceView(), { loadHistory: false });
 };
 
 // User value: supports closeAccountMenu so the OCR/transcription journey stays clear and reliable.
@@ -156,7 +181,8 @@ function showLoggedInUI() {
   }
   closeAccountMenu();
   if (typeof setWorkspaceView === "function") {
-    setWorkspaceView("conversion", { loadHistory: false });
+    const preferredView = getSavedWorkspaceView();
+    setWorkspaceView(preferredView, { loadHistory: preferredView === "history" });
   }
 }
 

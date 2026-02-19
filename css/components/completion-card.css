@@ -270,6 +270,7 @@
 .completion-row-middle {
   --completion-meta-key-size: 12px;
   --completion-meta-value-size: 12px;
+  --completion-meta-col-width: 124px;
   flex: 1;
   display: flex;
   align-items: center;
@@ -314,9 +315,9 @@
 }
 
 .completion-filename {
-  flex: 0 1 220px;
-  min-width: 120px;
-  max-width: 240px;
+  flex: 0 1 300px;
+  min-width: 180px;
+  max-width: 320px;
   font-weight: 600;
   color: #111827;
   overflow: hidden;
@@ -340,10 +341,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: var(--completion-meta-col-width);
 }
 
 .completion-meta-item.item-key-file-size {
-  min-width: 115px;
+  min-width: var(--completion-meta-col-width);
 }
 
 .completion-meta-item.is-placeholder {
