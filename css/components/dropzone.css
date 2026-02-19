@@ -132,9 +132,33 @@
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
+  flex-wrap: wrap;
+  row-gap: 2px;
+  column-gap: 6px;
   line-height: 1.35;
   color: #334155;
   text-align: center;
+}
+
+.dropzone-hint-part {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dropzone-hint-sep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  color: #64748b;
+  opacity: 0.85;
+}
+
+.dropzone-hint-sep svg {
+  width: 8px;
+  height: 8px;
+  fill: currentColor;
 }
 
 .drop-zone .filename {

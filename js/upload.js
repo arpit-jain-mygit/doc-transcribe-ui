@@ -20,9 +20,28 @@ const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff
 const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
 const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
 let UPLOAD_MODE = "OCR";
-const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ ड्रॉप करें . 20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट . PDF/Image: समय पेज संख्या और गुणवत्ता पर निर्भर";
+const DROPZONE_HINT_PARTS_HI = [
+  "फ़ाइल चुनें या यहाँ ड्रॉप करें",
+  "20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट",
+  "PDF/Image: समय पेज संख्या और गुणवत्ता पर निर्भर",
+];
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 const IDEMPOTENCY_CACHE = Object.create(null);
+
+// User value: renders a clean, centered upload hint with aligned separators for fast readability.
+function renderDropzoneHint(labelEl) {
+  if (!labelEl) return;
+  const sepSvg =
+    '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="2.6"></circle>' +
+    '</svg>';
+  const html = DROPZONE_HINT_PARTS_HI.map((part, idx) => {
+    const text = `<span class="dropzone-hint-part">${part}</span>`;
+    if (idx === 0) return text;
+    return `<span class="dropzone-hint-sep" aria-hidden="true">${sepSvg}</span>${text}`;
+  }).join("");
+  labelEl.innerHTML = html;
+}
 
 // User value: supports detectModeForFile so the OCR/transcription journey stays clear and reliable.
 function detectModeForFile(file) {
@@ -44,7 +63,7 @@ function applyUploadMode(mode) {
     input.dataset.autoUploadType = next;
     input.accept = ALL_EXTENSIONS;
   }
-  if (label) label.textContent = DROPZONE_HINT_HI;
+  if (label) renderDropzoneHint(label);
 }
 
 // User value: submits user files safely for OCR/transcription processing.
