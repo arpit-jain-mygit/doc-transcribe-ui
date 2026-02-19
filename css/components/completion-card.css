@@ -325,6 +325,16 @@
   white-space: nowrap;
 }
 
+.completion-filename-link {
+  color: #111827;
+  text-decoration: none;
+}
+
+.completion-filename-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
 .completion-meta {
   display: inline-flex;
   align-items: center;

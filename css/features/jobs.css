@@ -508,6 +508,16 @@
   white-space: nowrap;
 }
 
+.history-filename-link {
+  color: #111827;
+  text-decoration: none;
+}
+
+.history-filename-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
 .history-quality-badge {
   display: inline-flex;
   align-items: center;

@@ -443,9 +443,21 @@ function showCompletion(job) {
   }
 
   const uploadedFileEl = document.getElementById("uploadedFile");
+  const outUrl = jobContract().resolveDownloadUrl ? jobContract().resolveDownloadUrl(job) : job.download_url;
+  const outName = jobContract().resolveOutputFilename ? jobContract().resolveOutputFilename(job) : (job.output_filename || job.output_file || "transcript.txt");
   if (uploadedFileEl) {
     const uploaded = jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : (job.input_filename || job.input_file || "");
     uploadedFileEl.textContent = uploaded || LAST_UPLOADED_FILENAME || "-";
+    if (outUrl) {
+      uploadedFileEl.href = "#";
+      uploadedFileEl.onclick = (e) => {
+        e.preventDefault();
+        if (typeof forceDownload === "function") forceDownload(outUrl, outName);
+      };
+    } else {
+      uploadedFileEl.removeAttribute("href");
+      uploadedFileEl.onclick = null;
+    }
   }
   const uploadedFileIconEl = document.getElementById("completionUploadedFileIcon");
   if (uploadedFileIconEl) {
@@ -551,7 +563,6 @@ function showCompletion(job) {
 
   const downloadLink = document.getElementById("downloadLink");
   if (downloadLink) {
-    const outUrl = jobContract().resolveDownloadUrl ? jobContract().resolveDownloadUrl(job) : job.download_url;
     downloadLink.href = outUrl || "#";
   }
 }

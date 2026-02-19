@@ -484,6 +484,10 @@ function renderJobsList(jobs) {
 
     let actionHtml = "";
     const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
+    const outputName = contract().resolveOutputFilename ? contract().resolveOutputFilename(j) : (j.output_filename || "transcript.txt");
+    const filenameHtml = downloadUrl
+      ? `<a href="#" class="job-filename history-filename-link" data-url="${escapeHtml(downloadUrl)}" data-name="${escapeHtml(outputName)}" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</a>`
+      : `<span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>`;
     if (downloadUrl) {
       actionHtml = `<a href="#" class="history-download" data-url="${escapeHtml(downloadUrl)}">⤓ Download output</a>`;
     } else if (j.status === "FAILED") {
@@ -505,7 +509,7 @@ function renderJobsList(jobs) {
 
       <div class="job-middle">
         ${buildUploadedFileIconHtml(j)}
-        <span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>
+        ${filenameHtml}
         ${qualityBadgeHtml}
         ${detailsHtml}
       </div>
@@ -528,6 +532,13 @@ function renderJobsList(jobs) {
         const outUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : j.output_path;
         const outName = contract().resolveOutputFilename ? contract().resolveOutputFilename(j) : (j.output_filename || "transcript.txt");
         forceDownload(outUrl, outName);
+      };
+    }
+    const filenameLink = div.querySelector(".history-filename-link");
+    if (filenameLink) {
+      filenameLink.onclick = (e) => {
+        e.preventDefault();
+        forceDownload(downloadUrl, outputName);
       };
     }
 
