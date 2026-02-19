@@ -134,8 +134,8 @@
 .history-kind-tab {
   min-height: 36px;
   border: none;
-  background: #f8fafc;
-  color: #334155;
+  background: transparent;
+  color: #1f2937;
   border-radius: 0;
   padding: 0 14px;
   font-size: 12px;
@@ -148,31 +148,19 @@
   transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.history-kind-tab-transcription {
-  color: #1e3a8a;
-}
-
-.history-kind-tab-ocr {
-  color: #92400e;
-}
-
 .history-kind-tab + .history-kind-tab {
   border-left: 1px solid #dbe3ee;
 }
 
 .history-kind-tab:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
-.history-kind-tab-ocr.active {
-  background: linear-gradient(180deg, #fff4db 0%, #ffe9c2 100%);
-  color: #8a3f09;
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
-}
-
-.history-kind-tab-transcription.active {
-  background: linear-gradient(180deg, #eaf2ff 0%, #dbeafe 100%);
-  color: #1e3a8a;
+.history-kind-tab.active {
+  background: linear-gradient(180deg, #2f80de 0%, #1667cf 100%);
+  color: #ffffff;
+  border-left-color: transparent;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
@@ -190,14 +178,9 @@
   justify-content: center;
 }
 
-.history-kind-tab-ocr.active .history-kind-count {
-  background: #fde8bf;
-  color: #92400e;
-}
-
-.history-kind-tab-transcription.active .history-kind-count {
-  background: #cfe2ff;
-  color: #1d4ed8;
+.history-kind-tab.active .history-kind-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 @media (max-width: 760px) {
