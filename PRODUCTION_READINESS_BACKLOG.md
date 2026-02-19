@@ -71,6 +71,7 @@ Status values:
 | PRS-045 | 11 | **BIG EPIC**: Digambar Jainism GPT using RAG | All | Domain-specific AI knowledge assistant | Accurate, grounded answers on Digambar Jain concepts with source traceability | Users: grounded Digambar Jain answers; Dev: reusable RAG architecture; Ops: governable AI operations; Product: strategic AI differentiation. | Planned | Pending | Start after PRS-035..044. Build ingestion, indexing, retrieval, grounding, evaluation, safety, and deployment lifecycle for a Digambar Jainism RAG assistant. |
 | PRS-046A | 6 | Operations Dashboard (real-time reliability + incident triage) | API, Worker, UI | Operability observability | Faster incident detection, diagnosis, and recovery | Users: fewer prolonged outages; Dev: faster operational debugging; Ops: single-pane incident control; Product: SLA transparency. | Planned | Pending | Feature set: queue depth/inflight, funnel by status, failure taxonomy, latency/SLO, dependency/provider health, regression+CI run health. |
 | PRS-046B | 6 | Product Analytics Dashboard (usage + outcomes + cost) | API, Worker, UI | Product decision support | Better UX prioritization and cost-aware roadmap | Users: improved journey over time; Dev: measurable UX impact; Ops: demand trend awareness; Product: stronger prioritization via analytics. | Planned | Pending | Feature set: active users, completion/drop-off by step, median turnaround by type, quota/cost trend, cohort retention, top user pain points. |
+| PRS-047 | 10 | Document Intent Classification (Speech/Discourse/Pravachan/Q&A etc.) | UI, API | Metadata-driven processing and downstream quality controls | Users can explicitly label intent so processing, prompts, and output context align better with their content type | Users: better contextual output; Dev: cleaner intent-driven logic; Ops: easier issue segmentation by document type; Product: richer analytics and roadmap signals. | Planned | Pending | Planned scope: UI intent selector at upload + API contract/storage support for `document_intent`; deferred implementation. |
 
 ## Backlog Item Anchors
 
@@ -121,6 +122,7 @@ Status values:
 - <a id="prs-045"></a>`PRS-045`
 - <a id="prs-046a"></a>`PRS-046A`
 - <a id="prs-046b"></a>`PRS-046B`
+- <a id="prs-047"></a>`PRS-047`
 
 ## Execution order
 1. Phase 1 + Phase 2
@@ -154,6 +156,7 @@ Status values:
 - 2026-02-18: PRS-019..027 and PRS-033 implemented at code level (queue partitioning, worker concurrency controls, load baseline, readiness checks, runbooks, feature flags, quotas/limits, retry budgets, UI effort hints, CI gates); awaiting bounded regression validation.
 - 2026-02-18: PRS-016, PRS-019..027, PRS-031..033 validated with local + cloud regression and marked `Completed (Tested)`.
 - 2026-02-18: PRS-034 completed at code level by adding crisp user-centric file/method comments across UI/API/Worker source/config files; regression pending.
+- 2026-02-19: Added PRS-047 as planned feature backlog item for user-provided document intent (`Speech/Discourse/Pravachan/Q&A`) to be implemented later.
 
 ## Agent Basics (Beginner Friendly)
 
