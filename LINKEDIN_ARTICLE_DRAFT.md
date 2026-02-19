@@ -263,7 +263,63 @@ sequenceDiagram
 
 ---
 
-## 8) User impact summary
+## 8) UX Perspective: Why this is a killer experience
+
+### User journey we optimized
+`Sign in -> Select file -> Precheck guidance -> Upload -> Live progress -> History card -> Download`
+
+### Why this UX is high-impact (with rationale)
+1. **Confidence before commitment**
+- Decision: pre-upload precheck with detected route, warnings, and ETA.
+- Rationale: users decide in seconds whether to proceed; upfront clarity reduces anxiety and abandonment.
+- Backlog links: `PRS-035` (Smart Intake), `PRS-041` (User Assist).
+
+2. **Perceived speed during waits**
+- Decision: stage-wise progress and meaningful status text instead of static spinner.
+- Rationale: even if backend time is same, visible progress reduces uncertainty and support pings.
+- Backlog links: `PRS-017`, `PRS-041`.
+
+3. **Trust through deterministic failures**
+- Decision: stable error codes + clear user-safe messages.
+- Rationale: predictable failures feel fixable; opaque 500s destroy trust.
+- Backlog links: `PRS-003`, `PRS-012`, `PRS-015`.
+
+4. **Continuity of work (no single-job lock-in)**
+- Decision: async processing + history-first completion visibility (planned multi-job UX).
+- Rationale: users can submit and continue working; this converts waiting time into productive time.
+- Backlog links: `PRS-048` (planned).
+
+5. **Context-aware output quality**
+- Decision: show OCR quality signals/hints in history/status.
+- Rationale: users understand when output quality is limited by scan quality, not “random AI behavior”.
+- Backlog links: `PRS-036`.
+
+6. **Domain intent capture at source**
+- Decision: let users specify document type (`Speech/Discourse/Pravachan/Q&A`) at upload.
+- Rationale: intent captured at ingestion enables better downstream quality/routing/analytics.
+- Backlog links: `PRS-047` (planned).
+
+### Before vs after UX snapshot
+- Before: uncertain upload path, generic wait state, non-actionable errors, weak context in history.
+- After: guided upload decision, live explainable progress, deterministic error UX, quality-aware history.
+
+### How to measure UX impact (product + ops)
+Track these metrics by release:
+1. upload-to-submit conversion rate
+2. mid-processing abandonment rate
+3. retry rate after failure
+4. support tickets per 100 jobs
+5. median time-to-resolution for failed jobs
+6. repeat-usage rate (7-day returning users)
+
+### Repo role clarity for UX features
+- `UI repo`: interaction design, progress rendering, guidance copy, history presentation.
+- `API repo`: contracts, precheck decisions, safe error envelopes, metadata persistence.
+- `Worker repo`: execution truth, stage progression, quality and failure signals.
+
+---
+
+## 9) User impact summary
 
 What improved for end users:
 - clearer expectations before upload,
@@ -292,7 +348,7 @@ Sample quality payload (local deterministic scoring):
 
 ---
 
-## 9) What’s next
+## 10) What’s next
 
 Near term:
 - complete remaining agent stories for `PRS-035` to `PRS-044`.
@@ -304,7 +360,7 @@ Strategic:
 
 ---
 
-## 10) Suggested visual export workflow (for actual image files)
+## 11) Suggested visual export workflow (for actual image files)
 
 If you need PNG/SVG assets for LinkedIn carousel:
 1. Render Mermaid blocks from this markdown in VS Code/Markdown preview.
