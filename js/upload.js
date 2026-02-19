@@ -271,12 +271,13 @@ async function runIntakePrecheckForFile(type, file) {
   }
 
   const mediaDurationSec = await getMediaDurationSec(file);
+  const pdfPageCount = await getPdfPageCount(file);
   const payload = {
     filename: String(file?.name || ""),
     mime_type: String(file?.type || ""),
     file_size_bytes: Number(file?.size || 0),
     media_duration_sec: Number.isFinite(mediaDurationSec) ? Math.round(mediaDurationSec) : null,
-    pdf_page_count: null,
+    pdf_page_count: Number.isFinite(pdfPageCount) && pdfPageCount > 0 ? Math.round(pdfPageCount) : null,
   };
 
   try {
@@ -320,6 +321,23 @@ async function getMediaDurationSec(file) {
     };
     el.src = url;
   });
+}
+
+// User value: estimates PDF page count before upload so users get accurate intake warning/policy decisions.
+async function getPdfPageCount(file) {
+  if (!file) return null;
+  const name = String(file.name || "").toLowerCase();
+  if (!name.endsWith(".pdf")) return null;
+  try {
+    const bytes = await file.arrayBuffer();
+    const text = new TextDecoder("latin1").decode(bytes);
+    const pageNodes = (text.match(/\/Type\s*\/Page\b/g) || []).length;
+    const pagesNodes = (text.match(/\/Type\s*\/Pages\b/g) || []).length;
+    const estimate = Math.max(1, pageNodes - pagesNodes);
+    return Number.isFinite(estimate) && estimate > 0 ? estimate : null;
+  } catch {
+    return null;
+  }
 }
 
 // User value: submits user files safely for OCR/transcription processing.
