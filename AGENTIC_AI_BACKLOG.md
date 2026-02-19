@@ -926,7 +926,7 @@ Note:
 
 ### PRS-036 OCR Quality Agent
 
-<a id="agent-10-story-1"></a>
+<a id="agent-2-story-1"></a>
 #### Story 1: Define OCR quality contract
 **Stage**
 - During OCR execution and post-page quality evaluation
@@ -942,7 +942,29 @@ Note:
 **Test**
 - Unit test schema serialization and backward compatibility.
 
-<a id="agent-10-story-2"></a>
+**Implementation evidence (Story 1)**
+- Status: `Completed (Code + Unit Tested)`
+- Changes summary:
+  - Added OCR quality contract fields to API job response schema:
+    - `ocr_quality_score`
+    - `low_confidence_pages`
+    - `quality_hints`
+  - Added these fields to canonical contract export in API contract schema.
+  - Added positive + negative unit tests for quality contract validation and backward-compatible defaults.
+- Call hierarchy:
+  - Trigger event: API schema validation for status payload.
+  - API path: `schemas/responses.py` -> `JobStatusResponse`.
+  - Contract path: `schemas/job_contract.py` -> `CANONICAL_FIELDS`.
+  - Test path: `tests/test_ocr_quality_contract_unit.py`.
+- Files changed:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_ocr_quality_contract_unit.py`
+- Validation run:
+  - `python -m unittest tests.test_ocr_quality_contract_unit -v` -> PASS
+  - `python -m unittest tests.test_intake_contract_unit -v` -> PASS
+
+<a id="agent-2-story-2"></a>
 #### Story 2: Emit quality metadata from worker OCR path
 **Stage**
 - During OCR page processing
@@ -958,7 +980,29 @@ Note:
 **Test**
 - OCR sample test confirms quality fields are persisted.
 
-<a id="agent-10-story-3"></a>
+**Implementation evidence (Story 2)**
+- Status: `Completed (Code + Unit Tested)`
+- Changes summary:
+  - Added deterministic OCR quality scoring module using Pillow + text heuristics.
+  - Integrated scoring in worker OCR pipeline and persisted fields into job status:
+    - `ocr_quality_score`
+    - `low_confidence_pages`
+    - `quality_hints`
+  - Added worker unit tests for score boundaries and low-page detection.
+- Call hierarchy:
+  - Worker path: `run_ocr(...)` -> `gemini_ocr(...)` -> `score_page(...)` per page.
+  - Summary path: `summarize_document_quality(...)` -> final status write (`safe_hset`).
+  - Event trigger: each OCR page completion updates intermediate quality metrics; final completion writes summary fields.
+- Files changed:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/quality/ocr_quality.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/quality/__init__.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_ocr_quality_unit.py`
+- Validation run:
+  - `python -m py_compile worker/ocr.py worker/quality/ocr_quality.py` -> PASS
+  - `python -m unittest tests.test_ocr_quality_unit -v` -> PASS
+
+<a id="agent-2-story-3"></a>
 #### Story 3: Show OCR quality guidance in UI
 **Stage**
 - Post-processing review in UI/history
@@ -973,6 +1017,23 @@ Note:
 - Add a compact quality badge/warning message for low-confidence outputs.
 **Test**
 - UI manual test with low-quality sample pages.
+
+**Implementation evidence (Story 3)**
+- Status: `Completed (Code + Unit Tested)`
+- Changes summary:
+  - Added OCR quality badge rendering in history rows with warn/good visual tone.
+  - Added robust parsing for worker/API list fields (JSON string or array).
+  - Added UI unit tests for positive/negative badge rendering paths.
+- Call hierarchy:
+  - UI render path: `renderJobsList(...)` -> `buildOcrQualityBadgeHtml(job)` -> `getOcrQualityModel(job)`.
+  - Parsing path: `parseQualityList(...)` normalizes `low_confidence_pages` and `quality_hints`.
+  - Event trigger: history/jobs data load or refresh updates rendered quality badge state.
+- Files changed:
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/css/features/jobs.css`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/jobs-quality.test.js`
+- Validation run:
+  - `npm test` -> PASS
 
 ---
 
@@ -1359,3 +1420,106 @@ Note:
 - Add recurring insight summary format tied to roadmap decisions.
 **Test**
 - Validate summary accuracy against known sample metrics.
+
+---
+
+## 7) Repo Role Matrix (Agent + Story)
+
+Purpose:
+- Clarify exactly which repo is the decision maker vs middle layer vs presenter for each story.
+- Keep implementation ownership explicit for Product/Dev/Ops handoff.
+
+Legend:
+- `Primary`: core logic/decision happens here.
+- `Middle`: contract/transport/orchestration only.
+- `Presentation`: user-facing rendering and messaging.
+- `N/A`: no direct change expected.
+
+### Agent #1 (PRS-035) Smart Intake
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Intake contract | Presentation contract mapping | Primary contract schema | N/A |
+| S2 Feature flag wiring | Primary capability toggle in client flow | Primary flag gate | N/A |
+| S3 Route detector | N/A | Primary decision logic | N/A |
+| S4 Precheck warnings | Presentation of warnings | Primary warning generation | N/A |
+| S5 ETA estimator | Presentation of ETA | Primary ETA calculation | N/A |
+| S6 Precheck endpoint | Calls endpoint | Primary endpoint and payload | N/A |
+| S7 UI precheck call | Primary pre-upload UX flow | Middle (responds to precheck) | N/A |
+| S8 Flag respect | Primary skip/show behavior | Primary gate enforcement | N/A |
+| S9 Observability | N/A | Primary intake telemetry | N/A |
+| S10 Regression checks | Primary local/cloud script assertions | Middle (returns payload for assertions) | N/A |
+| S11 Rollout docs | Presentation/ops docs | Middle (deployment behavior docs) | N/A |
+| S12 Backlog closure | Primary docs updates | N/A | N/A |
+
+### Agent #2 (PRS-036) OCR Quality
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 OCR quality contract | N/A | Primary contract schema | N/A |
+| S2 Emit worker metadata | N/A | Middle (status passthrough) | Primary quality scoring + persistence |
+| S3 UI quality guidance | Primary badge/hints rendering | Middle (payload transport) | Middle (source of fields) |
+
+### Agent #3 (PRS-037) Transcription Quality
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Transcript quality contract | N/A | Primary contract schema | N/A |
+| S2 Emit segment quality metadata | N/A | Middle (status passthrough) | Primary segment scoring + persistence |
+| S3 UI transcript hints | Primary hint rendering | Middle (payload transport) | Middle (source of fields) |
+
+### Agent #4 (PRS-038) Retry & Recovery
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Recovery contract | N/A | Primary contract schema | Middle (producer alignment) |
+| S2 Recovery orchestration | N/A | Middle (policy exposure) | Primary recovery decision engine |
+| S3 API recovery trace | Presentation of trace to user/ops | Primary trace response | Middle (trace source) |
+
+### Agent #5 (PRS-039) Cost Guardrail
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Cost contract | N/A | Primary contract schema | N/A |
+| S2 Policy evaluator | N/A | Primary allow/warn/block decision | N/A |
+| S3 UI estimate message | Primary user messaging | Middle (policy output transport) | N/A |
+
+### Agent #6 (PRS-040) Queue Orchestration
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Scheduling policy config | N/A | Middle (policy config exposure) | Primary scheduling config |
+| S2 Adaptive dequeue | N/A | N/A | Primary queue balancing logic |
+| S3 Queue health metrics | N/A | Middle (metrics endpoint) | Primary metric emission |
+
+### Agent #7 (PRS-041) User Assist
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Assist contract | Presentation contract usage | Primary contract schema | N/A |
+| S2 Status/error -> assist mapping | Presentation rendering targets | Primary mapping service | Middle (error/stage source) |
+| S3 Assist panel rendering | Primary UX panel | Middle (assist payload transport) | N/A |
+
+### Agent #8 (PRS-042) Incident Triage
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Triage report schema | N/A | Primary report schema | Middle (source alignment) |
+| S2 Correlation collector | N/A | Primary correlation aggregator | Primary log/status evidence source |
+| S3 Runbook suggestions | Presentation in ops-facing outputs | Primary suggestion generation | Middle (incident context source) |
+
+### Agent #9 (PRS-043) Regression Certification
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Certification contract | N/A | Middle (optional endpoint/schema) | N/A |
+| S2 Aggregate CI/local/cloud evidence | Primary script/report generation | Middle (health/contract evidence) | Middle (processing evidence) |
+| S3 Release gate | Primary release docs/gating flow | Middle (gate evidence exposure) | Middle (gate evidence exposure) |
+
+### Agent #10 (PRS-044) Product Insights
+
+| Story | UI | API | Worker |
+|---|---|---|---|
+| S1 Product metric contract | N/A | Primary KPI contract schema | N/A |
+| S2 Analytics aggregation endpoint | N/A | Primary aggregation logic | Middle (raw metric source) |
+| S3 Insight summary output | Primary product-facing summary surfaces | Primary insight feed | Middle (source metrics/events) |
