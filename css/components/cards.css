@@ -45,6 +45,16 @@
   line-height: 1;
 }
 
+.workspace-tab-icon-svg svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .workspace-tab-label {
   display: inline-flex;
   align-items: center;
