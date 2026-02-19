@@ -128,8 +128,13 @@
 }
 
 .drop-zone .label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
   line-height: 1.35;
   color: #334155;
+  text-align: center;
 }
 
 .drop-zone .filename {

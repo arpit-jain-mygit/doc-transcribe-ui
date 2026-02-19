@@ -293,17 +293,13 @@ function updateProcessingUI(data) {
 
     if (header) {
       let pulseSpeed;
-
-      if (target < 50) {
-        pulseSpeed = 1.6;
-      } else if (target < 80) {
-        pulseSpeed = 2.2;
-      } else if (target < 95) {
-        pulseSpeed = 3.2;
+      if (target <= 10) {
+        pulseSpeed = 3.6; // slow: warm-up phase
+      } else if (target <= 85) {
+        pulseSpeed = 1.5; // fast: active processing phase
       } else {
-        pulseSpeed = 4.5;
+        pulseSpeed = 3.4; // slow: finalization phase
       }
-
       header.style.setProperty("--pulse-speed", `${pulseSpeed}s`);
     }
   }

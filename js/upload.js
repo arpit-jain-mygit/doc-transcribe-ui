@@ -20,7 +20,7 @@ const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff
 const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
 const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
 let UPLOAD_MODE = "OCR";
-const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ ड्रॉप करें    ·    20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट    ·    PDF/Image: समय पेज संख्या और गुणवत्ता पर निर्भर";
+const DROPZONE_HINT_HI = "फ़ाइल चुनें या यहाँ ड्रॉप करें . 20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट . PDF/Image: समय पेज संख्या और गुणवत्ता पर निर्भर";
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 const IDEMPOTENCY_CACHE = Object.create(null);
 
