@@ -112,18 +112,22 @@
   margin-top: 0;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .format-groups {
   margin-top: 10px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 2px;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 2px 2px;
 }
 
 .format-sep {
@@ -147,6 +151,7 @@
 .format-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border: 1px solid #bfdbfe;
   border-radius: 999px;
   padding: 2px 8px;
@@ -154,6 +159,23 @@
   color: #1d4ed8;
   font-size: 11px;
   font-weight: 700;
+  min-width: 46px;
+}
+
+@media (max-width: 760px) {
+  .format-groups {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .format-sep {
+    display: none;
+  }
+
+  .format-row {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 .intake-precheck-box {
