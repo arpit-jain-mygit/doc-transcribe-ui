@@ -30,6 +30,7 @@ let JOBS_FILTER = "COMPLETED";
 let JOBS_TYPE_FILTER = "OCR";
 let JOBS_STATUS_CONTROL_VISIBLE = false;
 const JOBS_PAGE_SIZE = 10;
+const LOAD_MORE_DWELL_MS = 1800;
 let JOBS_LAST_REFRESH_AT = null;
 let JOBS_LAST_REFRESH_TIMER = null;
 const JOBS_STATUS_COUNTS_BY_TYPE = {
@@ -247,6 +248,11 @@ function normalizeJobType(typeRaw) {
 // User value: loads latest OCR/transcription data so users see current status.
 function getJobsStateKey(jobType, status) {
   return `${normalizeJobType(jobType)}|${normalizeJobStatus(status)}`;
+}
+
+// User value: keeps Load-more feedback perceptible so users experience clear progress cues.
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
 }
 
 // User value: supports ensureJobsState so the OCR/transcription journey stays clear and reliable.
@@ -792,6 +798,10 @@ async function loadJobs({ reset = false, append = false } = {}) {
       toast(responseErrorMessage(res, payload, "Failed to load history"), "error");
       if (!append) box.innerHTML = "";
       return;
+    }
+
+    if (append) {
+      await sleepMs(LOAD_MORE_DWELL_MS);
     }
 
     if (Array.isArray(payload)) {
