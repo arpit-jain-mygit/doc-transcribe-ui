@@ -461,7 +461,7 @@ function showCompletion(job) {
       if (Number.isFinite(pages) && pages > 0) {
         details.push({
           key: "Pages",
-          value: `${pages}`,
+          value: `${pages} page${pages === 1 ? "" : "s"}`,
         });
       }
     } else if (isTranscription) {
