@@ -393,6 +393,26 @@ function completionMetaIconInfo(key) {
   return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/></svg>', label: String(key || ""), color: "#64748b" };
 }
 
+// User value: shows file-type-aware icon in completion card so users quickly identify output category.
+function completionUploadedFileIconInfo(job) {
+  const type = jobContract().resolveJobType ? jobContract().resolveJobType(job) : String(job?.job_type || "").toUpperCase();
+  if (type === "OCR") {
+    return {
+      svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M8.5 13h7"></path><path d="M8.5 16h5.5"></path></svg>',
+      label: "PDF file",
+      color: "#dc2626",
+    };
+  }
+  if (type === "TRANSCRIPTION") {
+    return {
+      svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18a3 3 0 1 0 0-6v8"></path><path d="M9 8.5 18 6v8"></path><path d="M18 16a3 3 0 1 0 0-6v6"></path></svg>',
+      label: "Audio/Video file",
+      color: "#7c3aed",
+    };
+  }
+  return completionMetaIconInfo("Uploaded file");
+}
+
 // User value: shows OCR quality on the completed card so users can quickly judge output trust.
 function formatCompletionOcrQuality(job) {
   const raw = Number(job?.ocr_quality_score);
@@ -426,6 +446,14 @@ function showCompletion(job) {
   if (uploadedFileEl) {
     const uploaded = jobContract().resolveUploadedFilename ? jobContract().resolveUploadedFilename(job) : (job.input_filename || job.input_file || "");
     uploadedFileEl.textContent = uploaded || LAST_UPLOADED_FILENAME || "-";
+  }
+  const uploadedFileIconEl = document.getElementById("completionUploadedFileIcon");
+  if (uploadedFileIconEl) {
+    const icon = completionUploadedFileIconInfo(job);
+    uploadedFileIconEl.innerHTML = icon.svg;
+    uploadedFileIconEl.title = icon.label;
+    uploadedFileIconEl.setAttribute("aria-label", icon.label);
+    uploadedFileIconEl.style.color = icon.color;
   }
 
   const completionMetaEl = document.getElementById("completionMeta");

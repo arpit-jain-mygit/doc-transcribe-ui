@@ -188,6 +188,21 @@ function buildHistoryMetaIconHtml(key, extraClass = "") {
   return `<span class="${cls}" title="${escapeHtml(info.label)}" aria-label="${escapeHtml(info.label)}" style="color:${escapeHtml(info.color)}">${info.svg}</span>`;
 }
 
+// User value: shows file-type-aware icon so users instantly know OCR vs transcription history rows.
+function buildUploadedFileIconHtml(job, extraClass = "") {
+  const cls = `history-meta-icon${extraClass ? ` ${extraClass}` : ""}`;
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type === "OCR") {
+    const svg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M8.5 13h7"></path><path d="M8.5 16h5.5"></path></svg>';
+    return `<span class="${cls}" title="PDF file" aria-label="PDF file" style="color:#dc2626">${svg}</span>`;
+  }
+  if (type === "TRANSCRIPTION") {
+    const svg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18a3 3 0 1 0 0-6v8"></path><path d="M9 8.5 18 6v8"></path><path d="M18 16a3 3 0 1 0 0-6v6"></path></svg>';
+    return `<span class="${cls}" title="Audio/Video file" aria-label="Audio/Video file" style="color:#7c3aed">${svg}</span>`;
+  }
+  return buildHistoryMetaIconHtml("Uploaded file", extraClass);
+}
+
 // User value: shows OCR quality with a color-coded dart icon for quick trust decisions.
 function buildOcrQualityIconHtml(tone) {
   const iconColorByTone = {
@@ -489,7 +504,7 @@ function renderJobsList(jobs) {
       </div>
 
       <div class="job-middle">
-        ${buildHistoryMetaIconHtml("Uploaded file")}
+        ${buildUploadedFileIconHtml(j)}
         <span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>
         ${qualityBadgeHtml}
         ${detailsHtml}
