@@ -91,6 +91,125 @@
   body:not(.logged-in) .step-text span {
     font-size: 12px;
   }
+
+  .history-top-bar {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .history-top-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .job-row-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .job-left {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .job-middle {
+    width: 100%;
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 6px 8px;
+  }
+
+  .job-filename {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .history-meta {
+    width: 100%;
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow: visible;
+    row-gap: 4px;
+  }
+
+  .history-meta-item {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .history-meta-sep {
+    display: none;
+  }
+
+  .job-right {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+
+  .history-when {
+    min-width: 0;
+    margin-right: 0;
+    justify-content: flex-start;
+  }
+
+  .job-actions {
+    margin-left: 0;
+  }
+
+  .completion-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .completion-row-left {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .completion-row-middle {
+    width: 100%;
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 6px 8px;
+  }
+
+  .completion-filename {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .completion-meta {
+    width: 100%;
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow: visible;
+    row-gap: 4px;
+  }
+
+  .completion-meta-item {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .completion-meta-sep {
+    display: none;
+  }
+
+  .completion-row-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 980px) {
