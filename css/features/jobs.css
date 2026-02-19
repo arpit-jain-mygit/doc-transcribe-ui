@@ -641,9 +641,9 @@
 }
 
 .history-load-more-btn {
-  border: 1px solid #cbd5e1;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  color: #0f172a;
+  border: 1px solid #0d9488;
+  background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%);
+  color: #ffffff;
   border-radius: 999px;
   height: 32px;
   padding: 0 12px;
@@ -660,8 +660,8 @@
 }
 
 .history-load-more-btn:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
-  border-color: #94a3b8;
+  background: linear-gradient(180deg, #2dd4bf 0%, #0f766e 100%);
+  border-color: #0f766e;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 
