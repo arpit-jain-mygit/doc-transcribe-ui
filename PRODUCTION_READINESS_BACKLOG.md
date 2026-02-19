@@ -72,6 +72,7 @@ Status values:
 | PRS-046A | 6 | Operations Dashboard (real-time reliability + incident triage) | API, Worker, UI | Operability observability | Faster incident detection, diagnosis, and recovery | Users: fewer prolonged outages; Dev: faster operational debugging; Ops: single-pane incident control; Product: SLA transparency. | Planned | Pending | Feature set: queue depth/inflight, funnel by status, failure taxonomy, latency/SLO, dependency/provider health, regression+CI run health. |
 | PRS-046B | 6 | Product Analytics Dashboard (usage + outcomes + cost) | API, Worker, UI | Product decision support | Better UX prioritization and cost-aware roadmap | Users: improved journey over time; Dev: measurable UX impact; Ops: demand trend awareness; Product: stronger prioritization via analytics. | Planned | Pending | Feature set: active users, completion/drop-off by step, median turnaround by type, quota/cost trend, cohort retention, top user pain points. |
 | PRS-047 | 10 | Document Intent Classification (Speech/Discourse/Pravachan/Q&A etc.) | UI, API | Metadata-driven processing and downstream quality controls | Users can explicitly label intent so processing, prompts, and output context align better with their content type | Users: better contextual output; Dev: cleaner intent-driven logic; Ops: easier issue segmentation by document type; Product: richer analytics and roadmap signals. | Planned | Pending | Planned scope: UI intent selector at upload + API contract/storage support for `document_intent`; deferred implementation. |
+| PRS-048 | 5 | Multi-job async background processing with completion notifications | UI, API, Worker | Concurrent throughput and asynchronous user experience | Users can submit multiple jobs, leave the page, and still get completion visibility in history and email | Users: no waiting on single active job; Dev: cleaner async orchestration; Ops: smoother queue utilization; Product: better completion and retention. | Planned | Pending | Planned scope: allow multi-submit queueing from UI, ensure independent background processing, show completed cards in history, and send completion email per finished job. |
 
 ## Backlog Item Anchors
 
@@ -123,6 +124,7 @@ Status values:
 - <a id="prs-046a"></a>`PRS-046A`
 - <a id="prs-046b"></a>`PRS-046B`
 - <a id="prs-047"></a>`PRS-047`
+- <a id="prs-048"></a>`PRS-048`
 
 ## Execution order
 1. Phase 1 + Phase 2
@@ -157,6 +159,7 @@ Status values:
 - 2026-02-18: PRS-016, PRS-019..027, PRS-031..033 validated with local + cloud regression and marked `Completed (Tested)`.
 - 2026-02-18: PRS-034 completed at code level by adding crisp user-centric file/method comments across UI/API/Worker source/config files; regression pending.
 - 2026-02-19: Added PRS-047 as planned feature backlog item for user-provided document intent (`Speech/Discourse/Pravachan/Q&A`) to be implemented later.
+- 2026-02-19: Added PRS-048 as planned feature backlog item for multi-job asynchronous background processing with history completion visibility and completion email notifications.
 
 ## Agent Basics (Beginner Friendly)
 
