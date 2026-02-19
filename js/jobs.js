@@ -485,7 +485,7 @@ function renderJobsList(jobs) {
     const status = formatStatus(j.status);
     const statusDotHtml = buildStatusDotHtml(j.status);
     const rowStatusClass = String(j.status || "").toUpperCase();
-    const qualityBadgeHtml = buildOcrQualityBadgeHtml(j);
+    const qualityBadgeHtml = buildQualityBadgeHtml(j);
 
     let actionHtml = "";
     const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
@@ -670,6 +670,22 @@ function getOcrQualityModel(job) {
   };
 }
 
+// User value: normalizes transcription quality fields so users can trust segment-level transcript output.
+function getTranscriptionQualityModel(job) {
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type !== "TRANSCRIPTION") return null;
+  const scoreRaw = job?.transcript_quality_score;
+  const score = Number(scoreRaw);
+  const lowSegments = parseQualityList(job?.low_confidence_segments).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  const hints = parseQualityList(job?.transcript_quality_hints).map((v) => String(v || "").trim()).filter(Boolean);
+  if (!Number.isFinite(score) && lowSegments.length === 0 && hints.length === 0) return null;
+  return {
+    score: Number.isFinite(score) ? Math.max(0, Math.min(1, score)) : null,
+    lowSegments,
+    hints,
+  };
+}
+
 // User value: shows compact OCR quality guidance so users can quickly decide whether to trust output or re-upload.
 function buildOcrQualityBadgeHtml(job) {
   const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
@@ -709,6 +725,42 @@ function buildOcrQualityBadgeHtml(job) {
       `<span class="history-quality-value">${escapeHtml(pct)}</span>` +
     `</span>`
   );
+}
+
+// User value: shows compact transcription quality guidance so users can focus transcript review quickly.
+function buildTranscriptionQualityBadgeHtml(job) {
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type !== "TRANSCRIPTION") return "";
+  const model = getTranscriptionQualityModel(job);
+  if (!model) {
+    return (
+      `<span class="history-quality-badge history-quality-badge-na" title="Transcription quality not available for this older job">` +
+        `${buildOcrQualityIconHtml("na")}` +
+        `<span class="history-quality-value">NA</span>` +
+      `</span>`
+    );
+  }
+  const pct = model.score === null ? "--" : `${Math.round(model.score * 100)}%`;
+  const tone = model.score === null
+    ? (model.lowSegments.length > 0 ? "warn" : "good")
+    : (model.score < 0.55 ? "bad" : (model.score < 0.80 ? "warn" : "good"));
+  const segText = model.lowSegments.length ? `Low segments: ${model.lowSegments.join(", ")}` : "No low-confidence segments";
+  const hintText = model.hints.length ? model.hints[0] : "";
+  const title = hintText ? `${segText}. ${hintText}` : segText;
+  return (
+    `<span class="history-quality-badge history-quality-badge-${tone}" title="${escapeHtml(title)}">` +
+      `${buildOcrQualityIconHtml(tone)}` +
+      `<span class="history-quality-value">${escapeHtml(pct)}</span>` +
+    `</span>`
+  );
+}
+
+// User value: renders the right quality badge for OCR/transcription so users get mode-specific trust signals.
+function buildQualityBadgeHtml(job) {
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type === "OCR") return buildOcrQualityBadgeHtml(job);
+  if (type === "TRANSCRIPTION") return buildTranscriptionQualityBadgeHtml(job);
+  return "";
 }
 
 // User value: builds the required payload/state for user OCR/transcription flow.

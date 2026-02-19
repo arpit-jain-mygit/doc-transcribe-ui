@@ -64,6 +64,29 @@ This file tracks release-level changes with backlog traceability.
   - `npm test` passed.
 - Status: `Completed (Code + Unit Tested)`
 
+### PRS-037 (Stories 1-3)
+- Backlog ID: `PRS-037`
+- Backlog Link: [PRS-037](./PRODUCTION_READINESS_BACKLOG.md#prs-037)
+- Type: `Feature` + `Contract`
+- Summary: Added end-to-end transcription quality contract, worker scoring, and UI quality badges.
+- Why: Give users trust signals for transcript quality and highlight low-confidence segments.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_transcription_quality_contract_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/quality/transcription_quality.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/transcribe.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_transcription_quality_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/ui.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/jobs-quality.test.js`
+- Risk: `Low`
+- Validation:
+  - `python -m unittest tests.test_transcription_quality_contract_unit -v` passed.
+  - `python -m unittest tests.test_transcription_quality_unit -v` passed.
+  - `node --test tests/jobs-quality.test.js` passed.
+- Status: `Completed (Code + Unit Tested)`
+
 ### PRS-001
 - Backlog ID: `PRS-001`
 - Backlog Link: [PRS-001](./PRODUCTION_READINESS_BACKLOG.md#prs-001)
