@@ -462,6 +462,15 @@
   background: transparent;
 }
 
+.history-meta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
 .history-meta-value {
   color: #0f172a;
   font-size: var(--history-meta-value-size);
@@ -512,6 +521,10 @@
 
 .history-quality-key {
   opacity: 0.9;
+}
+
+.history-quality-icon {
+  font-size: 12px;
 }
 
 .history-quality-value {

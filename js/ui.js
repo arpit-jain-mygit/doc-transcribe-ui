@@ -370,6 +370,27 @@ function getCompletionJobTypeThemeClass(job) {
   return "completion-job-type-neutral";
 }
 
+// User value: maps completion metadata labels to compact icons so users scan output details faster.
+function completionMetaIconInfo(key) {
+  const normalized = String(key || "").trim().toLowerCase();
+  if (normalized === "uploaded file") return { icon: "📄", label: "Uploaded file" };
+  if (normalized === "file size") return { icon: "💾", label: "File Size" };
+  if (normalized === "processing time") return { icon: "⏱", label: "Processing Time" };
+  if (normalized === "when") return { icon: "🕒", label: "When" };
+  if (normalized === "ocr quality") return { icon: "🎯", label: "OCR Quality" };
+  if (normalized === "pages") return { icon: "📚", label: "Pages" };
+  if (normalized === "duration") return { icon: "🎵", label: "Duration" };
+  return { icon: "•", label: String(key || "") };
+}
+
+// User value: shows OCR quality on the completed card so users can quickly judge output trust.
+function formatCompletionOcrQuality(job) {
+  const raw = Number(job?.ocr_quality_score);
+  if (!Number.isFinite(raw)) return "";
+  const bounded = Math.max(0, Math.min(1, raw));
+  return `${Math.round(bounded * 100)}%`;
+}
+
 // User value: gives users clear feedback during OCR/transcription operations.
 function showCompletion(job) {
   const wrapper = document.querySelector(".completion-wrapper");
@@ -417,6 +438,14 @@ function showCompletion(job) {
     });
 
     if (isOcr) {
+      const qualityText = formatCompletionOcrQuality(job);
+      if (qualityText) {
+        details.push({
+          key: "OCR Quality",
+          value: qualityText,
+        });
+      }
+
       const pages = jobContract().resolveTotalPages ? jobContract().resolveTotalPages(job) : Number(job.total_pages);
       if (Number.isFinite(pages) && pages > 0) {
         details.push({
@@ -455,7 +484,11 @@ function showCompletion(job) {
 
       const keyEl = document.createElement("span");
       keyEl.className = `completion-meta-key completion-meta-key-${keyToken}`;
-      keyEl.textContent = `${item.key}:`;
+      const iconInfo = completionMetaIconInfo(item.key);
+      keyEl.classList.add("completion-meta-icon");
+      keyEl.textContent = iconInfo.icon;
+      keyEl.title = iconInfo.label;
+      keyEl.setAttribute("aria-label", iconInfo.label);
 
       const valueEl = document.createElement("span");
       valueEl.className = "completion-meta-value";

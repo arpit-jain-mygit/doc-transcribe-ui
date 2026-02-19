@@ -168,6 +168,26 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+// User value: maps metadata labels to compact icons so users scan job details faster.
+function metaIconInfo(key) {
+  const normalized = String(key || "").trim().toLowerCase();
+  if (normalized === "uploaded file") return { icon: "📄", label: "Uploaded file" };
+  if (normalized === "file size") return { icon: "💾", label: "File Size" };
+  if (normalized === "processing time") return { icon: "⏱", label: "Processing Time" };
+  if (normalized === "when") return { icon: "🕒", label: "When" };
+  if (normalized === "ocr quality") return { icon: "🎯", label: "OCR Quality" };
+  if (normalized === "pages") return { icon: "📚", label: "Pages" };
+  if (normalized === "duration") return { icon: "🎵", label: "Duration" };
+  return { icon: "•", label: String(key || "") };
+}
+
+// User value: renders accessible metadata icons while keeping the row compact.
+function buildHistoryMetaIconHtml(key, extraClass = "") {
+  const info = metaIconInfo(key);
+  const cls = `history-meta-icon${extraClass ? ` ${extraClass}` : ""}`;
+  return `<span class="${cls}" title="${escapeHtml(info.label)}" aria-label="${escapeHtml(info.label)}">${escapeHtml(info.icon)}</span>`;
+}
+
 // User value: supports detailClassToken so the OCR/transcription journey stays clear and reliable.
 function detailClassToken(value) {
   return String(value || "")
@@ -424,8 +444,6 @@ function renderJobsList(jobs) {
     const uploadedFile = (contract().resolveUploadedFilename ? contract().resolveUploadedFilename(j) : (j.input_filename || j.input_file || "") ) || "-";
     const status = formatStatus(j.status);
     const statusDotHtml = buildStatusDotHtml(j.status);
-    const typeLabel = formatJobTypeLabel(j);
-    const typeThemeClass = getJobTypeThemeClass(j);
     const rowStatusClass = String(j.status || "").toUpperCase();
     const qualityBadgeHtml = buildOcrQualityBadgeHtml(j);
 
@@ -448,11 +466,10 @@ function renderJobsList(jobs) {
     <div class="job-row-inline">
       <div class="job-left job-left-${rowStatusClass}">
         ${statusDotHtml}
-        <span class="job-type-label ${escapeHtml(typeThemeClass)}">${escapeHtml(typeLabel)}</span>
       </div>
 
       <div class="job-middle">
-        <span class="history-label">Uploaded file:</span>
+        ${buildHistoryMetaIconHtml("Uploaded file")}
         <span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>
         ${qualityBadgeHtml}
         ${detailsHtml}
@@ -460,7 +477,7 @@ function renderJobsList(jobs) {
 
       <div class="job-right">
         <span class="history-when">
-          <span class="history-meta-key">When:</span>
+          ${buildHistoryMetaIconHtml("When")}
           <span class="job-time">${formatRelativeTime(j.updated_at)}</span>
         </span>
         <span class="job-actions">${actionHtml}</span>
@@ -601,14 +618,23 @@ function buildOcrQualityBadgeHtml(job) {
   const model = getOcrQualityModel(job);
   if (!model) return "";
   const pct = model.score === null ? "--" : `${Math.round(model.score * 100)}%`;
-  const low = (model.score !== null && model.score < 0.65) || model.lowPages.length > 0;
+  const totalPagesRaw = Number(job?.total_pages);
+  const totalPages = Number.isFinite(totalPagesRaw) && totalPagesRaw > 0 ? totalPagesRaw : null;
+  const lowPageRatio = totalPages ? (model.lowPages.length / totalPages) : 0;
+  const low = model.score === null
+    ? model.lowPages.length > 0
+    : (
+      model.score < 0.65
+      || (model.score < 0.80 && model.lowPages.length > 0)
+      || (totalPages !== null && lowPageRatio >= 0.25)
+    );
   const tone = low ? "warn" : "good";
   const pageText = model.lowPages.length ? `Low pages: ${model.lowPages.join(", ")}` : "No low-confidence pages";
   const hintText = model.hints.length ? model.hints[0] : "";
   const title = hintText ? `${pageText}. ${hintText}` : pageText;
   return (
     `<span class="history-quality-badge history-quality-badge-${tone}" title="${escapeHtml(title)}">` +
-      `<span class="history-quality-key">OCR Quality</span>` +
+      `${buildHistoryMetaIconHtml("OCR Quality", "history-quality-icon")}` +
       `<span class="history-quality-value">${escapeHtml(pct)}</span>` +
     `</span>`
   );
@@ -626,7 +652,7 @@ function buildJobDetailsHtml(job) {
     }
     parts.push(
       `<span class="history-meta-item item-key-${detailClassToken(item.key)}${item.placeholder ? " is-placeholder" : ""}">` +
-        `<span class="history-meta-key">${escapeHtml(item.key)}:</span>` +
+        `${buildHistoryMetaIconHtml(item.key)}` +
         `<span class="history-meta-value">${escapeHtml(item.value)}</span>` +
       `</span>`
     );
