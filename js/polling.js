@@ -12,6 +12,7 @@ let CANCEL_REQUESTED = false;
 const POLL_INTERVAL_ACTIVE_MS = 3000;
 const POLL_INTERVAL_BACKGROUND_MS = 10000;
 const POLL_INTERVAL_RETRY_MS = 5000;
+const COMPLETION_DWELL_MS = 2200;
 
 // User value: keeps users updated with live OCR/transcription progress.
 function currentPollDelayMs() {
@@ -26,6 +27,11 @@ function scheduleNextPoll(sessionId, delayMs) {
   POLL_INTERVAL = setTimeout(() => {
     pollStatus(sessionId);
   }, nextDelay);
+}
+
+// User value: adds a short pre-complete dwell so users can perceive finalization without changing backend timings.
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
 }
 // User value: updates user-visible OCR/transcription state accurately.
 function updateProcessingMetrics({ progressValue }) {
@@ -253,7 +259,7 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
     updateProcessingUI(data);
 
     if (data.status === "COMPLETED") {
-      handleJobCompleted(data);
+      await handleJobCompleted(data);
       return;
     }
     if (data.status === "FAILED") {
@@ -342,10 +348,28 @@ function completeAndResetUI() {
 }
 
 // User value: handles user/system events to keep OCR/transcription flow stable.
-function handleJobCompleted(data) {
+async function handleJobCompleted(data) {
   if (CANCEL_REQUESTED) {
     completeAndResetUI();
     return;
+  }
+
+  const stageEl = document.getElementById("stage");
+  const header = document.querySelector(".processing-panel h2");
+  const progressEl = document.getElementById("progress");
+
+  if (stageEl && lastProgress >= 90) {
+    stageEl.textContent = "Finalizing output...";
+  }
+  if (header && lastProgress >= 90) {
+    header.style.setProperty("--pulse-speed", "5.8s");
+  }
+  if (progressEl && lastProgress >= 90) {
+    progressEl.value = Math.max(Number(progressEl.value || 0), 99);
+  }
+
+  if (lastProgress >= 90) {
+    await sleepMs(COMPLETION_DWELL_MS);
   }
 
   completeAndResetUI();
