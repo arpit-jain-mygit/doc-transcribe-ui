@@ -105,8 +105,8 @@ function getTranscriptionMediaDuration(job) {
 // User value: formats OCR/transcription details into clear user-facing text.
 function formatJobTypeLabel(job) {
   const jobType = contract().resolveJobType ? contract().resolveJobType(job) : String(job?.job_type || job?.mode || "").toUpperCase();
-  if (jobType === "OCR") return "PDF / Image to Hindi Text";
-  if (jobType === "TRANSCRIPTION") return "Video / Audio to Hindi Text";
+  if (jobType === "OCR") return "📄 OCR";
+  if (jobType === "TRANSCRIPTION") return "🎵 Transcription";
   return job?.job_type || job?.mode || "Processing";
 }
 
