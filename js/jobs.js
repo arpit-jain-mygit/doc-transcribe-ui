@@ -427,6 +427,7 @@ function renderJobsList(jobs) {
     const typeLabel = formatJobTypeLabel(j);
     const typeThemeClass = getJobTypeThemeClass(j);
     const rowStatusClass = String(j.status || "").toUpperCase();
+    const qualityBadgeHtml = buildOcrQualityBadgeHtml(j);
 
     let actionHtml = "";
     const downloadUrl = contract().resolveDownloadUrl ? contract().resolveDownloadUrl(j) : (j.output_path || "");
@@ -453,6 +454,7 @@ function renderJobsList(jobs) {
       <div class="job-middle">
         <span class="history-label">Uploaded file:</span>
         <span class="job-filename" title="${escapeHtml(uploadedFile)}">${escapeHtml(uploadedFile)}</span>
+        ${qualityBadgeHtml}
         ${detailsHtml}
       </div>
 
@@ -563,6 +565,53 @@ function buildJobDetailItems(job) {
   }
 
   return details;
+}
+
+// User value: parses quality arrays safely so users see consistent OCR quality hints from API/worker payloads.
+function parseQualityList(raw) {
+  if (Array.isArray(raw)) return raw;
+  const text = String(raw || "").trim();
+  if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+// User value: normalizes OCR quality fields so users get clear trust signals regardless of payload format.
+function getOcrQualityModel(job) {
+  const type = contract().resolveJobType ? contract().resolveJobType(job) : normalizeJobType(job?.job_type || job?.type);
+  if (type !== "OCR") return null;
+  const scoreRaw = job?.ocr_quality_score;
+  const score = Number(scoreRaw);
+  const lowPages = parseQualityList(job?.low_confidence_pages).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  const hints = parseQualityList(job?.quality_hints).map((v) => String(v || "").trim()).filter(Boolean);
+  if (!Number.isFinite(score) && lowPages.length === 0 && hints.length === 0) return null;
+  return {
+    score: Number.isFinite(score) ? Math.max(0, Math.min(1, score)) : null,
+    lowPages,
+    hints,
+  };
+}
+
+// User value: shows compact OCR quality guidance so users can quickly decide whether to trust output or re-upload.
+function buildOcrQualityBadgeHtml(job) {
+  const model = getOcrQualityModel(job);
+  if (!model) return "";
+  const pct = model.score === null ? "--" : `${Math.round(model.score * 100)}%`;
+  const low = (model.score !== null && model.score < 0.65) || model.lowPages.length > 0;
+  const tone = low ? "warn" : "good";
+  const pageText = model.lowPages.length ? `Low pages: ${model.lowPages.join(", ")}` : "No low-confidence pages";
+  const hintText = model.hints.length ? model.hints[0] : "";
+  const title = hintText ? `${pageText}. ${hintText}` : pageText;
+  return (
+    `<span class="history-quality-badge history-quality-badge-${tone}" title="${escapeHtml(title)}">` +
+      `<span class="history-quality-key">OCR Quality</span>` +
+      `<span class="history-quality-value">${escapeHtml(pct)}</span>` +
+    `</span>`
+  );
 }
 
 // User value: builds the required payload/state for user OCR/transcription flow.

@@ -40,6 +40,30 @@ This file tracks release-level changes with backlog traceability.
   - Existing OCR/transcription bounded regressions continue unchanged after precheck step.
 - Status: `Completed (Tested)`
 
+### PRS-036 (Stories 1-3)
+- Backlog ID: `PRS-036`
+- Backlog Link: [PRS-036](./PRODUCTION_READINESS_BACKLOG.md#prs-036)
+- Type: `Feature` + `Contract`
+- Summary: Added end-to-end OCR quality contract, worker scoring, and UI quality badge guidance.
+- Why: Give users reliable quality trust signals and clear remediation hints for weak OCR pages.
+- Files:
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/responses.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/schemas/job_contract.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-api/tests/test_ocr_quality_contract_unit.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/quality/ocr_quality.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/worker/ocr.py`
+  - `/Users/arpitjain/PycharmProjects/doc-transcribe-worker/tests/test_ocr_quality_unit.py`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/js/jobs.js`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/css/features/jobs.css`
+  - `/Users/arpitjain/VSProjects/doc-transcribe-ui/tests/jobs-quality.test.js`
+- Risk: `Low`
+- Validation:
+  - `python -m unittest tests.test_ocr_quality_contract_unit -v` passed.
+  - `python -m py_compile worker/ocr.py worker/quality/ocr_quality.py` passed.
+  - `python -m unittest tests.test_ocr_quality_unit -v` passed.
+  - `npm test` passed.
+- Status: `Completed (Code + Unit Tested)`
+
 ### PRS-001
 - Backlog ID: `PRS-001`
 - Backlog Link: [PRS-001](./PRODUCTION_READINESS_BACKLOG.md#prs-001)
