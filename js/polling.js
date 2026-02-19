@@ -294,11 +294,11 @@ function updateProcessingUI(data) {
     if (header) {
       let pulseSpeed;
       if (target < 10) {
-        pulseSpeed = 4.4; // slower warm-up phase
+        pulseSpeed = 5.2; // slowest warm-up phase
       } else if (target <= 90) {
         pulseSpeed = 1.1; // faster: active processing phase
       } else {
-        pulseSpeed = 4.2; // slower finalization phase
+        pulseSpeed = 5.0; // slowest finalization phase
       }
       header.style.setProperty("--pulse-speed", `${pulseSpeed}s`);
     }
