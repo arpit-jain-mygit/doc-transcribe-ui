@@ -188,6 +188,26 @@ function buildHistoryMetaIconHtml(key, extraClass = "") {
   return `<span class="${cls}" title="${escapeHtml(info.label)}" aria-label="${escapeHtml(info.label)}" style="color:${escapeHtml(info.color)}">${info.svg}</span>`;
 }
 
+// User value: shows OCR quality with a color-coded dart icon for quick trust decisions.
+function buildOcrQualityIconHtml(tone) {
+  const iconColorByTone = {
+    good: "#16a34a",
+    warn: "#d97706",
+    bad: "#dc2626",
+    na: "#64748b",
+  };
+  const color = iconColorByTone[tone] || iconColorByTone.na;
+  const dartSvg =
+    '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="8"></circle>' +
+      '<circle cx="12" cy="12" r="4.8"></circle>' +
+      '<circle cx="12" cy="12" r="2.2"></circle>' +
+      '<path d="M17.6 6.4l-4.2 4.2"></path>' +
+      '<path d="M16.7 5.5l1.8.3-.3 1.8"></path>' +
+    '</svg>';
+  return `<span class="history-meta-icon history-quality-icon" title="OCR Quality" aria-label="OCR Quality" style="color:${color}">${dartSvg}</span>`;
+}
+
 // User value: supports detailClassToken so the OCR/transcription journey stays clear and reliable.
 function detailClassToken(value) {
   return String(value || "")
@@ -624,7 +644,7 @@ function buildOcrQualityBadgeHtml(job) {
   if (!model) {
     return (
       `<span class="history-quality-badge history-quality-badge-na" title="OCR quality not available for this older job">` +
-        `${buildHistoryMetaIconHtml("OCR Quality", "history-quality-icon")}` +
+        `${buildOcrQualityIconHtml("na")}` +
         `<span class="history-quality-value">NA</span>` +
       `</span>`
     );
@@ -633,20 +653,25 @@ function buildOcrQualityBadgeHtml(job) {
   const totalPagesRaw = Number(job?.total_pages);
   const totalPages = Number.isFinite(totalPagesRaw) && totalPagesRaw > 0 ? totalPagesRaw : null;
   const lowPageRatio = totalPages ? (model.lowPages.length / totalPages) : 0;
-  const low = model.score === null
-    ? model.lowPages.length > 0
+  const tone = model.score === null
+    ? (model.lowPages.length > 0 ? "warn" : "good")
     : (
-      model.score < 0.65
-      || (model.score < 0.80 && model.lowPages.length > 0)
-      || (totalPages !== null && lowPageRatio >= 0.25)
+      model.score < 0.45 || (totalPages !== null && lowPageRatio >= 0.5)
+        ? "bad"
+        : (
+          model.score < 0.75
+          || (model.score < 0.90 && model.lowPages.length > 0)
+          || (totalPages !== null && lowPageRatio >= 0.25)
+            ? "warn"
+            : "good"
+        )
     );
-  const tone = low ? "warn" : "good";
   const pageText = model.lowPages.length ? `Low pages: ${model.lowPages.join(", ")}` : "No low-confidence pages";
   const hintText = model.hints.length ? model.hints[0] : "";
   const title = hintText ? `${pageText}. ${hintText}` : pageText;
   return (
     `<span class="history-quality-badge history-quality-badge-${tone}" title="${escapeHtml(title)}">` +
-      `${buildHistoryMetaIconHtml("OCR Quality", "history-quality-icon")}` +
+      `${buildOcrQualityIconHtml(tone)}` +
       `<span class="history-quality-value">${escapeHtml(pct)}</span>` +
     `</span>`
   );

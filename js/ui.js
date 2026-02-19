@@ -403,7 +403,7 @@ function completionMetaIconInfo(key) {
   if (normalized === "file size") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 11h10"/><path d="M7 14h6"/></svg>', label: "File Size", color: "#475569" };
   if (normalized === "processing time") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 3h6"/></svg>', label: "Processing Time", color: "#d97706" };
   if (normalized === "when") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg>', label: "When", color: "#4f46e5" };
-  if (normalized === "ocr quality") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2"/><path d="M20 12h-2"/><path d="M12 20v-2"/><path d="M4 12h2"/></svg>', label: "OCR Quality", color: "#16a34a" };
+  if (normalized === "ocr quality") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4.8"></circle><circle cx="12" cy="12" r="2.2"></circle><path d="M17.6 6.4l-4.2 4.2"></path><path d="M16.7 5.5l1.8.3-.3 1.8"></path></svg>', label: "OCR Quality", color: "#16a34a" };
   if (normalized === "pages") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12a2 2 0 0 1 2 2v12"/><path d="M7 6h10v14H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>', label: "Pages", color: "#0ea5e9" };
   if (normalized === "duration") return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18V6"/><path d="M10 15V9"/><path d="M14 17V7"/><path d="M18 13v-2"/></svg>', label: "Duration", color: "#8b5cf6" };
   return { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/></svg>', label: String(key || ""), color: "#64748b" };
@@ -415,6 +415,15 @@ function formatCompletionOcrQuality(job) {
   if (!Number.isFinite(raw)) return "";
   const bounded = Math.max(0, Math.min(1, raw));
   return `${Math.round(bounded * 100)}%`;
+}
+
+// User value: mirrors history quality colors in the completion card for consistent trust signaling.
+function completionOcrQualityIconColor(job) {
+  const score = Number(job?.ocr_quality_score);
+  if (!Number.isFinite(score)) return "#64748b";
+  if (score < 0.55) return "#dc2626";
+  if (score < 0.8) return "#d97706";
+  return "#16a34a";
 }
 
 // User value: gives users clear feedback during OCR/transcription operations.
@@ -472,6 +481,7 @@ function showCompletion(job) {
         details.push({
           key: "OCR Quality",
           value: qualityText,
+          iconColor: completionOcrQualityIconColor(job),
         });
       }
 
@@ -518,7 +528,7 @@ function showCompletion(job) {
       keyEl.innerHTML = iconInfo.svg;
       keyEl.title = iconInfo.label;
       keyEl.setAttribute("aria-label", iconInfo.label);
-      keyEl.style.color = iconInfo.color;
+      keyEl.style.color = item.iconColor || iconInfo.color;
 
       const valueEl = document.createElement("span");
       valueEl.className = "completion-meta-value";

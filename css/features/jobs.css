@@ -535,6 +535,12 @@
   color: #9a3412;
 }
 
+.history-quality-badge-bad {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
 .history-quality-badge-na {
   border-color: #cbd5e1;
   background: #f8fafc;
