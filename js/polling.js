@@ -42,6 +42,49 @@ function updateProcessingMetrics({ progressValue }) {
   pctEl.textContent = `${pct}%`;
 }
 
+// User value: formats queued wait so users can clearly see how long worker pickup is taking.
+function formatQueueWait(secRaw) {
+  const sec = Math.max(0, Math.floor(Number(secRaw) || 0));
+  const mins = Math.floor(sec / 60);
+  const rem = sec % 60;
+  if (mins <= 0) return `${rem}s`;
+  return `${mins}m ${rem}s`;
+}
+
+// User value: updates queue signals so users understand scheduler state while job is queued.
+function updateQueueSignals(data) {
+  const wrap = document.getElementById("queueSignals");
+  const timerEl = document.getElementById("queueTimer");
+  const hintEl = document.getElementById("queueHint");
+  if (!wrap || !timerEl || !hintEl) return;
+
+  const status = String(data?.status || "").toUpperCase();
+  if (status !== "QUEUED") {
+    wrap.style.display = "none";
+    timerEl.textContent = "";
+    hintEl.textContent = "";
+    return;
+  }
+
+  let queuedSec = 0;
+  const created = (typeof parseBackendTime === "function")
+    ? parseBackendTime(data?.created_at)
+    : null;
+  if (created instanceof Date && !Number.isNaN(created.getTime())) {
+    queuedSec = Math.max(0, Math.floor((Date.now() - created.getTime()) / 1000));
+  }
+
+  timerEl.textContent = `Queued for ${formatQueueWait(queuedSec)}`;
+  if (queuedSec < 20) {
+    hintEl.textContent = "Queue load normal; worker pickup expected shortly.";
+  } else if (queuedSec < 60) {
+    hintEl.textContent = "Queue is busy; fair scheduler is balancing jobs.";
+  } else {
+    hintEl.textContent = "High queue load; fair scheduler active to prevent starvation.";
+  }
+  wrap.style.display = "inline-flex";
+}
+
 // User value: supports humanizeStage so the OCR/transcription journey stays clear and reliable.
 function humanizeStage(stage) {
   if (!stage) return "";
@@ -286,6 +329,7 @@ function updateProcessingUI(data) {
   if (typeof updateProcessingHeader === "function") {
     updateProcessingHeader(data);
   }
+  updateQueueSignals(data);
 
   const raw = Number(data.progress);
   let effectiveProgress = lastProgress;
@@ -333,6 +377,7 @@ function completeAndResetUI() {
 
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.style.display = "none";
+  updateQueueSignals({});
 
   const cancelBtn = document.getElementById("cancelJobBtn");
   if (cancelBtn) cancelBtn.disabled = true;

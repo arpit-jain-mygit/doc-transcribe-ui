@@ -423,6 +423,9 @@ function resetAfterUploadError() {
     stage.textContent = "";
     stage.classList.remove("error");
   }
+  if (typeof updateQueueSignals === "function") {
+    updateQueueSignals({});
+  }
 
   if (typeof setUIBusy === "function") setUIBusy(false);
 }

@@ -628,6 +628,15 @@ function updateProcessingHeader(job) {
     label.appendChild(badge);
   }
 
+  const currentStatus = String(job?.status || "").toUpperCase();
+  if (currentStatus === "QUEUED") {
+    const queueBadge = document.createElement("span");
+    queueBadge.className = "processing-policy-badge processing-policy-badge-queue";
+    queueBadge.textContent = "Fair Scheduler";
+    queueBadge.title = "Queue orchestration is active to reduce starvation across job types.";
+    label.appendChild(queueBadge);
+  }
+
   const name = document.createElement("span");
   name.className = "processing-head-name";
   name.textContent = fileName;
