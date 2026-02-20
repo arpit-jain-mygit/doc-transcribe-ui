@@ -1529,6 +1529,7 @@ Purpose:
   Concept: Render top actionable guidance inline in processing/failure views.  
   User sees: Contextual help without leaving the screen.  
   Stakeholder value: Product sees higher task completion after issues.
+- Implementation update (2026-02-20): API now emits deterministic Hindi assist payloads by `status/error_code` (`services/user_assist.py`, `/status/{job_id}`), and UI now renders assist panel + action button in queued/failed/cancelled states.
 
 ### Agent #8 Incident Triage (PRS-042)
 - Story 1: Triage report schema.  

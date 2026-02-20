@@ -305,6 +305,22 @@ For each story:
 {"panel":"assist","state":"FAILED","suggestions":["Check file type","Retry"]}
 ```
 
+### Latest UI-visible update (2026-02-20)
+- Before: users mostly saw generic failure toasts without clear next action.
+- After: users see Hindi assist panel with explicit next-step button in queued/failed/cancelled states.
+- User-centric example:
+```json
+{
+  "assist": {
+    "level": "WARN",
+    "title": "अस्थायी तकनीकी समस्या",
+    "message": "सर्वर व्यस्त या अस्थायी रूप से अनुपलब्ध है। कृपया थोड़ी देर बाद पुनः प्रयास करें।",
+    "action_label": "पुनः प्रयास",
+    "action_type": "RETRY_JOB"
+  }
+}
+```
+
 ## Agent #8 - Incident Triage Agent (PRS-042)
 
 ### Story 1 - Define triage report schema

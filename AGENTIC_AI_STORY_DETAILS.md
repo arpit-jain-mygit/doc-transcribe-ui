@@ -309,6 +309,16 @@ For every story, coverage includes:
 - Stakeholder impact: better completion journey.
 - User-visible example: inline recover action CTA.
 
+### Latest implementation update (2026-02-20)
+- Implemented in API: deterministic Hindi assist mapping by `status/error_code` (`services/user_assist.py`) and assist payload in `/status/{job_id}`.
+- Implemented in API contract: canonical `assist` field for status payload.
+- Implemented in UI: processing-card assist panel with Hindi title/message + action button for queued/failed/cancelled states.
+- Stage: Processing and terminal guidance (queued wait / failed / cancelled).
+- UI witness:
+  - `कतार में अधिक प्रतीक्षा`
+  - `सत्र समाप्त हो गया`
+  - `फ़ाइल प्रारूप समर्थित नहीं`
+
 ## Agent #8 - Incident Triage Agent (PRS-042)
 
 ### Story 1 - Triage report schema

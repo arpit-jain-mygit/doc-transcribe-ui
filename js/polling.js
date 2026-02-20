@@ -17,6 +17,86 @@ const QUEUE_HEALTH_REFRESH_MS = 12000;
 let QUEUE_HEALTH_LAST_TS = 0;
 let QUEUE_HEALTH_CACHE = null;
 
+// User value: hides assist panel when no contextual guidance is available.
+function clearAssistPanel() {
+  const panel = document.getElementById("assistPanel");
+  const title = document.getElementById("assistTitle");
+  const message = document.getElementById("assistMessage");
+  const actionBtn = document.getElementById("assistActionBtn");
+  if (!panel || !title || !message || !actionBtn) return;
+  panel.style.display = "none";
+  title.textContent = "";
+  message.textContent = "";
+  actionBtn.style.display = "none";
+  actionBtn.textContent = "";
+  actionBtn.onclick = null;
+}
+
+// User value: executes assist actions so users can recover quickly from queue/failure states.
+function runAssistAction(actionType) {
+  const action = String(actionType || "").toUpperCase();
+  if (action === "RELOGIN") {
+    if (typeof logout === "function") logout();
+    return;
+  }
+  if (action === "REUPLOAD") {
+    const input = document.getElementById("unifiedFile");
+    if (input) input.focus();
+    const anchor = document.getElementById("uploadGrid");
+    if (anchor && typeof anchor.scrollIntoView === "function") {
+      anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    return;
+  }
+  if (action === "OPEN_HISTORY" || action === "RETRY_JOB") {
+    if (typeof setActiveTab === "function") setActiveTab("history");
+    if (typeof setJobsFilter === "function") {
+      setJobsFilter(action === "RETRY_JOB" ? "FAILED" : "PROCESSING");
+    }
+    if (typeof loadJobs === "function") {
+      loadJobs({ reset: true, append: false });
+    }
+    return;
+  }
+}
+
+// User value: renders a Hindi assist panel with one clear next step when guidance is available.
+function renderAssistPanel(data) {
+  const panel = document.getElementById("assistPanel");
+  const title = document.getElementById("assistTitle");
+  const message = document.getElementById("assistMessage");
+  const actionBtn = document.getElementById("assistActionBtn");
+  if (!panel || !title || !message || !actionBtn) return;
+
+  const assist = data && typeof data === "object" ? data.assist : null;
+  if (!assist || typeof assist !== "object") {
+    clearAssistPanel();
+    return;
+  }
+
+  const textTitle = String(assist.title || "").trim();
+  const textMessage = String(assist.message || "").trim();
+  if (!textTitle && !textMessage) {
+    clearAssistPanel();
+    return;
+  }
+  title.textContent = textTitle || "सहायता संदेश";
+  message.textContent = textMessage || "";
+  panel.style.display = "flex";
+
+  const actionLabel = String(assist.action_label || "").trim();
+  const actionType = String(assist.action_type || "").trim().toUpperCase();
+  if (actionLabel && actionType) {
+    actionBtn.style.display = "inline-flex";
+    actionBtn.textContent = actionLabel;
+    actionBtn.onclick = () => runAssistAction(actionType);
+  } else {
+    actionBtn.style.display = "none";
+    actionBtn.textContent = "";
+    actionBtn.onclick = null;
+  }
+}
+
 // User value: keeps users updated with live OCR/transcription progress.
 function currentPollDelayMs() {
   return document.hidden ? POLL_INTERVAL_BACKGROUND_MS : POLL_INTERVAL_ACTIVE_MS;
@@ -148,6 +228,7 @@ function bootstrapProgress(stageText = "Preparing…", value = 3) {
   const stageEl = document.getElementById("stage");
 
   if (typeof hideCompletion === "function") hideCompletion();
+  clearAssistPanel();
 
   if (statusBox) statusBox.style.display = "block";
   document.body.classList.add("processing-active");
@@ -366,6 +447,7 @@ function updateProcessingUI(data) {
     updateProcessingHeader(data);
   }
   updateQueueSignals(data);
+  renderAssistPanel(data);
 
   const raw = Number(data.progress);
   let effectiveProgress = lastProgress;
@@ -414,6 +496,7 @@ function completeAndResetUI() {
   const statusBox = document.getElementById("statusBox");
   if (statusBox) statusBox.style.display = "none";
   updateQueueSignals({});
+  clearAssistPanel();
 
   const cancelBtn = document.getElementById("cancelJobBtn");
   if (cancelBtn) cancelBtn.disabled = true;
@@ -503,15 +586,44 @@ function handleJobFailed(data) {
   const detail = typeof getJobFailureMessage === "function"
     ? getJobFailureMessage(data)
     : ((data && (data.error_message || data.error || data.stage)) || "Please try again.");
-
-  toast(`Processing failed: ${detail}`, "error");
+  const statusBox = document.getElementById("statusBox");
+  const statusEl = document.getElementById("status");
+  const stageEl = document.getElementById("stage");
+  const progressEl = document.getElementById("progress");
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (statusBox) statusBox.style.display = "block";
+  if (statusEl) statusEl.textContent = "असफल";
+  if (stageEl) {
+    stageEl.textContent = detail;
+    stageEl.classList.add("error");
+  }
+  if (progressEl) progressEl.value = Math.max(0, Number(data?.progress) || 0);
+  if (cancelBtn) cancelBtn.disabled = true;
+  if (typeof updateProcessingHeader === "function") updateProcessingHeader(data || {});
+  renderAssistPanel(data || {});
+  toast(`प्रोसेसिंग असफल रही: ${detail}`, "error");
 }
 
 // User value: lets users stop running OCR/transcription jobs quickly.
 function handleJobCancelled(data) {
   CANCEL_REQUESTED = false;
   completeAndResetUI();
-  toast(data?.stage || "Job cancelled", "info");
+  const statusBox = document.getElementById("statusBox");
+  const statusEl = document.getElementById("status");
+  const stageEl = document.getElementById("stage");
+  const progressEl = document.getElementById("progress");
+  const cancelBtn = document.getElementById("cancelJobBtn");
+  if (statusBox) statusBox.style.display = "block";
+  if (statusEl) statusEl.textContent = "रद्द";
+  if (stageEl) {
+    stageEl.textContent = String(data?.stage || "कार्य रद्द किया गया");
+    stageEl.classList.remove("error");
+  }
+  if (progressEl) progressEl.value = Math.max(0, Number(data?.progress) || 0);
+  if (cancelBtn) cancelBtn.disabled = true;
+  if (typeof updateProcessingHeader === "function") updateProcessingHeader(data || {});
+  renderAssistPanel(data || {});
+  toast("कार्य रद्द किया गया", "info");
 }
 
 document.addEventListener("partials:loaded", () => {

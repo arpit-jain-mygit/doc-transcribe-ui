@@ -408,7 +408,7 @@ This section maps popular “agent terms” to what is actually implemented here
 - In this project: lifecycle split into intake -> enqueue -> process -> status -> history -> download, plus per-agent story decomposition.
 
 5. **Human-in-the-Loop (HITL)**
-- In this project: user chooses upload, can cancel/retry, and (planned) receives actionable assist guidance; release gates also include human review of certification evidence.
+- In this project: user chooses upload, can cancel/retry, and receives actionable Hindi assist guidance during queued/failed/cancelled states; release gates also include human review of certification evidence.
 
 6. **Multi-Agent System**
 - In this project: 10-agent catalog with clear boundaries and ownership; agents collaborate through shared contract/status fields.

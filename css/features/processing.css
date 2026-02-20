@@ -315,6 +315,45 @@
   color: #dc2626;
 }
 
+.assist-panel {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.assist-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.assist-message {
+  font-size: 12px;
+  color: #334155;
+}
+
+.assist-action-btn {
+  align-self: flex-start;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #93c5fd;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assist-action-btn:hover {
+  background: #bfdbfe;
+}
+
 .queue-signals {
   display: inline-flex;
   align-items: center;
