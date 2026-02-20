@@ -366,3 +366,48 @@ If you need PNG/SVG assets for LinkedIn carousel:
 1. Render Mermaid blocks from this markdown in VS Code/Markdown preview.
 2. Export each diagram as PNG/SVG.
 3. Optionally annotate in Figma/Excalidraw for publication-ready branding.
+
+---
+
+## 12) Agentic AI Terminology Used In This Project
+
+This section maps popular “agent terms” to what is actually implemented here.
+
+### Implemented and safe to claim now
+
+1. **AI Agents**
+- In this project: specialized autonomous modules (Smart Intake, Quality, Recovery, Guardrails, etc.) making scoped decisions.
+
+2. **Tools / Actions**
+- In this project: agents act through concrete tools: API routes, Redis queue/status, GCS, Vertex/Gemini calls, worker executors, regression scripts.
+
+3. **Guardrails / Policies**
+- In this project: deterministic controls for retries, quotas, cost decisions (`ALLOW/WARN/BLOCK`), validation limits, and fail-fast behavior.
+
+4. **Task Decomposition**
+- In this project: lifecycle split into intake -> enqueue -> process -> status -> history -> download, plus per-agent story decomposition.
+
+5. **Human-in-the-Loop (HITL)**
+- In this project: user chooses upload, can cancel/retry, and (planned) receives actionable assist guidance; release gates also include human review of certification evidence.
+
+6. **Multi-Agent System**
+- In this project: 10-agent catalog with clear boundaries and ownership; agents collaborate through shared contract/status fields.
+
+7. **Prompt Engineering**
+- In this project: OCR/transcription prompts and execution guidance are tuned for output quality and consistency.
+
+8. **LLM**
+- In this project: Gemini is used for OCR/transcription execution paths; quality/cost/recovery policies are intentionally deterministic where possible.
+
+### Use with explicit scope (avoid over-claiming)
+
+1. **Memory**
+- Current scope: persistent job-state/context memory in Redis (`job_status`, queue metadata, correlation IDs), not conversational long-term memory.
+
+2. **Tool Calling**
+- Current scope: orchestrated service/tool invocations in code paths (not generic chat-agent function-calling UX).
+
+### Future / strategic (do not claim as current implementation)
+
+1. **RAG**
+- Planned in `PRS-045` (Digambar Jainism GPT epic), not part of the current OCR/transcription production path.
