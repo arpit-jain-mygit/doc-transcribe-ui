@@ -16,6 +16,7 @@ Handwritten whiteboard pack (for LinkedIn visuals):
 
 Recommended extra whiteboard:
 - **Agentic vs Non-Agentic Comparison Board** (chatbot/RPA/RAG vs orchestrated multi-agent loop for this platform)
+- **AI Agent vs Agentic AI vs Generative AI Board** (single agent vs coordinated system vs model capability)
 
 ---
 

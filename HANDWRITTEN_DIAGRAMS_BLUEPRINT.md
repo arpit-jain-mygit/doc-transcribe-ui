@@ -22,6 +22,7 @@ Use this to pick the most useful diagrams for your article:
 | Release Certification Flow | Medium | Best for CI/testing/release quality narrative. |
 | UX Rationale Board | High | Best for user-centric impact framing. |
 | Agentic vs Non-Agentic Comparison Board | High | Clarifies what this platform automates as true agentic behavior vs basic AI/RPA/RAG. |
+| AI Agent vs Agentic AI Comparison Board | High | Helps readers distinguish single-agent, multi-agent orchestration, and plain GenAI usage. |
 
 ---
 
@@ -296,6 +297,46 @@ Right margin notes:
 
 Use-case mapping line at bottom:
 - “In this OCR/transcription product, agentic behavior is event-driven and deterministic where possible, with LLM calls only where needed.”
+
+---
+
+## 12) AI Agent vs Agentic AI vs Generative AI Board
+
+Draw 3 side-by-side columns:
+
+1. **AI Agent (single specialist)**
+   - Executes a focused task with bounded tools
+   - Operates on a local goal/scope
+   - Example in this platform: OCR quality scorer, retry classifier, queue controller
+
+2. **Agentic AI (coordinated system)**
+   - Multiple specialized agents coordinated by workflow/orchestration
+   - Multi-step planning + feedback + policy control
+   - Example in this platform: A1-A10 plane across UI/API/Worker
+
+3. **Generative AI (model capability)**
+   - Produces text/transcription/OCR output from prompts
+   - Not a full workflow by itself
+   - Example in this platform: Gemini OCR/transcription model calls
+
+Add a simple “key difference” strip:
+- AI Agent: single-loop execution
+- Agentic AI: closed-loop orchestration across agents/tools/state
+- GenAI: content generation engine
+
+Add comparison table at bottom:
+
+| Aspect | AI Agent | Agentic AI | Generative AI |
+|---|---|---|---|
+| Initiation | Triggered per task | Triggered by goal + orchestration | Triggered by prompt/input |
+| Scope | Narrow | End-to-end workflow | Response generation |
+| Adaptation | Rule/policy based | Feedback-driven multi-step | Limited to model response |
+| Memory | Local task state | Shared persistent state | Minimal session context |
+| Best fit here | Specialized controls | Production orchestration | OCR/transcription inference |
+
+Right margin notes:
+- “Agentic AI = system design + control loops, not just model calls.”
+- “GenAI is a component; agentic behavior is the architecture.”
 
 ---
 
