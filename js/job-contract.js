@@ -61,10 +61,25 @@
     return Number(job.input_size_bytes);
   }
 
+  // User value: keeps output filenames user-friendly by deriving `<uploaded-name>.txt` when backend sends generic fallback names.
+  function deriveOutputFromUploaded(job) {
+    const uploaded = resolveUploadedFilename(job);
+    if (!uploaded) return "";
+    const cleaned = uploaded.replace(/[\\/]+/g, "_").trim();
+    if (!cleaned) return "";
+    const dot = cleaned.lastIndexOf(".");
+    const stem = (dot > 0 ? cleaned.slice(0, dot) : cleaned).trim();
+    if (!stem) return "";
+    return `${stem}.txt`;
+  }
+
   // User value: supports resolveOutputFilename so the OCR/transcription journey stays clear and reliable.
   function resolveOutputFilename(job) {
     if (!job || typeof job !== "object") return "";
-    return String(job.output_filename || job.output_file || "transcript.txt").trim();
+    const raw = String(job.output_filename || job.output_file || "transcript.txt").trim();
+    if (raw && raw.toLowerCase() !== "transcript.txt") return raw;
+    const derived = deriveOutputFromUploaded(job);
+    return derived || raw || "transcript.txt";
   }
 
   // User value: lets users fetch generated OCR/transcription output reliably.
