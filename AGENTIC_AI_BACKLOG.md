@@ -1,7 +1,6 @@
 # Agentic AI Backlog
 
 This document is the dedicated implementation guide for agent backlog items:
-- `PRS-035` to `PRS-044`
 
 It is written for beginners. It explains:
 1. What each agent does.
@@ -31,9 +30,6 @@ Mandatory story documentation standard (for all future updates):
 | 5 | PRS-039 | Cost Guardrail Agent | Cost/limit prediction + enforcement | Clear limits | Safer controls | Cost/load control | Better unit economics | [Story 1: Cost contract](#agent-5-story-1)<br>[Story 2: Policy evaluator](#agent-5-story-2)<br>[Story 3: UI estimate message](#agent-5-story-3) |
 | 6 | PRS-040 | Queue Orchestration Agent | Dynamic balancing and prioritization | Lower waits | Better scheduler logic | Less contention | Better peak UX | [Story 1: Scheduling config](#agent-6-story-1)<br>[Story 2: Adaptive dequeue](#agent-6-story-2)<br>[Story 3: Queue-health metrics](#agent-6-story-3) |
 | 7 | PRS-041 | User Assist Agent | Next-best-action guidance in UI | Clearer journey | Reusable guidance patterns | Fewer support tickets | Lower drop-off | [Story 1: Assist contract](#agent-7-story-1)<br>[Story 2: Status-to-assist mapping](#agent-7-story-2)<br>[Story 3: UI assist panel](#agent-7-story-3) |
-| 8 | PRS-042 | Incident Triage Agent | Cross-layer root-cause helper | Faster resolution | Faster debugging | Lower MTTR | Reliability confidence | [Story 1: Triage report schema](#agent-8-story-1)<br>[Story 2: Correlation collector](#agent-8-story-2)<br>[Story 3: Runbook suggestions](#agent-8-story-3) |
-| 9 | PRS-043 | Regression Certification Agent | Auto certify release readiness | Fewer regressions | Faster release checks | Predictable deploy quality | Safer release cadence | [Story 1: Certification contract](#agent-9-story-1)<br>[Story 2: Evidence aggregation](#agent-9-story-2)<br>[Story 3: Release gate](#agent-9-story-3) |
-| 10 | PRS-044 | Product Insights Agent | Usage/failure trend analysis | Better UX over time | Data-backed prioritization | Trend visibility | Better roadmap decisions | [Story 1: Product metric contract](#agent-10-story-1)<br>[Story 2: Analytics aggregation endpoint](#agent-10-story-2)<br>[Story 3: Insight summary output](#agent-10-story-3) |
 
 ---
 
@@ -748,13 +744,11 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 <a id="agent-8-stories"></a>
-### PRS-042 Incident Triage Agent
 
 **Stage**
 - Post-failure operations and support triage
 
 **Agent used**
-- PRS-042 Incident Triage Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -773,13 +767,11 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 <a id="agent-9-stories"></a>
-### PRS-043 Regression Certification Agent
 
 **Stage**
 - Pre-release validation and release gate stage
 
 **Agent used**
-- PRS-043 Regression Certification Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -798,13 +790,11 @@ Use this structure for every agent story and design review.
   - Engineering: execution model, failure handling, controls
 
 <a id="agent-10-stories"></a>
-### PRS-044 Product Insights Agent
 
 **Stage**
 - Post-run analytics and product planning stage
 
 **Agent used**
-- PRS-044 Product Insights Agent
 **Product owns (what and why)**
 - Business goals
 - User outcomes
@@ -903,24 +893,20 @@ Important baseline note:
 - Before: Error may be correct but next action is unclear.
 - After: Contextual next-best action appears immediately.
 
-### PRS-042 Incident Triage Agent
 1. Production incident ticket
 - Before: Support/dev manually correlate UI/API/Worker logs.
 - After: Agent provides probable root cause + runbook steps with evidence links.
 
-### PRS-043 Regression Certification Agent
 1. Release readiness decision
 - Before: Teams manually combine CI + local/cloud evidence.
 - After: Agent emits a single certification verdict with reasoned pass/fail gates.
 
-### PRS-044 Product Insights Agent
 1. Roadmap prioritization meeting
 - Before: Decisions depend on fragmented anecdotes.
 - After: Agent provides trend-backed priority recommendations (usage, failures, drop-offs).
 
 ---
 
-## 6) Tiny Stories for All Remaining Agents (`PRS-036` to `PRS-044`)
 
 Note:
 - Story format is intentionally small for novice-friendly execution.
@@ -1279,13 +1265,11 @@ Note:
 
 ---
 
-### PRS-042 Incident Triage Agent
 
 #### Story 1: Define triage report schema
 **Stage**
 - Incident analysis
 **Agent used**
-- Incident Triage Agent (PRS-042)
 **Goal**
 - Standardize incident report output.
 **Files**
@@ -1300,7 +1284,6 @@ Note:
 **Stage**
 - Ops/debug tooling
 **Agent used**
-- Incident Triage Agent (PRS-042)
 **Goal**
 - Collect API/Worker traces by `request_id/job_id`.
 **Files**
@@ -1315,7 +1298,6 @@ Note:
 **Stage**
 - Post-failure remediation
 **Agent used**
-- Incident Triage Agent (PRS-042)
 **Goal**
 - Suggest top remediation steps automatically.
 **Files**
@@ -1328,13 +1310,11 @@ Note:
 
 ---
 
-### PRS-043 Regression Certification Agent
 
 #### Story 1: Define certification output contract
 **Stage**
 - Pre-release gate
 **Agent used**
-- Regression Certification Agent (PRS-043)
 **Goal**
 - Standardize certification result document.
 **Files**
@@ -1349,7 +1329,6 @@ Note:
 **Stage**
 - Release evidence collection
 **Agent used**
-- Regression Certification Agent (PRS-043)
 **Goal**
 - Build one consolidated release-readiness artifact.
 **Files**
@@ -1364,7 +1343,6 @@ Note:
 **Stage**
 - Go/No-Go
 **Agent used**
-- Regression Certification Agent (PRS-043)
 **Goal**
 - Enforce fail-fast if critical checks fail.
 **Files**
@@ -1377,13 +1355,11 @@ Note:
 
 ---
 
-### PRS-044 Product Insights Agent
 
 #### Story 1: Define product-metric contract
 **Stage**
 - Analytics model definition
 **Agent used**
-- Product Insights Agent (PRS-044)
 **Goal**
 - Define stable KPI schema for usage/outcome insights.
 **Files**
@@ -1397,7 +1373,6 @@ Note:
 **Stage**
 - Data aggregation
 **Agent used**
-- Product Insights Agent (PRS-044)
 **Goal**
 - Expose filtered product metrics by time window and job type.
 **Files**
@@ -1412,7 +1387,6 @@ Note:
 **Stage**
 - Product planning
 **Agent used**
-- Product Insights Agent (PRS-044)
 **Goal**
 - Produce plain-language top pain points and trend summary.
 **Files**
@@ -1531,7 +1505,6 @@ Purpose:
   Stakeholder value: Product sees higher task completion after issues.
 - Implementation update (2026-02-20): API now emits deterministic Hindi assist payloads by `status/error_code` (`services/user_assist.py`, `/status/{job_id}`), and UI now renders assist panel + action button in queued/failed/cancelled states.
 
-### Agent #8 Incident Triage (PRS-042)
 - Story 1: Triage report schema.  
   Concept: Define one machine-readable incident report shape.  
   User sees: Faster support turnaround indirectly.  
@@ -1545,7 +1518,6 @@ Purpose:
   User sees: Faster recovery from common incidents.  
   Stakeholder value: Ops response becomes consistent and repeatable.
 
-### Agent #9 Regression Certification (PRS-043)
 - Story 1: Certification contract.  
   Concept: Define pass/fail evidence artifact schema for release readiness.  
   User sees: Safer releases with fewer regressions.  
@@ -1559,7 +1531,6 @@ Purpose:
   User sees: Stability prioritized over risky speed.  
   Stakeholder value: Ops avoids avoidable incidents after deploy.
 
-### Agent #10 Product Insights (PRS-044)
 - Story 1: Product metric contract.  
   Concept: Define stable KPI schema for usage, failure, latency, drop-off.  
   User sees: Improvements guided by real behavior over time.  
@@ -1650,7 +1621,6 @@ Legend:
 | S2 Status/error -> assist mapping | Presentation rendering targets | Primary mapping service | Middle (error/stage source) |
 | S3 Assist panel rendering | Primary UX panel | Middle (assist payload transport) | N/A |
 
-### Agent #8 (PRS-042) Incident Triage
 
 | Story | UI | API | Worker |
 |---|---|---|---|
@@ -1658,7 +1628,6 @@ Legend:
 | S2 Correlation collector | N/A | Primary correlation aggregator | Primary log/status evidence source |
 | S3 Runbook suggestions | Presentation in ops-facing outputs | Primary suggestion generation | Middle (incident context source) |
 
-### Agent #9 (PRS-043) Regression Certification
 
 | Story | UI | API | Worker |
 |---|---|---|---|
@@ -1666,7 +1635,6 @@ Legend:
 | S2 Aggregate CI/local/cloud evidence | Primary script/report generation | Middle (health/contract evidence) | Middle (processing evidence) |
 | S3 Release gate | Primary release docs/gating flow | Middle (gate evidence exposure) | Middle (gate evidence exposure) |
 
-### Agent #10 (PRS-044) Product Insights
 
 | Story | UI | API | Worker |
 |---|---|---|---|

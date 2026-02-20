@@ -220,7 +220,6 @@ Show stitched timeline:
 
 ---
 
-## 9) Release Certification Flow (Agent #9)
 
 Draw gate flow:
 1. Unit tests

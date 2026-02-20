@@ -74,7 +74,7 @@ Why this matters:
 
 ---
 
-## 4) Logical / Layered Architecture (with all external systems + all 10 agents)
+## 4) Logical / Layered Architecture (with all external systems + implemented agents (1-7))
 
 ```mermaid
 flowchart TB
@@ -109,7 +109,7 @@ flowchart TB
   GH --> API
   GH --> W
 
-  subgraph AG["Agent Plane (PRS-035 to PRS-044)"]
+  subgraph AG["Agent Plane (PRS-035 to PRS-041)"]
     direction TB
     A1["1. Smart Intake Agent"]:::agent
     A2["2. OCR Quality Agent"]:::agent
@@ -118,9 +118,6 @@ flowchart TB
     A5["5. Cost Guardrail Agent"]:::agent
     A6["6. Queue Orchestration Agent"]:::agent
     A7["7. User Assist Agent"]:::agent
-    A8["8. Incident Triage Agent"]:::agent
-    A9["9. Regression Certification Agent"]:::agent
-    A10["10. Product Insights Agent"]:::agent
   end
 
   AG --> UI
@@ -371,7 +368,6 @@ Sample quality payload (local deterministic scoring):
 ## 10) What’s next
 
 Near term:
-- complete remaining agent stories for `PRS-035` to `PRS-044`.
 - operationalize quality, triage, and certification agents.
 - keep quality scoring deterministic first (Pillow-based), then optionally add LLM scoring as an enrichment layer.
 

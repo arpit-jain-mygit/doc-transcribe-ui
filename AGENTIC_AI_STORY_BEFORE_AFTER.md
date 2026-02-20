@@ -1,6 +1,6 @@
 # Agentic AI Story Before/After (User-Centric)
 
-This file captures before/after impact for **every story** across Agent #1 to Agent #10.
+This file captures before/after impact for **every story** across Agent #1 to Agent #7.
 For each story:
 - Before: what user/stakeholder pain existed
 - After: what changes after implementation
@@ -321,7 +321,6 @@ For each story:
 }
 ```
 
-## Agent #8 - Incident Triage Agent (PRS-042)
 
 ### Story 1 - Define triage report schema
 - Before: Incident triage output had no stable shape.
@@ -347,7 +346,6 @@ For each story:
 {"next_actions":["Check REDIS_URL","Run worker readiness","Inspect queue depth"]}
 ```
 
-## Agent #9 - Regression Certification Agent (PRS-043)
 
 ### Story 1 - Define certification output contract
 - Before: Release readiness summary was inconsistent.
@@ -373,7 +371,6 @@ For each story:
 {"gate":"release","required_checks":["ci","local","cloud"],"result":"BLOCKED"}
 ```
 
-## Agent #10 - Product Insights Agent (PRS-044)
 
 ### Story 1 - Define product metric contract
 - Before: Product KPI fields were ad-hoc.

@@ -65,9 +65,6 @@ Status values:
 | PRS-039 | 10 | Cost Guardrail Agent (quota/cost prediction + enforcement) | API, UI | Cost governance | Predictable usage and reduced surprise failures | Users: transparent limits/cost expectations; Dev: safer policy controls; Ops: predictable load/cost; Product: controlled spend vs growth. | Completed (Code) | Completed (Unit Tests) | API: added deterministic cost evaluator + policy decision (`ALLOW/WARN/BLOCK`) contract fields and upload-time enforcement (`services/cost_guardrail.py`, `routes/intake.py`, `services/upload_orchestrator.py`, `schemas/responses.py`, `schemas/job_contract.py`, tests). UI: shows projected cost/effort/policy in pre-upload precheck panel (`js/upload.js`, `partials/upload-grid.html`, `css/components/cards.css`, `tests/job-contract.test.js`). |
 | PRS-040 | 10 | Queue Orchestration Agent (dynamic balancing/prioritization) | Worker, API, UI | Throughput and fairness optimization | Lower wait time under mixed OCR/A-V load | Users: reduced wait under mixed load; Dev: adaptive orchestration hooks; Ops: lower queue contention; Product: better peak-time UX. | Completed (Code + Unit Tests) | Pending (Run Local + Cloud Regression) | Worker: added explicit scheduler policy contract (`WORKER_SCHEDULER_POLICY`, `WORKER_SCHEDULER_MAX_CONSECUTIVE`) and adaptive dequeue ordering + anti-loop safeguards. API: added authenticated `/queue/health` endpoint + contract capability `queue_orchestration_enabled`. UI: consumes queue-health signals in queued state with live timer/hints + `Fair Scheduler (policy)` badge. |
 | PRS-041 | 10 | User Assist Agent (in-flow guidance + next-best action) | UI, API | UX assistance | Clearer guidance during wait/failure/retry states | Users: actionable next steps in real time; Dev: consistent guidance patterns; Ops: fewer repetitive tickets; Product: lower drop-off. | Completed (Code + Unit Tests) | Pending (Run Local + Cloud Regression) | API: added deterministic Hindi assist mapping service and `/status/{job_id}` assist payload (`services/user_assist.py`, `routes/status.py`, `tests/test_user_assist_unit.py`, contract fields). UI: added assist panel + action button in processing card for queued/failed/cancelled states (`partials/processing-panel.html`, `js/polling.js`, `css/features/processing.css`). |
-| PRS-042 | 10 | Incident Triage Agent (cross-layer root-cause assistant) | API, Worker, UI/scripts | Operational triage acceleration | Faster support resolution with fewer manual hops | Users: faster issue resolution; Dev: cross-layer trace shortcuts; Ops: reduced MTTR; Product: improved reliability perception. | Planned | Pending | Test criteria: replay incidents and verify agent maps request_id/job_id to root cause and runbook steps. |
-| PRS-043 | 10 | Regression Certification Agent (auto-certify release readiness) | UI/scripts, API, Worker | Release governance automation | Faster, consistent go/no-go decisions | Users: fewer release regressions; Dev: automated release gates; Ops: predictable deploy quality; Product: safer release cadence. | Planned | Pending | Test criteria: ensure certification output matches local/cloud regression, contract checks, and CI outcomes. |
-| PRS-044 | 10 | Product Insights Agent (usage/failure analytics + prioritization) | API, Worker, UI | Product feedback loop | Data-driven UX and roadmap decisions | Users: targeted UX improvements; Dev: data-backed fix prioritization; Ops: trend visibility; Product: roadmap driven by evidence. | Planned | Pending | Test criteria: validate generated insight reports, trend detection quality, and backlog recommendation relevance. |
 | PRS-045 | 11 | **BIG EPIC**: Digambar Jainism GPT using RAG | All | Domain-specific AI knowledge assistant | Accurate, grounded answers on Digambar Jain concepts with source traceability | Users: grounded Digambar Jain answers; Dev: reusable RAG architecture; Ops: governable AI operations; Product: strategic AI differentiation. | Planned | Pending | Start after PRS-035..044. Build ingestion, indexing, retrieval, grounding, evaluation, safety, and deployment lifecycle for a Digambar Jainism RAG assistant. |
 | PRS-046A | 6 | Operations Dashboard (real-time reliability + incident triage) | API, Worker, UI | Operability observability | Faster incident detection, diagnosis, and recovery | Users: fewer prolonged outages; Dev: faster operational debugging; Ops: single-pane incident control; Product: SLA transparency. | Planned | Pending | Feature set: queue depth/inflight, funnel by status, failure taxonomy, latency/SLO, dependency/provider health, regression+CI run health. |
 | PRS-046B | 6 | Product Analytics Dashboard (usage + outcomes + cost) | API, Worker, UI | Product decision support | Better UX prioritization and cost-aware roadmap | Users: improved journey over time; Dev: measurable UX impact; Ops: demand trend awareness; Product: stronger prioritization via analytics. | Planned | Pending | Feature set: active users, completion/drop-off by step, median turnaround by type, quota/cost trend, cohort retention, top user pain points. |
@@ -117,9 +114,6 @@ Status values:
 - <a id="prs-039"></a>`PRS-039`
 - <a id="prs-040"></a>`PRS-040`
 - <a id="prs-041"></a>`PRS-041`
-- <a id="prs-042"></a>`PRS-042`
-- <a id="prs-043"></a>`PRS-043`
-- <a id="prs-044"></a>`PRS-044`
 - <a id="prs-045"></a>`PRS-045`
 - <a id="prs-046a"></a>`PRS-046A`
 - <a id="prs-046b"></a>`PRS-046B`
@@ -203,13 +197,10 @@ What changes when using agents vs non-agent logic:
 7. User Assist Agent
 - Provides real-time wait estimates, actionable errors, and next-best guidance in UI.
 
-8. Incident Triage Agent
 - Correlates `request_id`/`job_id` across UI/API/Worker logs and drafts root-cause + runbook actions.
 
-9. Regression Certification Agent
 - Runs local/cloud regression + contract checks and certifies release readiness per backlog item.
 
-10. Product Insights Agent
 - Analyzes usage/failure trends and recommends prioritized UX/product improvements.
 
 ### Recommended starter order (for first-time Agentic AI implementation)
@@ -217,9 +208,6 @@ What changes when using agents vs non-agent logic:
 1. `PRS-035` Smart Intake Agent
 2. `PRS-041` User Assist Agent
 3. `PRS-039` Cost Guardrail Agent
-4. `PRS-042` Incident Triage Agent
-5. `PRS-043` Regression Certification Agent
-6. Advanced pipeline agents: `PRS-036`, `PRS-037`, `PRS-038`, `PRS-040`, `PRS-044`
 
 ## Detailed Item Specifications
 
@@ -265,9 +253,6 @@ What changes when using agents vs non-agent logic:
 - [PRS-039 - Cost Guardrail Agent (quota/cost prediction + enforcement)](#prs-039--cost-guardrail-agent-quotacost-prediction--enforcement)
 - [PRS-040 - Queue Orchestration Agent (dynamic balancing/prioritization)](#prs-040--queue-orchestration-agent-dynamic-balancingprioritization)
 - [PRS-041 - User Assist Agent (in-flow guidance + next-best action)](#prs-041--user-assist-agent-in-flow-guidance--next-best-action)
-- [PRS-042 - Incident Triage Agent (cross-layer root-cause assistant)](#prs-042--incident-triage-agent-cross-layer-root-cause-assistant)
-- [PRS-043 - Regression Certification Agent (auto-certify release readiness)](#prs-043--regression-certification-agent-auto-certify-release-readiness)
-- [PRS-044 - Product Insights Agent (usage/failure analytics + prioritization)](#prs-044--product-insights-agent-usagefailure-analytics--prioritization)
 - [PRS-045 - BIG EPIC: Digambar Jainism GPT using RAG](#prs-045---big-epic-digambar-jainism-gpt-using-rag)
 - [PRS-046A - Operations Dashboard (real-time reliability + incident triage)](#prs-046a---operations-dashboard-real-time-reliability--incident-triage)
 - [PRS-046B - Product Analytics Dashboard (usage + outcomes + cost)](#prs-046b---product-analytics-dashboard-usage--outcomes--cost)
@@ -1728,7 +1713,6 @@ What changes when using agents vs non-agent logic:
 2. Verify guidance relevance and clarity.
 3. Measure completion improvement in guided flows.
 
-### PRS-042 - Incident Triage Agent (cross-layer root-cause assistant)
 
 **Purpose**
 - Automatically map an incident to probable root cause using cross-layer traces.
@@ -1744,7 +1728,6 @@ What changes when using agents vs non-agent logic:
 2. Validate triage output links evidence across layers.
 3. Confirm generated runbook action list correctness.
 
-### PRS-043 - Regression Certification Agent (auto-certify release readiness)
 
 **Purpose**
 - Automate release go/no-go based on functional, contract, and CI evidence.
@@ -1760,7 +1743,6 @@ What changes when using agents vs non-agent logic:
 2. Validate generated certification report and gating verdict.
 3. Confirm failed checks block certification output.
 
-### PRS-044 - Product Insights Agent (usage/failure analytics + prioritization)
 
 **Purpose**
 - Convert usage and failure signals into prioritized product and UX actions.
@@ -1782,7 +1764,6 @@ What changes when using agents vs non-agent logic:
 - Build a production-grade GPT assistant grounded in Digambar Jainism source material using RAG (Retrieval-Augmented Generation).
 
 **Why this is in Phase 11**
-- This is a larger strategic initiative and should begin after Phase 10 agentic foundations (`PRS-035` to `PRS-044`) are complete and stable.
 
 **Repo touchpoints**
 - `All`:

@@ -319,7 +319,6 @@ For every story, coverage includes:
   - `सत्र समाप्त हो गया`
   - `फ़ाइल प्रारूप समर्थित नहीं`
 
-## Agent #8 - Incident Triage Agent (PRS-042)
 
 ### Story 1 - Triage report schema
 - Stage: Incident reporting
@@ -348,7 +347,6 @@ For every story, coverage includes:
 - Stakeholder impact: faster consistent recovery.
 - User-visible example: “Redis auth failure -> check env/connection policy”.
 
-## Agent #9 - Regression Certification Agent (PRS-043)
 
 ### Story 1 - Certification output contract
 - Stage: Release decisioning
@@ -377,7 +375,6 @@ For every story, coverage includes:
 - Stakeholder impact: fewer bad releases.
 - User-visible example: deployment blocked with actionable reasons.
 
-## Agent #10 - Product Insights Agent (PRS-044)
 
 ### Story 1 - Product metric contract
 - Stage: Product telemetry
