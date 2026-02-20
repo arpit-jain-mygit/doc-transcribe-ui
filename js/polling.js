@@ -97,6 +97,13 @@ function renderAssistPanel(data) {
   }
 }
 
+// User value: detects whether assist payload is present so UI can suppress duplicate legacy toasts.
+function hasAssistPayload(data) {
+  const assist = data && typeof data === "object" ? data.assist : null;
+  if (!assist || typeof assist !== "object") return false;
+  return Boolean(String(assist.title || "").trim() || String(assist.message || "").trim());
+}
+
 // User value: keeps users updated with live OCR/transcription progress.
 function currentPollDelayMs() {
   return document.hidden ? POLL_INTERVAL_BACKGROUND_MS : POLL_INTERVAL_ACTIVE_MS;
@@ -601,7 +608,9 @@ function handleJobFailed(data) {
   if (cancelBtn) cancelBtn.disabled = true;
   if (typeof updateProcessingHeader === "function") updateProcessingHeader(data || {});
   renderAssistPanel(data || {});
-  toast(`प्रोसेसिंग असफल रही: ${detail}`, "error");
+  if (!hasAssistPayload(data)) {
+    toast(`प्रोसेसिंग असफल रही: ${detail}`, "error");
+  }
 }
 
 // User value: lets users stop running OCR/transcription jobs quickly.
@@ -623,7 +632,9 @@ function handleJobCancelled(data) {
   if (cancelBtn) cancelBtn.disabled = true;
   if (typeof updateProcessingHeader === "function") updateProcessingHeader(data || {});
   renderAssistPanel(data || {});
-  toast("कार्य रद्द किया गया", "info");
+  if (!hasAssistPayload(data)) {
+    toast("कार्य रद्द किया गया", "info");
+  }
 }
 
 document.addEventListener("partials:loaded", () => {

@@ -426,6 +426,9 @@ function resetAfterUploadError() {
   if (typeof updateQueueSignals === "function") {
     updateQueueSignals({});
   }
+  if (typeof clearAssistPanel === "function") {
+    clearAssistPanel();
+  }
 
   if (typeof setUIBusy === "function") setUIBusy(false);
 }
@@ -463,7 +466,8 @@ async function upload(type, file) {
   if (typeof bootstrapProgress === "function") {
     bootstrapProgress("Uploading file…", 5);
   }
-  if (window.FEATURE_COST_HINTS) {
+  const hasIntakePrecheck = Boolean(window.ACTIVE_INTAKE_PRECHECK && typeof window.ACTIVE_INTAKE_PRECHECK === "object");
+  if (window.FEATURE_COST_HINTS && !hasIntakePrecheck) {
     toast(estimateProcessingHint(type, uploadFile, mediaDurationSec), "info");
   }
 
