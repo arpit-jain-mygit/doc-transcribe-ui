@@ -21,6 +21,7 @@ Use this to pick the most useful diagrams for your article:
 | Observability Correlation Diagram | Medium | Best for debugging and operations narrative. |
 | Release Certification Flow | Medium | Best for CI/testing/release quality narrative. |
 | UX Rationale Board | High | Best for user-centric impact framing. |
+| Agentic vs Non-Agentic Comparison Board | High | Clarifies what this platform automates as true agentic behavior vs basic AI/RPA/RAG. |
 
 ---
 
@@ -246,6 +247,55 @@ Draw 5 cards:
 Under each card:
 - Before vs After one-liner
 - metric to track (conversion, abandonment, retry rate, MTTR, repeat usage)
+
+---
+
+## 11) Agentic vs Non-Agentic Comparison Board
+
+Draw two large sections:
+
+Top section title:
+- **These are NOT Agentic AI**
+
+Create 3 vertical columns:
+1. **LLM Chatbot**
+   - Query -> Prompt -> LLM -> Output
+   - No tool planning, no multi-step control loop
+2. **RPA**
+   - Query -> Fixed script -> Output
+   - Deterministic automation, but no adaptive reasoning
+3. **RAG**
+   - Query -> Retrieval -> LLM -> Output
+   - Better grounding, but still usually single-turn answer flow
+
+Bottom section title:
+- **This is Agentic AI (our platform style)**
+
+Draw one orchestrated loop:
+- User query/file -> **Orchestrator**
+- Orchestrator uses:
+  - Planning
+  - Memory/state context (Redis + job metadata)
+  - Tools/actions (API routes, queue, worker executors, GCS, Vertex)
+  - Feedback loop (status/metrics/errors)
+- Routes to specialized agents:
+  - Intake
+  - Quality
+  - Recovery
+  - Guardrails
+  - Queue orchestration
+  - User assist
+  - Triage
+  - Certification
+  - Insights
+- Final output + operational evidence
+
+Right margin notes:
+- “Single model call != agentic system.”
+- “Agentic value comes from closed-loop control, not just LLM text generation.”
+
+Use-case mapping line at bottom:
+- “In this OCR/transcription product, agentic behavior is event-driven and deterministic where possible, with LLM calls only where needed.”
 
 ---
 

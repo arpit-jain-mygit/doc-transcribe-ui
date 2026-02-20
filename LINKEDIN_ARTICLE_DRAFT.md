@@ -14,6 +14,9 @@ The platform is built as:
 Handwritten whiteboard pack (for LinkedIn visuals):  
 `/Users/arpitjain/VSProjects/doc-transcribe-ui/HANDWRITTEN_DIAGRAMS_BLUEPRINT.md`
 
+Recommended extra whiteboard:
+- **Agentic vs Non-Agentic Comparison Board** (chatbot/RPA/RAG vs orchestrated multi-agent loop for this platform)
+
 ---
 
 ## 1) Why this problem matters
