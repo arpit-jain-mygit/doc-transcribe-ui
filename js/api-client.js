@@ -72,6 +72,13 @@ window.ApiClient = {
       body: JSON.stringify(payload || {}),
     });
   },
+  getQueueHealth({ requestId = "" } = {}) {
+    return apiClientFetchJson("/queue/health", {
+      method: "GET",
+      includeAuth: true,
+      requestId,
+    });
+  },
   async refreshSmartIntakeCapability() {
     try {
       const { data } = await apiClientFetchJson("/contract/job-status", {

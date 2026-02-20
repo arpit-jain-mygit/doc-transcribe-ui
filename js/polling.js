@@ -13,6 +13,9 @@ const POLL_INTERVAL_ACTIVE_MS = 3000;
 const POLL_INTERVAL_BACKGROUND_MS = 10000;
 const POLL_INTERVAL_RETRY_MS = 5000;
 const COMPLETION_DWELL_MS = 2200;
+const QUEUE_HEALTH_REFRESH_MS = 12000;
+let QUEUE_HEALTH_LAST_TS = 0;
+let QUEUE_HEALTH_CACHE = null;
 
 // User value: keeps users updated with live OCR/transcription progress.
 function currentPollDelayMs() {
@@ -75,14 +78,43 @@ function updateQueueSignals(data) {
   }
 
   timerEl.textContent = `Queued for ${formatQueueWait(queuedSec)}`;
-  if (queuedSec < 20) {
-    hintEl.textContent = "Queue load normal; worker pickup expected shortly.";
-  } else if (queuedSec < 60) {
-    hintEl.textContent = "Queue is busy; fair scheduler is balancing jobs.";
+  const queueHealth = (window.QUEUE_HEALTH_STATE && typeof window.QUEUE_HEALTH_STATE === "object")
+    ? window.QUEUE_HEALTH_STATE
+    : null;
+  const queueDepthTotal = Array.isArray(queueHealth?.queues)
+    ? queueHealth.queues.reduce((sum, q) => sum + Math.max(0, Number(q?.depth) || 0), 0)
+    : 0;
+  const schedulerPolicy = String(queueHealth?.scheduler_policy || "adaptive").toUpperCase();
+  if (queueDepthTotal <= 1 && queuedSec < 20) {
+    hintEl.textContent = `Queue load normal (${schedulerPolicy}); worker pickup expected shortly.`;
+  } else if (queueDepthTotal <= 3 && queuedSec < 60) {
+    hintEl.textContent = `Queue is busy (${schedulerPolicy}); fair scheduler is balancing jobs.`;
   } else {
-    hintEl.textContent = "High queue load; fair scheduler active to prevent starvation.";
+    hintEl.textContent = `High queue load (${schedulerPolicy}); fair scheduler active to prevent starvation.`;
   }
   wrap.style.display = "inline-flex";
+}
+
+// User value: fetches queue health periodically so queued users see real scheduler and depth signals.
+async function refreshQueueHealth() {
+  if (!window.ApiClient || !window.ApiClient.getQueueHealth || !ID_TOKEN) return;
+  const now = Date.now();
+  if ((now - QUEUE_HEALTH_LAST_TS) < QUEUE_HEALTH_REFRESH_MS && QUEUE_HEALTH_CACHE) {
+    window.QUEUE_HEALTH_STATE = QUEUE_HEALTH_CACHE;
+    return;
+  }
+  try {
+    const { res, data } = await window.ApiClient.getQueueHealth({
+      requestId: window.ACTIVE_REQUEST_ID || "",
+    });
+    if (res && res.ok && data && !data._nonJson) {
+      QUEUE_HEALTH_CACHE = data;
+      QUEUE_HEALTH_LAST_TS = now;
+      window.QUEUE_HEALTH_STATE = data;
+    }
+  } catch {
+    // ignore queue-health fetch failures; status polling remains source of truth.
+  }
 }
 
 // User value: supports humanizeStage so the OCR/transcription journey stays clear and reliable.
@@ -299,6 +331,10 @@ async function pollStatus(sessionId = POLL_SESSION_ID) {
       window.ACTIVE_REQUEST_ID = String(data.request_id).trim();
     }
 
+    if (String(data.status || "").toUpperCase() === "QUEUED") {
+      await refreshQueueHealth();
+    }
+
     updateProcessingUI(data);
 
     if (data.status === "COMPLETED") {
@@ -386,6 +422,9 @@ function completeAndResetUI() {
   window.ACTIVE_JOB_TYPE = null;
   window.ACTIVE_REQUEST_ID = null;
   window.ACTIVE_INTAKE_PRECHECK = null;
+  window.QUEUE_HEALTH_STATE = null;
+  QUEUE_HEALTH_CACHE = null;
+  QUEUE_HEALTH_LAST_TS = 0;
   localStorage.removeItem("active_job_id");
   CANCEL_REQUESTED = false;
 

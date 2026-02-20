@@ -272,9 +272,10 @@ For each story:
 ```json
 {
   "status": "QUEUED",
+  "queue_health_source": "/queue/health",
   "queue_timer": "Queued for 1m 12s",
-  "queue_hint": "High queue load; fair scheduler active to prevent starvation.",
-  "scheduler_badge": "Fair Scheduler"
+  "queue_hint": "High queue load (ADAPTIVE); fair scheduler active to prevent starvation.",
+  "scheduler_badge": "Fair Scheduler (ADAPTIVE)"
 }
 ```
 

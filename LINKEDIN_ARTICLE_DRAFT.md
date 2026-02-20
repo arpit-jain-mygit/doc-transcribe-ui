@@ -64,7 +64,8 @@ NFRs intentionally engineered:
 Queue orchestration is now visible directly in the processing card (not only in logs):
 - Live queue timer: `Queued for Xm Ys`
 - Load hint text (normal/busy/high load bands)
-- Scheduler badge: `Fair Scheduler`
+- Scheduler badge: `Fair Scheduler (ADAPTIVE|FAIR|FIFO)`
+- Backend queue-health source: authenticated `GET /queue/health` (depth + inflight + worker clients)
 
 Why this matters:
 - Users can distinguish “job accepted but waiting in queue” from “job stuck”.

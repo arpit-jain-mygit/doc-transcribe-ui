@@ -267,6 +267,9 @@ For every story, coverage includes:
 
 ### Latest implementation update (2026-02-20)
 - Implemented in Worker: requeue backoff + jitter and stale inflight cleanup guard to avoid tight busy loops.
+- Implemented in Worker: explicit scheduler policy env contract + adaptive dequeue target ordering.
+- Implemented in API: authenticated `/queue/health` endpoint with queue depth, inflight, scheduler policy, and worker-client visibility.
+- Implemented in API contract: `capabilities.queue_orchestration_enabled`.
 - Implemented in UI: queued timer (`Queued for Xm Ys`), queue-load hint text, and `Fair Scheduler` badge while job is queued.
 - Stage: Queue wait experience (processing card while status=`QUEUED`).
 - Commits:
@@ -274,8 +277,8 @@ For every story, coverage includes:
   - UI: `e37f91e`
 - UI witness:
   - `Queued for 42s`
-  - `Queue is busy; fair scheduler is balancing jobs.`
-  - Header badge: `Fair Scheduler`
+  - `Queue is busy (ADAPTIVE); fair scheduler is balancing jobs.`
+  - Header badge: `Fair Scheduler (ADAPTIVE)`
 
 ## Agent #7 - User Assist Agent (PRS-041)
 

@@ -630,10 +630,17 @@ function updateProcessingHeader(job) {
 
   const currentStatus = String(job?.status || "").toUpperCase();
   if (currentStatus === "QUEUED") {
+    const queueHealth = (window.QUEUE_HEALTH_STATE && typeof window.QUEUE_HEALTH_STATE === "object")
+      ? window.QUEUE_HEALTH_STATE
+      : null;
+    const scheduler = String(queueHealth?.scheduler_policy || "adaptive").toUpperCase();
+    const queueDepthTotal = Array.isArray(queueHealth?.queues)
+      ? queueHealth.queues.reduce((sum, q) => sum + Math.max(0, Number(q?.depth) || 0), 0)
+      : 0;
     const queueBadge = document.createElement("span");
     queueBadge.className = "processing-policy-badge processing-policy-badge-queue";
-    queueBadge.textContent = "Fair Scheduler";
-    queueBadge.title = "Queue orchestration is active to reduce starvation across job types.";
+    queueBadge.textContent = `Fair Scheduler (${scheduler})`;
+    queueBadge.title = `Queue orchestration is active to reduce starvation across job types. Total queued jobs: ${queueDepthTotal}.`;
     label.appendChild(queueBadge);
   }
 
