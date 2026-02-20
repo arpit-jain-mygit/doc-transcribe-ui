@@ -86,11 +86,11 @@ function updateQueueSignals(data) {
     : 0;
   const schedulerPolicy = String(queueHealth?.scheduler_policy || "adaptive").toUpperCase();
   if (queueDepthTotal <= 1 && queuedSec < 20) {
-    hintEl.textContent = `Queue load normal (${schedulerPolicy}); worker pickup expected shortly.`;
+    hintEl.textContent = `कतार सामान्य है (${schedulerPolicy}); आपका काम शीघ्र शुरू होगा।`;
   } else if (queueDepthTotal <= 3 && queuedSec < 60) {
-    hintEl.textContent = `Queue is busy (${schedulerPolicy}); fair scheduler is balancing jobs.`;
+    hintEl.textContent = `कतार व्यस्त है (${schedulerPolicy}); निष्पक्ष क्रम से काम आगे बढ़ रहे हैं।`;
   } else {
-    hintEl.textContent = `High queue load (${schedulerPolicy}); fair scheduler active to prevent starvation.`;
+    hintEl.textContent = `कतार पर अधिक लोड है (${schedulerPolicy}); आपके काम को प्राथमिकता क्रम में जल्द उठाया जाएगा।`;
   }
   wrap.style.display = "inline-flex";
 }
