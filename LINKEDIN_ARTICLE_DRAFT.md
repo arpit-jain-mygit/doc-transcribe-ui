@@ -11,6 +11,9 @@ The platform is built as:
 - API repo: `doc-transcribe-api` (FastAPI orchestration + contracts + auth + status)
 - Worker repo: `doc-transcribe-worker` (queue consumer + OCR/Transcription execution)
 
+Handwritten whiteboard pack (for LinkedIn visuals):  
+`/Users/arpitjain/VSProjects/doc-transcribe-ui/HANDWRITTEN_DIAGRAMS_BLUEPRINT.md`
+
 ---
 
 ## 1) Why this problem matters
