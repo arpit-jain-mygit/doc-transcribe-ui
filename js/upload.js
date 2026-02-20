@@ -20,6 +20,17 @@ const OCR_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff
 const AV_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".webm"];
 const ALL_EXTENSIONS = OCR_EXTENSIONS.concat(AV_EXTENSIONS).join(",");
 let UPLOAD_MODE = "OCR";
+const CONTENT_SUBTYPE_OPTIONS = {
+  OCR: [
+    { value: "jain_literature", label: "Jain literature" },
+    { value: "general", label: "General" },
+  ],
+  TRANSCRIPTION: [
+    { value: "pravachan", label: "Pravachan" },
+    { value: "shanka_samadhan", label: "Shanka Samadhan" },
+  ],
+};
+let ACTIVE_CONTENT_SUBTYPE = "jain_literature";
 const DROPZONE_HINT_PARTS_HI = [
   "फ़ाइल चुनें या यहाँ ड्रॉप करें",
   "20 मिनट का ऑडियो/वीडियो: लगभग 2-3 मिनट",
@@ -113,6 +124,7 @@ function applyUploadMode(mode) {
     input.dataset.autoUploadType = next;
     input.accept = ALL_EXTENSIONS;
   }
+  syncContentSubtypeControl(next);
   if (label) renderDropzoneHint(label);
 }
 
@@ -125,6 +137,7 @@ function clearUploadInputState(inputId = "unifiedFile") {
 
   const name = document.getElementById("unifiedFilename");
   if (name) name.textContent = "";
+  syncContentSubtypeControl(UPLOAD_MODE);
   if (typeof clearIntakePrecheckView === "function") clearIntakePrecheckView();
 }
 
@@ -138,13 +151,53 @@ window.autoselectUploadModeForFile = function autoselectUploadModeForFile(file) 
 
 window.initUnifiedUpload = function initUnifiedUpload() {
   applyUploadMode(UPLOAD_MODE);
+  initContentSubtypeSelector();
 };
+
+// User value: keeps content-specific prompt routing explicit so outputs match user intent.
+function resolveActiveContentSubtype(type) {
+  const mode = String(type || "").toUpperCase() === "TRANSCRIPTION" ? "TRANSCRIPTION" : "OCR";
+  const choices = CONTENT_SUBTYPE_OPTIONS[mode] || [];
+  const fallback = choices[0]?.value || "";
+  const current = String(ACTIVE_CONTENT_SUBTYPE || "").trim().toLowerCase();
+  const isValid = choices.some((x) => x.value === current);
+  return isValid ? current : fallback;
+}
+
+// User value: keeps the subtype selector accurate for PDF vs audio before upload.
+function syncContentSubtypeControl(mode) {
+  const select = document.getElementById("contentSubtypeSelect");
+  if (!select) return;
+  const key = String(mode || "").toUpperCase() === "TRANSCRIPTION" ? "TRANSCRIPTION" : "OCR";
+  const options = CONTENT_SUBTYPE_OPTIONS[key] || [];
+  const current = resolveActiveContentSubtype(key);
+  select.innerHTML = "";
+  options.forEach((opt) => {
+    const el = document.createElement("option");
+    el.value = opt.value;
+    el.textContent = opt.label;
+    select.appendChild(el);
+  });
+  select.value = current;
+  ACTIVE_CONTENT_SUBTYPE = current;
+}
+
+// User value: captures user-selected content subtype to route best-fit prompts in backend.
+function initContentSubtypeSelector() {
+  const select = document.getElementById("contentSubtypeSelect");
+  if (!select) return;
+  select.addEventListener("change", () => {
+    ACTIVE_CONTENT_SUBTYPE = String(select.value || "").trim().toLowerCase();
+  });
+  syncContentSubtypeControl(UPLOAD_MODE);
+}
 
 // User value: submits user files safely for OCR/transcription processing.
 function createUploadFormData(file, type) {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("type", type);
+  fd.append("content_subtype", resolveActiveContentSubtype(type));
   return fd;
 }
 
