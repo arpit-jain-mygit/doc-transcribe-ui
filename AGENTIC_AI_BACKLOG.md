@@ -1514,6 +1514,7 @@ Purpose:
   Concept: Publish lag/pickup/pressure metrics for scheduling decisions.  
   User sees: Indirectly fewer “stuck queue” experiences.  
   Stakeholder value: Ops can detect and correct imbalance fast.
+- Implementation update (2026-02-20): Worker now applies inflight requeue backoff + stale marker cleanup (`f133018`), and UI now surfaces queue wait signals (`e37f91e`): live queued timer, queue-load hint, and `Fair Scheduler` badge.
 
 ### Agent #7 User Assist (PRS-041)
 - Story 1: Assist contract.  

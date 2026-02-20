@@ -265,6 +265,19 @@ For each story:
 {"metric":"queue_wait_p95_sec","ocr":42,"transcription":55}
 ```
 
+### Latest UI-visible update (2026-02-20)
+- Before: user only saw generic `Queued` with no queue context.
+- After: user sees live queue wait and scheduler context on processing card.
+- User-centric example:
+```json
+{
+  "status": "QUEUED",
+  "queue_timer": "Queued for 1m 12s",
+  "queue_hint": "High queue load; fair scheduler active to prevent starvation.",
+  "scheduler_badge": "Fair Scheduler"
+}
+```
+
 ## Agent #7 - User Assist Agent (PRS-041)
 
 ### Story 1 - Define assist-message contract

@@ -59,6 +59,18 @@ NFRs intentionally engineered:
 7. **Operability**: readiness checks, runbooks, feature flags for controlled rollout.
 8. **Quality governance**: unit/integration tests, local/cloud bounded regression, CI gates.
 
+## 3.1) Agent 6 UX Proof Points (what users now see)
+
+Queue orchestration is now visible directly in the processing card (not only in logs):
+- Live queue timer: `Queued for Xm Ys`
+- Load hint text (normal/busy/high load bands)
+- Scheduler badge: `Fair Scheduler`
+
+Why this matters:
+- Users can distinguish “job accepted but waiting in queue” from “job stuck”.
+- Support teams can ask for screenshot evidence and immediately infer queue pressure.
+- Product gets clearer UX signals on queue wait perception during peak periods.
+
 ---
 
 ## 4) Logical / Layered Architecture (with all external systems + all 10 agents)

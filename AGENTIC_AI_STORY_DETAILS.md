@@ -265,6 +265,18 @@ For every story, coverage includes:
 - Stakeholder impact: proactive scaling decisions.
 - User-visible example: fewer stuck queued jobs.
 
+### Latest implementation update (2026-02-20)
+- Implemented in Worker: requeue backoff + jitter and stale inflight cleanup guard to avoid tight busy loops.
+- Implemented in UI: queued timer (`Queued for Xm Ys`), queue-load hint text, and `Fair Scheduler` badge while job is queued.
+- Stage: Queue wait experience (processing card while status=`QUEUED`).
+- Commits:
+  - Worker: `f133018`
+  - UI: `e37f91e`
+- UI witness:
+  - `Queued for 42s`
+  - `Queue is busy; fair scheduler is balancing jobs.`
+  - Header badge: `Fair Scheduler`
+
 ## Agent #7 - User Assist Agent (PRS-041)
 
 ### Story 1 - Assist contract
